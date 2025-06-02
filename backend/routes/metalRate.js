@@ -1,3 +1,4 @@
+// routes/metalRate.js
 const express = require('express');
 const router = express.Router();
 const MetalRate = require('../models/MetalRate');

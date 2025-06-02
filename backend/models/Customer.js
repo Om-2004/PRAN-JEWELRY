@@ -1,3 +1,4 @@
+// models/Customer.js
 const mongoose = require('mongoose');
 
 const CustomerTransactionSchema = new mongoose.Schema({
@@ -28,23 +29,22 @@ const CustomerTransactionSchema = new mongoose.Schema({
     enum: ['cash', 'cheque', 'gold', 'silver'],
     required: true
   },
-  // Only required if paymentForm is gold/silver
   purity: String,
   grams_given: Number,
   equivalentAmount: Number,
-
-  // Only required if paymentForm is cash/cheque
   cashAmount: Number,
-
-  // Required only when actionType === 'out'
   jewelleryName: String,
   subtype: String,
   grossWeight: Number,
   netWeight: Number,
   metalPurity: String,
+  remarks: String,
 
-  // Optional
-  remarks: String
+  vendorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vendor',
+    required: true
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('CustomerTransaction', CustomerTransactionSchema);

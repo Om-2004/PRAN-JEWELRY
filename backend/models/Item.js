@@ -1,3 +1,4 @@
+// models/Item.js
 const mongoose = require('mongoose');
 
 const ItemSchema = new mongoose.Schema({
@@ -53,6 +54,13 @@ const ItemSchema = new mongoose.Schema({
   labourCharge: {
     type: Number
   },
+
+  vendorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vendor',
+    required: true
+  },
+
   createdAt: {
     type: Date,
     default: Date.now

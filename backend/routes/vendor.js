@@ -1,3 +1,4 @@
+// routes/vendor.js
 const express = require('express');
 const router = express.Router();
 const Vendor = require('../models/Vendor');
@@ -34,8 +35,6 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { shopName, contact, HUID_no, address, type } = req.body;
-
-    console.log('Incoming Body:', req.body);
 
     if (!shopName || !contact || !HUID_no) {
       return res.status(400).json({ message: 'Missing required fields: shopName, contact, or HUID_no' });

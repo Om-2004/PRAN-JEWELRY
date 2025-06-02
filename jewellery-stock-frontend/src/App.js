@@ -1,11 +1,10 @@
-// src/App.js
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
-import Home          from './components/Home';
-import Register      from './components/Register';
-import VendorLogin   from './components/VendorLogin';
-import VendorDashboard from './components/VendorDashboard'; // ← updated import
+import Home from './components/Home';
+import Register from './components/Register';
+import VendorLogin from './components/VendorLogin';
+import VendorDashboard from './components/VendorDashboard';
 
 function App() {
   return (
@@ -21,7 +20,7 @@ function App() {
         <Route path="/login" element={<VendorLogin />} />
 
         {/* Dashboard (protected) */}
-        <Route path="/dashboard" element={<VendorDashboard />} /> {/* ← updated route */}
+        <Route path="/dashboard" element={<VendorDashboard />} />
       </Routes>
     </div>
   );

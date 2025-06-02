@@ -1,3 +1,4 @@
+// models/KaragirLeisure.js
 const mongoose = require('mongoose');
 
 const KaragirSchema = new mongoose.Schema({
@@ -11,18 +12,14 @@ const KaragirSchema = new mongoose.Schema({
     enum: ['gold', 'silver'],
     required: true
   },
-  purity: {              // New field for purity of metal for both in and out
+  purity: {
     type: String,
     required: true
   },
-
-  // For 'out' (metal given to karagir) - now this is metal given, so grams is required here
-  grams: { 
+  grams: {
     type: Number,
     required: function() { return this.actionType === 'out'; }
   },
-
-  // For 'in' (ready-made ornament received from karagir)
   ornamentName: {
     type: String,
     required: function() { return this.actionType === 'in'; }
@@ -47,10 +44,7 @@ const KaragirSchema = new mongoose.Schema({
     type: String,
     required: function() { return this.actionType === 'in'; }
   },
-
   karagirName: String,
-
-  // status ONLY for 'out' (metal given to karagir)
   status: {
     type: String,
     enum: ['pending', 'completed'],
@@ -61,8 +55,13 @@ const KaragirSchema = new mongoose.Schema({
       return this.actionType === 'out';
     }
   },
-
   remarks: String,
+
+  vendorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vendor',
+    required: true
+  },
 
   createdAt: {
     type: Date,

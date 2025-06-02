@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 function Register() {
-  // State variables for form fields and message
   const [shopName, setShopName] = useState('');
   const [HUID_no, setHUIDNo] = useState('');
   const [contact, setContact] = useState('');
@@ -9,7 +8,6 @@ function Register() {
   const [type, setType] = useState('');
   const [message, setMessage] = useState('');
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     const vendorData = { shopName, HUID_no, contact, address, type };
@@ -17,11 +15,10 @@ function Register() {
       const response = await fetch('/api/vendors', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(vendorData),
+        body: JSON.stringify(vendorData)
       });
       if (response.ok) {
         setMessage('Vendor registered successfully');
-        // (Optional) Clear the form fields
         setShopName('');
         setHUIDNo('');
         setContact('');
@@ -47,7 +44,7 @@ function Register() {
           <input
             type="text"
             value={shopName}
-            onChange={e => setShopName(e.target.value)}
+            onChange={(e) => setShopName(e.target.value)}
             required
           />
         </div>
@@ -56,7 +53,7 @@ function Register() {
           <input
             type="text"
             value={HUID_no}
-            onChange={e => setHUIDNo(e.target.value)}
+            onChange={(e) => setHUIDNo(e.target.value)}
             required
           />
         </div>
@@ -65,7 +62,7 @@ function Register() {
           <input
             type="text"
             value={contact}
-            onChange={e => setContact(e.target.value)}
+            onChange={(e) => setContact(e.target.value)}
             required
           />
         </div>
@@ -74,7 +71,7 @@ function Register() {
           <input
             type="text"
             value={address}
-            onChange={e => setAddress(e.target.value)}
+            onChange={(e) => setAddress(e.target.value)}
             required
           />
         </div>
@@ -83,7 +80,7 @@ function Register() {
           <input
             type="text"
             value={type}
-            onChange={e => setType(e.target.value)}
+            onChange={(e) => setType(e.target.value)}
             required
           />
         </div>

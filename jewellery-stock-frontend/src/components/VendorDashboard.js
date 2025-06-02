@@ -7,7 +7,7 @@ import './Dashboard.css';
 function VendorDashboard() {
   const [view, setView] = useState('items');
 
-  // ✅ Get vendor data from localStorage
+  // Get vendor data from localStorage if you stored any vendor info (not strictly needed for API calls now)
   const vendor = JSON.parse(localStorage.getItem('vendor'));
 
   return (

@@ -1,21 +1,23 @@
+// routes/item.js
 const express = require('express');
 const router = express.Router();
+const verifyToken = require('../middleware/auth');
 const Item = require('../models/Item');
 
-// GET all items
-router.get('/', async (req, res) => {
+// GET all items for this vendor
+router.get('/', verifyToken, async (req, res) => {
   try {
-    const items = await Item.find().sort({ createdAt: -1 });
+    const items = await Item.find({ vendorId: req.vendorId }).sort({ createdAt: -1 });
     res.json(items);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// GET a single item
-router.get('/:id', async (req, res) => {
+// GET a single item by ID (only if it belongs to this vendor)
+router.get('/:id', verifyToken, async (req, res) => {
   try {
-    const item = await Item.findById(req.params.id);
+    const item = await Item.findOne({ _id: req.params.id, vendorId: req.vendorId });
     if (!item) return res.status(404).json({ message: 'Item not found' });
     res.json(item);
   } catch (err) {
@@ -23,9 +25,9 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST a new item
-router.post('/', async (req, res) => {
-  const item = new Item(req.body);
+// POST a new item (attach vendorId automatically)
+router.post('/', verifyToken, async (req, res) => {
+  const item = new Item({ ...req.body, vendorId: req.vendorId });
   try {
     const newItem = await item.save();
     res.status(201).json(newItem);
@@ -35,9 +37,13 @@ router.post('/', async (req, res) => {
 });
 
 // PUT update an existing item
-router.put('/:id', async (req, res) => {
+router.put('/:id', verifyToken, async (req, res) => {
   try {
-    const updatedItem = await Item.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedItem = await Item.findOneAndUpdate(
+      { _id: req.params.id, vendorId: req.vendorId },
+      req.body,
+      { new: true }
+    );
     if (!updatedItem) return res.status(404).json({ message: 'Item not found' });
     res.json(updatedItem);
   } catch (err) {
@@ -46,9 +52,9 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE an item
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verifyToken, async (req, res) => {
   try {
-    const deletedItem = await Item.findByIdAndDelete(req.params.id);
+    const deletedItem = await Item.findOneAndDelete({ _id: req.params.id, vendorId: req.vendorId });
     if (!deletedItem) return res.status(404).json({ message: 'Item not found' });
     res.json({ message: 'Item deleted successfully' });
   } catch (err) {

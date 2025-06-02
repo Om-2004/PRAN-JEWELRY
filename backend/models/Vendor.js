@@ -1,3 +1,4 @@
+// models/Vendor.js
 const mongoose = require('mongoose');
 
 const VendorSchema = new mongoose.Schema({
@@ -19,14 +20,14 @@ const VendorSchema = new mongoose.Schema({
   },
   address: {
     type: String,
-    required:true
+    required: true
   },
   type: {
     type: String,
-    required:true,
+    required: true,
     default: '',
     trim: true,
-    enum: ['retailer','wholesaler']
+    enum: ['retailer', 'wholesaler']
   }
 }, { timestamps: true });
 

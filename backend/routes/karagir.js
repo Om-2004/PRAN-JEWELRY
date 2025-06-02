@@ -1,10 +1,12 @@
+// routes/karagir.js
 const express = require('express');
 const router = express.Router();
+const verifyToken = require('../middleware/auth');
 const Karagir = require('../models/KaragirLeisure');
 const Item = require('../models/Item');
 
-// POST - Unified
-router.post('/', async (req, res) => {
+// POST a new Karagir entry
+router.post('/', verifyToken, async (req, res) => {
   try {
     const {
       actionType,
@@ -21,7 +23,6 @@ router.post('/', async (req, res) => {
       remarks
     } = req.body;
 
-    // Validate actionType and metalType
     if (!['in', 'out'].includes(actionType)) {
       return res.status(400).json({ message: 'Invalid actionType. Must be "in" or "out".' });
     }
@@ -31,18 +32,11 @@ router.post('/', async (req, res) => {
     if (!purity) {
       return res.status(400).json({ message: 'Purity is required.' });
     }
-
-    // Validate fields depending on actionType with inverted logic
-    if (actionType === 'out') {
-      // 'out' = metal given to karagir
-      if (!grams) {
-        return res.status(400).json({ message: 'Grams is required for Karagir-Out (metal given).' });
-      }
-    } else if (actionType === 'in') {
-      // 'in' = ready-made ornament received from karagir
-      if (!ornamentName || !karatOrHUID || !grossWeight || !netWeight || !labourCharge || !subtype) {
-        return res.status(400).json({ message: 'Missing required fields for Karagir-In (ornament received).' });
-      }
+    if (actionType === 'out' && !grams) {
+      return res.status(400).json({ message: 'Grams is required for Karagir-Out.' });
+    }
+    if (actionType === 'in' && (!ornamentName || !karatOrHUID || !grossWeight || !netWeight || !labourCharge || !subtype)) {
+      return res.status(400).json({ message: 'Missing required fields for Karagir-In.' });
     }
 
     const karagirData = new Karagir({
@@ -57,27 +51,25 @@ router.post('/', async (req, res) => {
       netWeight,
       subtype,
       karagirName,
-      remarks
+      remarks,
+      vendorId: req.vendorId
     });
 
     const savedKaragir = await karagirData.save();
 
-    // Auto-create Item entry logic inverted:
-    // Add to Item if karagir-in (ornament received), NOT on karagir-out (metal given)
     let newItem = null;
     if (actionType === 'in') {
       newItem = new Item({
         jewelleryName: ornamentName,
         metalType,
-        purity,
+        subtype,
         karatOrHUID,
         grossWeight,
         netWeight,
-        subtype,
         sourceType: 'karagir',
-        labourCharge
+        labourCharge,
+        vendorId: req.vendorId
       });
-
       await newItem.save();
     }
 
@@ -87,25 +79,24 @@ router.post('/', async (req, res) => {
       addedToInventory: newItem
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Internal server error.' });
+    res.status(500).json({ message: err.message });
   }
 });
 
-// GET all
-router.get('/', async (req, res) => {
+// GET all Karagir entries for this vendor
+router.get('/', verifyToken, async (req, res) => {
   try {
-    const entries = await Karagir.find().sort({ createdAt: -1 });
+    const entries = await Karagir.find({ vendorId: req.vendorId }).sort({ createdAt: -1 });
     res.json(entries);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// GET one
-router.get('/:id', async (req, res) => {
+// GET a single Karagir entry
+router.get('/:id', verifyToken, async (req, res) => {
   try {
-    const entry = await Karagir.findById(req.params.id);
+    const entry = await Karagir.findOne({ _id: req.params.id, vendorId: req.vendorId });
     if (!entry) return res.status(404).json({ message: 'Entry not found.' });
     res.json(entry);
   } catch (err) {
@@ -113,49 +104,47 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// PUT - Update Karagir entry and conditionally add item to inventory
-router.put('/:id', async (req, res) => {
+// PUT update Karagir entry
+router.put('/:id', verifyToken, async (req, res) => {
   try {
-    const karagirEntry = await Karagir.findById(req.params.id);
+    const karagirEntry = await Karagir.findOne({ _id: req.params.id, vendorId: req.vendorId });
     if (!karagirEntry) return res.status(404).json({ message: 'Entry not found.' });
 
-    // Check if status is being changed to "completed" and actionType is "out" (metal given)
     const isStatusChangingToCompleted = req.body.status === 'completed' && karagirEntry.status !== 'completed';
     const isOutEntry = karagirEntry.actionType === 'out';
 
-    // Update the Karagir entry
-    const updated = await Karagir.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updated = await Karagir.findOneAndUpdate(
+      { _id: req.params.id, vendorId: req.vendorId },
+      req.body,
+      { new: true }
+    );
 
-    // If status is being changed to completed, and it’s an 'out' entry, no item creation here
-    // Item creation logic only for 'in' (ornament received)
     let newItem = null;
     if (isStatusChangingToCompleted && !isOutEntry) {
-      // That means 'in' entry status changed to completed - add item to inventory
       const exists = await Item.findOne({
         jewelleryName: karagirEntry.ornamentName,
         karatOrHUID: karagirEntry.karatOrHUID,
         metalType: karagirEntry.metalType,
-        purity: karagirEntry.purity,
+        subtype: karagirEntry.subtype,
         grossWeight: karagirEntry.grossWeight,
         netWeight: karagirEntry.netWeight,
         labourCharge: karagirEntry.labourCharge,
-        subtype: karagirEntry.subtype,
-        sourceType: 'karagir'
+        sourceType: 'karagir',
+        vendorId: req.vendorId
       });
 
       if (!exists) {
         newItem = new Item({
           jewelleryName: karagirEntry.ornamentName,
           metalType: karagirEntry.metalType,
-          purity: karagirEntry.purity,
+          subtype: karagirEntry.subtype,
           karatOrHUID: karagirEntry.karatOrHUID,
           grossWeight: karagirEntry.grossWeight,
           netWeight: karagirEntry.netWeight,
           labourCharge: karagirEntry.labourCharge,
-          subtype: karagirEntry.subtype,
-          sourceType: 'karagir'
+          sourceType: 'karagir',
+          vendorId: req.vendorId
         });
-
         await newItem.save();
       }
     }
@@ -170,10 +159,10 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE
-router.delete('/:id', async (req, res) => {
+// DELETE a Karagir entry
+router.delete('/:id', verifyToken, async (req, res) => {
   try {
-    const deleted = await Karagir.findByIdAndDelete(req.params.id);
+    const deleted = await Karagir.findOneAndDelete({ _id: req.params.id, vendorId: req.vendorId });
     if (!deleted) return res.status(404).json({ message: 'Entry not found.' });
     res.json({ message: 'Entry deleted successfully.' });
   } catch (err) {

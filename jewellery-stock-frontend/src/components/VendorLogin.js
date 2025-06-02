@@ -10,17 +10,18 @@ function VendorLogin() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/vendors');
-      const vendors = await response.json();
-      const vendor = vendors.find(v =>
-        v.shopName === shopName && v.HUID_no === HUID_no
-      );
-      if (vendor) {
-        localStorage.setItem('vendor', JSON.stringify(vendor));
+      const response = await fetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shopName, HUID_no })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
         setMessage('Login Successful!');
         navigate('/dashboard');
       } else {
-        setMessage('Invalid credentials');
+        setMessage(data.error || 'Invalid credentials');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -38,7 +39,7 @@ function VendorLogin() {
           <input
             type="text"
             value={shopName}
-            onChange={e => setShopName(e.target.value)}
+            onChange={(e) => setShopName(e.target.value)}
             required
           />
         </div>
@@ -47,7 +48,7 @@ function VendorLogin() {
           <input
             type="text"
             value={HUID_no}
-            onChange={e => setHUIDNo(e.target.value)}
+            onChange={(e) => setHUIDNo(e.target.value)}
             required
           />
         </div>
