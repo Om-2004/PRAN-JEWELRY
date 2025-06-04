@@ -11,6 +11,10 @@ const ItemSchema = new mongoose.Schema({
     enum: ['gold', 'silver'],
     required: true
   },
+  purity: {
+    type: String,
+    required: false          // now we store purity
+  },
   subtype: {
     type: String,
     validate: {
@@ -48,19 +52,23 @@ const ItemSchema = new mongoose.Schema({
   },
   sourceType: {
     type: String,
-    default: 'maunal',
+    default: 'manual',
     enum: ['manual', 'karagir']
   },
   labourCharge: {
     type: Number
   },
-
   vendorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Vendor',
     required: true
   },
-
+  // --- new field: link back to the Karagir entry that spawned this item ---
+  karagirEntryId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Karagir',
+    required: false
+  },
   createdAt: {
     type: Date,
     default: Date.now

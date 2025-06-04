@@ -107,3 +107,10 @@
   font-size: 14px;
   cursor: pointer;
 }
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;   /* ← center each row of buttons */
+  margin-bottom: 20px;
+}

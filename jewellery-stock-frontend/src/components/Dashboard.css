@@ -1,15 +1,70 @@
-/* src/components/Dashboard.css */
+/* ──────────────────────────────────────────────────────────────────────────────── */
+/* Container that holds header + buttons + main content                             */
+/* ──────────────────────────────────────────────────────────────────────────────── */
 .dashboard-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────── */
+/* Header bar: greeting on left, LOG OUT button on right                             */
+/* ──────────────────────────────────────────────────────────────────────────────── */
+.dashboard-header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  height: 80vh;
-  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.dashboard-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────── */
+/* Styling for the Log Out button                                                    */
+/* ──────────────────────────────────────────────────────────────────────────────── */
+.logout-button {
+  padding: 6px 12px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.logout-button:hover {
+  background-color: #c82333;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────── */
+/* Row of view‐switch buttons (“Items”, “Karagir In-Out”, “Customer In-Out”)         */
+/* ──────────────────────────────────────────────────────────────────────────────── */
+.dashboard-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .dashboard-button {
   padding: 10px 20px;
-  font-size: 16px;
+  font-size: 1rem;
   cursor: pointer;
+  border: 1px solid #007bff;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
 }
+
+.dashboard-button:hover {
+  background-color: #0056b3;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────── */
+/* Main content area (where ItemsManager, KaragirForm, or CustomerForm shows)        */
+/* ──────────────────────────────────────────────────────────────────────────────── */
+/* .dashboard-content { */
+  /* you can add padding or background here if desired */
+/* }  */

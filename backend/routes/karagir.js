@@ -1,12 +1,19 @@
 // routes/karagir.js
-const express = require('express');
-const router = express.Router();
-const verifyToken = require('../middleware/auth');
-const Karagir = require('../models/KaragirLeisure');
-const Item = require('../models/Item');
 
-// POST a new Karagir entry
-router.post('/', verifyToken, async (req, res) => {
+const express  = require('express');
+const router   = express.Router();
+const verify   = require('../middleware/auth');
+const Karagir  = require('../models/KaragirLeisure');
+const Item     = require('../models/Item');
+const { v4: uuid } = require('uuid');   // npm install uuid
+
+/**
+ * 1) POST /api/karagirleisures
+ *    - Create a new Karagir entry (In or Out)
+ *    - If actionType === 'in', auto-mark matching 'out' as completed,
+ *      and create a new Item with purity + karagirEntryId.
+ */
+router.post('/', verify, async (req, res) => {
   try {
     const {
       actionType,
@@ -23,6 +30,7 @@ router.post('/', verifyToken, async (req, res) => {
       remarks
     } = req.body;
 
+    // ── Basic validations ───────────────────────────────────────────────────────
     if (!['in', 'out'].includes(actionType)) {
       return res.status(400).json({ message: 'Invalid actionType. Must be "in" or "out".' });
     }
@@ -32,141 +40,273 @@ router.post('/', verifyToken, async (req, res) => {
     if (!purity) {
       return res.status(400).json({ message: 'Purity is required.' });
     }
-    if (actionType === 'out' && !grams) {
+    if (actionType === 'out' && (grams === undefined || grams === null)) {
       return res.status(400).json({ message: 'Grams is required for Karagir-Out.' });
     }
-    if (actionType === 'in' && (!ornamentName || !karatOrHUID || !grossWeight || !netWeight || !labourCharge || !subtype)) {
+    if (actionType === 'in' && (
+        !ornamentName ||
+        !karatOrHUID ||
+        grossWeight === undefined ||
+        netWeight === undefined ||
+        labourCharge === undefined ||
+        !subtype
+      )) {
       return res.status(400).json({ message: 'Missing required fields for Karagir-In.' });
     }
 
-    const karagirData = new Karagir({
-      actionType,
+    const nameLC = karagirName.toLowerCase();
+
+    // ── 1a) Handle “Out” ─────────────────────────────────────────────────────────
+    if (actionType === 'out') {
+      const outDoc = new Karagir({
+        actionType,
+        metalType,
+        purity,
+        grams,
+        karagirName: nameLC,
+        remarks,
+        status: 'pending',
+        transactionId: uuid(),
+        vendorId: req.vendorId
+      });
+      await outDoc.save();
+      return res.status(201).json({
+        message: 'Karagir-Out recorded (pending).',
+        karagirEntry: outDoc
+      });
+    }
+
+    // ── 1b) Handle “In” ──────────────────────────────────────────────────────────
+    // Mark earliest pending Out as completed
+    const outDoc = await Karagir.findOneAndUpdate(
+      {
+        vendorId: req.vendorId,
+        karagirName: nameLC,
+        actionType: 'out',
+        status: 'pending'
+      },
+      { status: 'completed' },
+      { sort: { createdAt: 1 }, new: true }
+    );
+
+    if (!outDoc) {
+      return res.status(400).json({ message: 'No pending Karagir-Out found for this karagir.' });
+    }
+
+    const inDoc = new Karagir({
+      actionType: 'in',
       metalType,
       purity,
-      grams,
       ornamentName,
       labourCharge,
       karatOrHUID,
       grossWeight,
       netWeight,
       subtype,
-      karagirName,
+      karagirName: nameLC,
       remarks,
+      transactionId: outDoc.transactionId,
       vendorId: req.vendorId
     });
+    await inDoc.save();
 
-    const savedKaragir = await karagirData.save();
+    const item = new Item({
+      jewelleryName: ornamentName,
+      metalType,
+      purity,
+      subtype,
+      karatOrHUID,
+      grossWeight,
+      netWeight,
+      sourceType: 'karagir',
+      labourCharge,
+      vendorId: req.vendorId,
+      karagirEntryId: inDoc._id
+    });
+    await item.save();
 
-    let newItem = null;
-    if (actionType === 'in') {
-      newItem = new Item({
-        jewelleryName: ornamentName,
-        metalType,
-        subtype,
-        karatOrHUID,
-        grossWeight,
-        netWeight,
-        sourceType: 'karagir',
-        labourCharge,
-        vendorId: req.vendorId
-      });
-      await newItem.save();
-    }
-
-    res.status(201).json({
-      message: `Karagir-${actionType} recorded successfully.`,
-      karagirEntry: savedKaragir,
-      addedToInventory: newItem
+    return res.status(201).json({
+      message: 'Karagir-In recorded, pending-Out closed, Item created.',
+      karagirEntry: inDoc,
+      matchedOut: outDoc,
+      newItem: item
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error in POST /api/karagirleisures:', err);
+    return res.status(500).json({ message: err.message });
   }
 });
 
-// GET all Karagir entries for this vendor
-router.get('/', verifyToken, async (req, res) => {
+/**
+ * 2) GET /api/karagirleisures
+ *    - Return all Karagir entries for this vendor, optionally filtered by query params.
+ */
+router.get('/', verify, async (req, res) => {
   try {
-    const entries = await Karagir.find({ vendorId: req.vendorId }).sort({ createdAt: -1 });
-    res.json(entries);
+    const filter = { vendorId: req.vendorId };
+
+    if (req.query.actionType) {
+      filter.actionType = req.query.actionType;
+    }
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+    if (req.query.karagirName) {
+      filter.karagirName = req.query.karagirName.toLowerCase();
+    }
+
+    const entries = await Karagir.find(filter).sort({ createdAt: -1 });
+    return res.json(entries);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error in GET /api/karagirleisures:', err);
+    return res.status(500).json({ message: err.message });
   }
 });
 
-// GET a single Karagir entry
-router.get('/:id', verifyToken, async (req, res) => {
+/**
+ * 3) GET /api/karagirleisures/:id
+ *    - Return one Karagir entry (must belong to this vendor).
+ */
+router.get('/:id', verify, async (req, res) => {
   try {
-    const entry = await Karagir.findOne({ _id: req.params.id, vendorId: req.vendorId });
-    if (!entry) return res.status(404).json({ message: 'Entry not found.' });
-    res.json(entry);
+    const entry = await Karagir.findOne({
+      _id: req.params.id,
+      vendorId: req.vendorId
+    });
+    if (!entry) {
+      return res.status(404).json({ message: 'Karagir entry not found.' });
+    }
+    return res.json(entry);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error in GET /api/karagirleisures/:id', err);
+    return res.status(500).json({ message: err.message });
   }
 });
 
-// PUT update Karagir entry
-router.put('/:id', verifyToken, async (req, res) => {
+/**
+ * 4) PUT /api/karagirleisures/:id
+ *    - Update a Karagir entry (only if it belongs to this vendor).
+ *    - If this was originally an “in” entry and purity changed, update the corresponding Item.
+ *    - If an “out” flips status from completed→pending, delete its paired “in” and linked Item.
+ *    - Mirror certain out-field changes to paired in entry.
+ */
+router.put('/:id', verify, async (req, res) => {
   try {
-    const karagirEntry = await Karagir.findOne({ _id: req.params.id, vendorId: req.vendorId });
-    if (!karagirEntry) return res.status(404).json({ message: 'Entry not found.' });
+    const update = { ...req.body };
+    if (update.karagirName) {
+      update.karagirName = update.karagirName.toLowerCase();
+    }
 
-    const isStatusChangingToCompleted = req.body.status === 'completed' && karagirEntry.status !== 'completed';
-    const isOutEntry = karagirEntry.actionType === 'out';
+    // 4a) Find existing
+    const existing = await Karagir.findOne({
+      _id: req.params.id,
+      vendorId: req.vendorId
+    });
+    if (!existing) {
+      return res.status(404).json({ message: 'Karagir entry not found.' });
+    }
 
-    const updated = await Karagir.findOneAndUpdate(
-      { _id: req.params.id, vendorId: req.vendorId },
-      req.body,
-      { new: true }
-    );
+    const beforeStatus = existing.status; // may be undefined for “in”
 
-    let newItem = null;
-    if (isStatusChangingToCompleted && !isOutEntry) {
-      const exists = await Item.findOne({
-        jewelleryName: karagirEntry.ornamentName,
-        karatOrHUID: karagirEntry.karatOrHUID,
-        metalType: karagirEntry.metalType,
-        subtype: karagirEntry.subtype,
-        grossWeight: karagirEntry.grossWeight,
-        netWeight: karagirEntry.netWeight,
-        labourCharge: karagirEntry.labourCharge,
-        sourceType: 'karagir',
+    // 4b) Apply updates
+    Object.assign(existing, update);
+    const saved = await existing.save();
+
+    // 4c) If OUT updated … handle cascades
+    if (saved.actionType === 'out') {
+      const inDoc = await Karagir.findOne({
+        transactionId: saved.transactionId,
+        actionType: 'in',
         vendorId: req.vendorId
       });
 
-      if (!exists) {
-        newItem = new Item({
-          jewelleryName: karagirEntry.ornamentName,
-          metalType: karagirEntry.metalType,
-          subtype: karagirEntry.subtype,
-          karatOrHUID: karagirEntry.karatOrHUID,
-          grossWeight: karagirEntry.grossWeight,
-          netWeight: karagirEntry.netWeight,
-          labourCharge: karagirEntry.labourCharge,
-          sourceType: 'karagir',
-          vendorId: req.vendorId
+      // A-1) status flip completed→pending: delete paired IN + Item
+      if (beforeStatus === 'completed' && saved.status === 'pending' && inDoc) {
+        await Karagir.deleteOne({ _id: inDoc._id });
+        await Item.deleteOne({ karagirEntryId: inDoc._id });
+      }
+
+      // A-2) mirror metalType/purity/karagirName to IN if it still exists
+      if (inDoc) {
+        ['metalType', 'purity', 'karagirName'].forEach(f => {
+          inDoc[f] = saved[f];
         });
-        await newItem.save();
+        await inDoc.save();
       }
     }
 
-    res.json({
+    // 4d) If IN updated … sync to Item
+    if (saved.actionType === 'in') {
+      await Item.findOneAndUpdate(
+        { karagirEntryId: saved._id },
+        {
+          jewelleryName: saved.ornamentName,
+          metalType    : saved.metalType,
+          purity       : saved.purity,
+          subtype      : saved.subtype,
+          karatOrHUID  : saved.karatOrHUID,
+          grossWeight  : saved.grossWeight,
+          netWeight    : saved.netWeight,
+          labourCharge : saved.labourCharge
+        },
+        { new: true }
+      );
+    }
+
+    return res.json({
       message: 'Karagir entry updated successfully.',
-      updatedEntry: updated,
-      addedToInventory: newItem
+      updatedEntry: saved
     });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Error in PUT /api/karagirleisures/:id', err);
+    return res.status(400).json({ message: err.message });
   }
 });
 
-// DELETE a Karagir entry
-router.delete('/:id', verifyToken, async (req, res) => {
+/**
+ * 5) DELETE /api/karagirleisures/:id
+ *    - Delete a single Karagir entry (only if it belongs to this vendor).
+ *    - Also delete its corresponding Item (if any) and paired entry.
+ */
+router.delete('/:id', verify, async (req, res) => {
   try {
-    const deleted = await Karagir.findOneAndDelete({ _id: req.params.id, vendorId: req.vendorId });
-    if (!deleted) return res.status(404).json({ message: 'Entry not found.' });
-    res.json({ message: 'Entry deleted successfully.' });
+    const deleted = await Karagir.findOneAndDelete({
+      _id: req.params.id,
+      vendorId: req.vendorId
+    });
+    if (!deleted) {
+      return res.status(404).json({ message: 'Karagir entry not found.' });
+    }
+
+    // If this entry had a transactionId, remove its pair + linked Item
+    if (deleted.transactionId) {
+      await Karagir.deleteMany({
+        transactionId: deleted.transactionId,
+        _id: { $ne: deleted._id },
+        vendorId: req.vendorId
+      });
+      await Item.deleteMany({ karagirEntryId: deleted._id });
+    }
+
+    return res.json({ message: 'Karagir entry deleted successfully.' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error in DELETE /api/karagirleisures/:id', err);
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+/**
+ * 6) DELETE /api/karagirleisures
+ *    - Delete ALL Karagir entries for this vendor (and their linked Items).
+ */
+router.delete('/', verify, async (req, res) => {
+  try {
+    const result = await Karagir.deleteMany({ vendorId: req.vendorId });
+    await Item.deleteMany({ karagirEntryId: { $exists: true }, vendorId: req.vendorId });
+    return res.json({ message: `Deleted ${result.deletedCount} Karagir entries.` });
+  } catch (err) {
+    console.error('Error in DELETE /api/karagirleisures (all)', err);
+    return res.status(500).json({ message: err.message });
   }
 });
 

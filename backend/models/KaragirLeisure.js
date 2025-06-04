@@ -16,10 +16,12 @@ const KaragirSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  // “Out” requires `grams`
   grams: {
     type: Number,
     required: function() { return this.actionType === 'out'; }
   },
+  // “In” requires these fields:
   ornamentName: {
     type: String,
     required: function() { return this.actionType === 'in'; }
@@ -44,7 +46,14 @@ const KaragirSchema = new mongoose.Schema({
     type: String,
     required: function() { return this.actionType === 'in'; }
   },
-  karagirName: String,
+
+  karagirName: {
+    type: String,
+    required: true,
+    set: v => v.toLowerCase()
+  },
+
+  // “Out” entries start as “pending”; “In” does not need a status
   status: {
     type: String,
     enum: ['pending', 'completed'],
@@ -55,8 +64,14 @@ const KaragirSchema = new mongoose.Schema({
       return this.actionType === 'out';
     }
   },
+  transactionId: {
+    type: String,
+    index: true
+  },
+
   remarks: String,
 
+  // *** New: vendorId to scope everything per‐vendor ***
   vendorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Vendor',
