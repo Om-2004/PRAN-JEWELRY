@@ -7,27 +7,32 @@ function VendorLogin() {
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shopName, HUID_no })
-      });
-      const data = await response.json();
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        setMessage('Login Successful!');
-        navigate('/dashboard');
-      } else {
-        setMessage(data.error || 'Invalid credentials');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      setMessage('Login failed: ' + error.message);
+const handleLogin = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ shopName, HUID_no })
+    });
+    const data = await response.json();
+    if (response.ok) {
+      localStorage.setItem('token', data.token);
+      // Store vendor data including shopName
+      localStorage.setItem('vendor', JSON.stringify({
+        shopName: shopName,
+        HUID_no: HUID_no
+      }));
+      setMessage('Login Successful!');
+      navigate('/dashboard');
+    } else {
+      setMessage(data.error || 'Invalid credentials');
     }
-  };
+  } catch (error) {
+    console.error('Login error:', error);
+    setMessage('Login failed: ' + error.message);
+  }
+};
 
   return (
     <div>

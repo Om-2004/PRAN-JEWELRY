@@ -9,12 +9,9 @@ function VendorDashboard() {
   const [view, setView] = useState('items');
   const navigate = useNavigate();
 
-  // Retrieve stored vendor info (if you saved it after login)
+  // Retrieve stored vendor info
   const vendor = JSON.parse(localStorage.getItem('vendor'));
 
-  // ──────────────────────────────────────────────────────────────────────────────
-  // LOG OUT HANDLER: clears stored vendor/token and returns to login page
-  // ──────────────────────────────────────────────────────────────────────────────
   const handleLogout = () => {
     localStorage.removeItem('vendor');
     localStorage.removeItem('token');
@@ -24,21 +21,22 @@ function VendorDashboard() {
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h2>Welcome, {vendor?.shopName || 'Vendor'}</h2>
+        <div className="header-left">
+          <h2>Welcome, {vendor?.shopName || 'Vendor'}</h2>
+          <div className="dashboard-buttons">
+            <button className="dashboard-button" onClick={() => setView('items')}>
+              Items
+            </button>
+            <button className="dashboard-button" onClick={() => setView('karagir')}>
+              Karagir In-Out
+            </button>
+            <button className="dashboard-button" onClick={() => setView('customer')}>
+              Customer In-Out
+            </button>
+          </div>
+        </div>
         <button className="logout-button" onClick={handleLogout}>
           Log Out
-        </button>
-      </div>
-
-      <div className="dashboard-buttons">
-        <button className="dashboard-button" onClick={() => setView('items')}>
-          Items
-        </button>
-        <button className="dashboard-button" onClick={() => setView('karagir')}>
-          Karagir In-Out
-        </button>
-        <button className="dashboard-button" onClick={() => setView('customer')}>
-          Customer In-Out
         </button>
       </div>
 
