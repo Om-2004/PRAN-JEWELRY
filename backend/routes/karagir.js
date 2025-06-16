@@ -1,457 +1,456 @@
 const express = require('express');
 const router = express.Router();
-const verify = require('../middleware/auth');
-const Karagir = require('../models/KaragirLeisure'); // Assuming KaragirLeisure is your model name
-const Item = require('../models/Item');
-const { v4: uuid } = require('uuid'); // npm install uuid
+const verifyToken = require('../middleware/auth'); // Assuming this middleware extracts req.vendorId
+const KaragirLeisure = require('../models/KaragirLeisure');
+const Item = require('../models/Item'); // Make sure you have this model
 
-/**
- * 1) POST /api/karagirleisures
- * - Create a new Karagir entry (In or Out)
- * - If actionType === 'in', auto-mark matching 'out' as completed,
- * and create a new Item with purity + karagirEntryId.
- */
-router.post('/', verify, async (req, res) => {
+// Middleware to protect routes (assuming verifyToken sets req.vendorId)
+// All routes below this line will require authentication.
+router.use(verifyToken);
+
+// Helper function to check for pending Karagir-Out entries
+const getPendingOutEntries = async (vendorId, karagirName, metalType) => {
+    // Ensure karagirName is lowercased for the query, as it's stored lowercase in DB
+    const lowercasedKaragirName = karagirName.toLowerCase();
+    return await KaragirLeisure.find({
+        vendorId,
+        karagirName: lowercasedKaragirName, // Use lowercased name for query
+        metalType, // metalType is already lowercased by schema enum
+        entryType: 'out',
+        status: 'pending'
+    }).lean(); // .lean() for faster retrieval if you don't need Mongoose document methods
+};
+
+// @route   GET /api/karagir
+// @desc    Get all Karagir entries for the authenticated vendor
+// @access  Private
+router.get('/', async (req, res) => {
     try {
-        const {
-            actionType,
-            metalType,
-            purity,
-            grams,
-            ornamentName,
-            labourCharge,
-            // These fields now directly represent the specific purity type
-            huidNo,      // Expected for gold
-            karatCarat,  // Expected for silver/others
-            grossWeight,
-            netWeight,
-            subtype,
-            karagirName,
-            remarks,
-            balance
-        } = req.body;
+        const karagirEntries = await KaragirLeisure.find({ vendorId: req.vendorId })
+            .sort({ createdAt: -1 })
+            .lean();
+        res.json(karagirEntries);
+    } catch (err) {
+        console.error('Error in GET /api/karagir:', err);
+        res.status(500).json({ message: 'Server error: Could not retrieve Karagir entries.' });
+    }
+});
 
-        // ── Basic validations ───────────────────────────────────────────────────────
-        if (!['in', 'out'].includes(actionType)) {
-            return res.status(400).json({ message: 'Invalid actionType. Must be "in" or "out".' });
+// @route   GET /api/karagir/pending-out
+// @desc    Check for pending Karagir-Out entries for a specific karagir and metal type
+// @access  Private
+// --- IMPORTANT: This route MUST come BEFORE /api/karagir/:id ---
+router.get('/pending-out', async (req, res) => {
+    try {
+        const { karagirName, metalType } = req.query;
+        if (!karagirName || !metalType) {
+            return res.status(400).json({ message: 'Karagir name and metal type are required for pending-out check.' });
         }
-        // Updated metalType validation to include 'others'
-        if (!['gold', 'silver', 'others'].includes(metalType)) {
-            return res.status(400).json({ message: 'Invalid metalType. Must be "gold", "silver", or "others".' });
-        }
+        // Ensure karagirName is lowercased for the query
+        const lowercasedKaragirName = karagirName.toLowerCase();
 
-        if (actionType === 'out' && (grams === undefined || grams === null || isNaN(parseFloat(grams)))) {
-            return res.status(400).json({ message: 'Grams (a number) is required for Karagir-Out.' });
-        }
-        if (actionType === 'in' && (
-            !ornamentName ||
-            grossWeight === undefined || isNaN(parseFloat(grossWeight)) ||
-            netWeight === undefined || isNaN(parseFloat(netWeight)) ||
-            labourCharge === undefined || isNaN(parseFloat(labourCharge)) ||
-            !subtype,
-            balance === undefined || balance === null || balance.trim() === ''
-        )) {
-            return res.status(400).json({ message: 'Missing required fields for Karagir-In: ornamentName, grossWeight, netWeight, labourCharge, subtype.' });
-        }
-
-        // Additional validation for purity based on metalType for 'in' entries
-        if (actionType === 'in') {
-            if (metalType === 'gold') {
-                if (!huidNo || !/^[a-zA-Z0-9]{6}$/.test(huidNo)) {
-                    return res.status(400).json({ message: 'HUID No (6 digits) is required for gold items.' });
-                }
-            } else if (metalType === 'silver' || metalType === 'others') {
-                if (!karatCarat) {
-                    return res.status(400).json({ message: 'Karat/Carat is required for silver/other items.' });
-                }
-            }
-        }
-
-        const nameLC = karagirName ? karagirName.toLowerCase() : ''; // Ensure karagirName is handled
-
-        // ── 1a) Handle “Out” ─────────────────────────────────────────────────────────
-        if (actionType === 'out') {
-            const outDoc = new Karagir({
-                actionType,
-                metalType,
-                grams: parseFloat(grams),
-                karagirName: nameLC,
-                purity,
-                remarks,
-                status: 'pending',
-                transactionId: uuid(), // Generate new transaction ID for 'out'
-                vendorId: req.vendorId
-            });
-            await outDoc.save();
-            return res.status(201).json({
-                message: 'Karagir-Out recorded (pending).',
-                karagirEntry: outDoc
-            });
-        }
-
-        // ── 1b) Handle “In” ──────────────────────────────────────────────────────────
-        // Mark earliest pending Out as completed
-        const outDoc = await Karagir.findOneAndUpdate(
-            {
-                vendorId: req.vendorId,
-                karagirName: nameLC,
-                actionType: 'out',
-                status: 'pending'
-            },
-            { status: 'completed' },
-            { sort: { createdAt: 1 }, new: true }
-        );
-
-        if (!outDoc) {
-            return res.status(400).json({ message: 'No pending Karagir-Out found for this karagir to mark as completed.' });
-        }
-
-        const inDocData = {
-            actionType: 'in',
-            metalType,
-            ornamentName,
-            labourCharge: parseFloat(labourCharge),
-            grossWeight: parseFloat(grossWeight),
-            netWeight: parseFloat(netWeight),
-            subtype,
-            karagirName: nameLC,
-            balance,
-            remarks,
-            transactionId: outDoc.transactionId, // Link 'in' to 'out' transaction
-            vendorId: req.vendorId
-        };
-
-        // Assign huidNo or karatCarat based on metalType for KaragirLeisure model
-        if (metalType === 'gold') {
-            inDocData.huidNo = huidNo;
-            inDocData.karatCarat = undefined; // Ensure karatCarat is not stored for gold
-        } else if (metalType === 'silver' || metalType === 'others') {
-            inDocData.karatCarat = karatCarat;
-            inDocData.huidNo = undefined; // Ensure huidNo is not stored for silver/others
-        }
-
-        const inDoc = new Karagir(inDocData);
-        await inDoc.save();
-
-        // Prepare item data for the Item model, mapping huidNo/karatCarat correctly
-        const itemData = {
-            jewelleryName: ornamentName,
-            metalType,
-            subtype,
-            grossWeight: parseFloat(grossWeight),
-            netWeight: parseFloat(netWeight),
-            sourceType: 'karagir', // Item source type for karagir entries
-            labourCharge: parseFloat(labourCharge),
-            balance,
+        const pendingOutEntriesCount = await KaragirLeisure.countDocuments({
             vendorId: req.vendorId,
-            karagirEntryId: inDoc._id // Link Item to the new 'in' Karagir entry
-        };
-
-        if (metalType === 'gold') {
-            itemData.huidNo = huidNo;
-            itemData.karatCarat = undefined; // Ensure karatCarat is unset for Item model
-        } else if (metalType === 'silver' || metalType === 'others') {
-            itemData.karatCarat = karatCarat;
-            itemData.huidNo = undefined; // Ensure huidNo is unset for Item model
-        }
-
-        const item = new Item(itemData);
-        await item.save();
-
-        return res.status(201).json({
-            message: 'Karagir-In recorded, pending-Out closed, Item created.',
-            karagirEntry: inDoc,
-            matchedOut: outDoc,
-            newItem: item
+            karagirName: lowercasedKaragirName, // Use lowercased name for query
+            metalType,
+            entryType: 'out',
+            status: 'pending'
         });
+        res.json({ hasPending: pendingOutEntriesCount > 0, count: pendingOutEntriesCount });
     } catch (err) {
-        console.error('Error in POST /api/karagirleisures:', err);
-        // Handle MongoDB duplicate key error specifically for HUID
-        if (err.code === 11000 && err.keyPattern && err.keyPattern.huidNo) {
-            return res.status(409).json({ message: 'Duplicate HUID No. A gold item with this HUID already exists.' });
-        }
-        // Handle Mongoose validation errors
-        if (err.name === 'ValidationError') {
-            const errors = Object.values(err.errors).map(e => e.message);
-            return res.status(400).json({ message: 'Validation failed', errors });
-        }
-        return res.status(500).json({ message: err.message || 'An unexpected error occurred.' });
+        console.error('Error checking pending Karagir-Out entries:', err);
+        res.status(500).json({ message: 'Server error during pending out check.' });
     }
 });
 
-/**
- * 2) GET /api/karagirleisures
- * - Return all Karagir entries for this vendor, optionally filtered by query params.
- */
-router.get('/', verify, async (req, res) => {
+// @route   GET /api/karagir/:id
+// @desc    Get a single Karagir entry by ID for the authenticated vendor
+// @access  Private
+// --- IMPORTANT: This route MUST come AFTER /api/karagir/pending-out ---
+router.get('/:id', async (req, res) => {
     try {
-        const filter = { vendorId: req.vendorId };
-
-        if (req.query.actionType) {
-            filter.actionType = req.query.actionType;
-        }
-        if (req.query.status) {
-            filter.status = req.query.status;
-        }
-        if (req.query.karagirName) {
-            filter.karagirName = req.query.karagirName.toLowerCase();
-        }
-
-        const entries = await Karagir.find(filter).sort({ createdAt: -1 });
-        return res.json(entries);
-    } catch (err) {
-        console.error('Error in GET /api/karagirleisures:', err);
-        return res.status(500).json({ message: err.message });
-    }
-});
-
-/**
- * 3) GET /api/karagirleisures/:id
- * - Return one Karagir entry (must belong to this vendor).
- */
-router.get('/:id', verify, async (req, res) => {
-    try {
-        const entry = await Karagir.findOne({
-            _id: req.params.id,
-            vendorId: req.vendorId
-        });
-        if (!entry) {
+        const karagirEntry = await KaragirLeisure.findOne({ _id: req.params.id, vendorId: req.vendorId }).lean();
+        if (!karagirEntry) {
             return res.status(404).json({ message: 'Karagir entry not found.' });
         }
-        return res.json(entry);
+        res.json(karagirEntry);
     } catch (err) {
-        console.error('Error in GET /api/karagirleisures/:id', err);
-        return res.status(500).json({ message: err.message });
+        console.error('Error in GET /api/karagir/:id', err);
+        // Handle CastError for invalid IDs (e.g., if a non-ObjectId string like 'pending-out' is passed)
+        if (err.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid Karagir entry ID format.' });
+        }
+        res.status(500).json({ message: 'Server error: Could not retrieve Karagir entry.' });
     }
 });
 
-/**
- * 4) PUT /api/karagirleisures/:id
- * - Update a Karagir entry (only if it belongs to this vendor).
- * - If this was originally an “in” entry and purity changed, update the corresponding Item.
- * - If an “out” flips status from completed→pending, delete its paired “in” and linked Item.
- * - Mirror certain out-field changes to paired in entry.
- */
-router.put('/:id', verify, async (req, res) => {
+// @route   POST /api/karagir
+// @desc    Create a new Karagir entry (Karagir-Out or Karagir-In)
+// @access  Private
+router.post('/', async (req, res) => {
+    const {
+        entryType, karagirName, metalType, remarks,
+        // Karagir-Out specific
+        gramsGiven, purityGiven,
+        // Karagir-In specific
+        jewelleryName, subtype, huidNo, karatCarat, grossWeight, netWeight, purityReceived, labourCharge, balance
+    } = req.body;
+
+    // Ensure karagirName is lowercased before using in queries or creating the new entry
+    const lowercasedKaragirName = karagirName ? karagirName.toLowerCase() : karagirName; // Handle potential undefined/null
+
+    // Base data for the new entry
+    let newEntryData = {
+        vendorId: req.vendorId,
+        karagirName: lowercasedKaragirName, // Use lowercased name
+        metalType,
+        remarks,
+        entryType
+    };
+
     try {
-        const {
-            karagirName,
-            metalType, // This comes from client, but we will use existing.metalType for logic
-            purity,
-            remarks,
-            balance,
-            grams,
-            status,
-            ornamentName,
-            labourCharge,
-            huidNo,      // Now expecting these directly
-            karatCarat,  // Now expecting these directly
-            grossWeight,
-            netWeight,
-            subtype
-        } = req.body;
-
-        // 4a) Find existing entry
-        const existing = await Karagir.findOne({
-            _id: req.params.id,
-            vendorId: req.vendorId
-        });
-        if (!existing) {
-            return res.status(404).json({ message: 'Karagir entry not found.' });
-        }
-
-        const beforeStatus = existing.status; // Save for status flip logic
-
-        // Prepare update object, using existing metalType and actionType for logic consistency
-        const updateFields = {
-            karagirName: karagirName ? karagirName.toLowerCase() : existing.karagirName,
-            remarks: remarks !== undefined ? remarks : existing.remarks,
-            // metalType and actionType are generally not changeable on update,
-            // using existing values for logic.
-            // If they are explicitly sent in payload, they will be used, but UI disables them.
-        };
-
-        // Apply fields based on existing actionType
-        if (existing.actionType === 'out') {
-            updateFields.grams = parseFloat(grams) || 0;
-            updateFields.status = status || 'pending';
-            updateFields.purity = purity || existing.purity; // Purity for 'out'
-
-            // Ensure 'in' specific fields are unset
-            updateFields.ornamentName = undefined;
-            updateFields.labourCharge = undefined;
-            updateFields.purity = purity || '';
-            updateFields.huidNo = undefined;
-            updateFields.karatCarat = undefined;
-            updateFields.grossWeight = undefined;
-            updateFields.netWeight = undefined;
-            updateFields.subtype = undefined;
-            updateFields.balance = undefined; // Ensure balance is unset for 'out'
-
-        } else if (existing.actionType === 'in') {
-            updateFields.ornamentName = ornamentName !== undefined ? ornamentName : existing.ornamentName;
-            updateFields.labourCharge = parseFloat(labourCharge) || 0;
-            updateFields.grossWeight = parseFloat(grossWeight) || 0;
-            updateFields.balance = balance !== undefined ? balance : existing.balance; // Update balance for 'in'
-            updateFields.netWeight = parseFloat(netWeight) || 0;
-            updateFields.subtype = subtype !== undefined ? subtype : existing.subtype;
-
-            // Handle purity fields based on existing metalType
-            if (existing.metalType === 'gold') {
-                if (huidNo !== undefined && (!huidNo || !/^[a-zA-Z0-9]{6}$/.test(huidNo))) {
-                    return res.status(400).json({ message: 'HUID No (6 digits) is required for gold items.' });
-                }
-                updateFields.huidNo = huidNo;
-                updateFields.karatCarat = undefined; // Ensure karatCarat is unset
-            } else if (existing.metalType === 'silver' || existing.metalType === 'others') {
-                if (!karatCarat) {
-                    return res.status(400).json({ message: 'Karat/Carat is required for silver/other items.' });
-                }
-                updateFields.karatCarat = karatCarat;
-                updateFields.huidNo = undefined; // Ensure huidNo is unset
+        if (entryType === 'out') {
+            // Validate Karagir-Out specific fields
+            if (gramsGiven === undefined || purityGiven === undefined) {
+                return res.status(400).json({ message: 'Grams Given and Purity Given are required for Karagir-Out entry.' });
+            }
+            newEntryData = {
+                ...newEntryData,
+                gramsGiven: parseFloat(gramsGiven),
+                purityGiven,
+                status: 'pending' // Default status for Karagir-Out
+            };
+        } else if (entryType === 'in') {
+            // Validate Karagir-In specific fields
+            if (!jewelleryName || !subtype || grossWeight === undefined || netWeight === undefined ||
+                purityReceived === undefined || labourCharge === undefined) {
+                return res.status(400).json({ message: 'Missing required fields for Karagir-In entry.' });
             }
 
-            // Ensure 'out' specific fields are unset
-            updateFields.grams = undefined;
-            updateFields.status = undefined;
-            updateFields.purity = undefined; // Purity is for 'out'
-        } else {
-            return res.status(400).json({ message: 'Invalid existing actionType for update.' });
-        }
-
-        // Apply updates and save
-        const saved = await Karagir.findByIdAndUpdate(
-            req.params.id,
-            { $set: updateFields },
-            { new: true, runValidators: true }
-        );
-
-        if (!saved) {
-            return res.status(404).json({ message: 'Karagir entry not found after update attempt.' });
-        }
-
-        // 4c) If OUT updated … handle cascades
-        if (saved.actionType === 'out') {
-            const inDoc = await Karagir.findOne({
-                transactionId: saved.transactionId,
-                actionType: 'in',
-                vendorId: req.vendorId
-            });
-
-            // A-1) status flip completed→pending: delete paired IN + Item
-            if (beforeStatus === 'completed' && saved.status === 'pending' && inDoc) {
-                await Karagir.deleteOne({ _id: inDoc._id });
-                await Item.deleteOne({ karagirEntryId: inDoc._id });
+            // Check for pending Karagir-Out entries (though frontend also checks)
+            // Use the lowercased name for this check as well
+            const pendingOutEntries = await getPendingOutEntries(req.vendorId, lowercasedKaragirName, metalType);
+            if (pendingOutEntries.length > 0) {
+                console.log(`Karagir "${lowercasedKaragirName}" has ${pendingOutEntries.length} pending OUT entries for ${metalType}. Proceeding with IN entry.`);
+                // Frontend is expected to show a popup. Backend proceeds.
             }
 
-            // A-2) mirror metalType/karagirName to IN if it still exists
-            if (inDoc) {
-                // Only mirror if the field was updated in the OUT document
-                if (updateFields.metalType !== undefined) {
-                    inDoc.metalType = updateFields.metalType;
-                }
-                if (updateFields.karagirName !== undefined) {
-                    inDoc.karagirName = updateFields.karagirName;
-                }
-                // No need to mirror huidNo/karatCarat from OUT to IN as OUT doesn't have them
-                await inDoc.save();
-            }
-        }
-
-        // 4d) If IN updated … sync to Item
-        if (saved.actionType === 'in') {
-            const itemUpdateFields = {
-                jewelleryName: saved.ornamentName,
-                metalType: saved.metalType,
-                subtype: saved.subtype,
-                grossWeight: saved.grossWeight,
-                netWeight: saved.netWeight,
-                labourCharge: saved.labourCharge,
-                balance: saved.balance,
+            // Prepare item data for automatic insertion into Item collection
+            const itemData = {
+                vendorId: req.vendorId,
+                jewelleryName,
+                metalType,
+                subtype,
+                grossWeight: parseFloat(grossWeight),
+                netWeight: parseFloat(netWeight),
+                purity: purityReceived, // Use purityReceived from Karagir-In
+                sourceType: 'karagir', // Automatically set sourceType to 'karagir'
+                labourCharge: parseFloat(labourCharge),
+                balance: balance || "0", // Ensure balance is a string, default to "0"
             };
 
-            // Conditionally assign huidNo or karatCarat based on metalType for Item model
-            if (saved.metalType === 'gold') {
-                itemUpdateFields.huidNo = saved.huidNo;
-                itemUpdateFields.karatCarat = undefined; // Explicitly unset
-            } else if (saved.metalType === 'silver' || saved.metalType === 'others') {
-                itemUpdateFields.karatCarat = saved.karatCarat;
-                itemUpdateFields.huidNo = undefined; // Explicitly unset
+            // Handle HUID No / KaratCarat conditional logic for Item creation
+            if (metalType === 'gold') {
+                if (!huidNo) {
+                    return res.status(400).json({ message: 'HUID No is required for gold items in Karagir-In.' });
+                }
+                if (!/^[a-zA-Z0-9]{6}$/.test(huidNo)) {
+                    return res.status(400).json({ message: 'HUID No must be exactly 6 alphanumeric characters.', field: 'huidNo' });
+                }
+                // Check HUID uniqueness for Item model before saving
+                const existingItemWithHUID = await Item.findOne({ huidNo: huidNo, metalType: 'gold' });
+                if (existingItemWithHUID) {
+                     return res.status(400).json({ message: 'HUID number already exists. It must be unique.', field: 'huidNo' });
+                }
+                itemData.huidNo = huidNo;
+            } else {
+                if (!karatCarat) {
+                    return res.status(400).json({ message: 'Karat/Carat is required for silver/others metal types in Karagir-In.' });
+                }
+                itemData.karatCarat = karatCarat;
             }
 
-            await Item.findOneAndUpdate(
-                { karagirEntryId: saved._id },
-                { $set: itemUpdateFields },
-                { new: true }
-            );
+            // Attempt to create the new Item first
+            const newItem = new Item(itemData);
+            let createdItem;
+            try {
+                createdItem = await newItem.save();
+                console.log(`New Item created in inventory: ${createdItem._id}`);
+            } catch (itemErr) {
+                console.error('Error saving new Item from Karagir-In:', itemErr);
+                // Mongoose validation errors
+                if (itemErr.name === 'ValidationError') {
+                    const errors = Object.values(itemErr.errors).map(e => ({ field: e.path, message: e.message }));
+                    return res.status(400).json({ message: 'Item validation failed', errors });
+                }
+                // Other errors, potentially unique index errors (though HUID unique check is above)
+                return res.status(400).json({ message: `Failed to create item in inventory: ${itemErr.message}` });
+            }
+
+            // Add Karagir-In specific fields to the entry data
+            newEntryData = {
+                ...newEntryData,
+                jewelleryName,
+                subtype,
+                huidNo: metalType === 'gold' ? huidNo : undefined, // Only store HUID if gold
+                karatCarat: metalType !== 'gold' ? karatCarat : undefined, // Only store Karat/Carat if silver/others
+                grossWeight: parseFloat(grossWeight),
+                netWeight: parseFloat(netWeight),
+                purityReceived,
+                labourCharge: parseFloat(labourCharge),
+                balance: balance || "0",
+                linkedItemId: createdItem._id, // Link to the newly created item
+                status: 'completed' // Karagir-In entries are 'completed' by nature
+            };
+
+            // Optionally, try to find and update a corresponding pending Karagir-Out entry to 'completed'
+            // We find the oldest pending 'out' entry for this karagir and metal type
+            if (pendingOutEntries.length > 0) {
+                const oldestPendingOut = pendingOutEntries.sort((a, b) => a.createdAt - b.createdAt)[0];
+                await KaragirLeisure.findByIdAndUpdate(
+                    oldestPendingOut._id,
+                    { $set: { status: 'completed' } },
+                    { new: true }
+                );
+                newEntryData.completesOutEntry = oldestPendingOut._id;
+                console.log(`Marked Karagir-Out entry ${oldestPendingOut._id} as completed by this IN entry.`);
+            }
+
+        } else {
+            return res.status(400).json({ message: 'Invalid entryType. Must be "in" or "out".' });
         }
 
-        return res.json({
-            message: 'Karagir entry updated successfully.',
-            updatedEntry: saved
-        });
+        const karagirEntry = new KaragirLeisure(newEntryData);
+        const newKaragirEntry = await karagirEntry.save();
+
+        res.status(201).json(newKaragirEntry);
+
     } catch (err) {
-        console.error('Error in PUT /api/karagirleisures/:id', err);
-        if (err.code === 11000 && err.keyPattern && err.keyPattern.huidNo) {
-            return res.status(409).json({ message: 'Duplicate HUID No. A gold item with this HUID already exists.' });
-        }
+        console.error('Error in POST /api/karagir:', err);
+        // Handle Mongoose validation errors
         if (err.name === 'ValidationError') {
-            const errors = Object.values(err.errors).map(e => e.message);
+            const errors = Object.values(err.errors).map(e => ({
+                field: e.path,
+                message: e.message
+            }));
             return res.status(400).json({ message: 'Validation failed', errors });
         }
-        return res.status(500).json({ message: err.message || 'An unexpected error occurred.' });
+        // Handle duplicate key errors (e.g., for transactionId)
+        if (err.code === 11000) {
+            const field = Object.keys(err.keyValue)[0];
+            const value = err.keyValue[field];
+            return res.status(409).json({ message: `Duplicate value for ${field}: ${value}. It must be unique.`, field });
+        }
+        res.status(500).json({ message: err.message || 'Server error: An unexpected error occurred during Karagir entry creation.' });
     }
 });
 
-/**
- * 5) DELETE /api/karagirleisures/:id
- * - Delete a single Karagir entry (only if it belongs to this vendor).
- * - Also delete its corresponding Item (if any) and paired entry.
- */
-router.delete('/:id', verify, async (req, res) => {
+// @route   PUT /api/karagir/:id
+// @desc    Update an existing Karagir entry for the authenticated vendor
+// @access  Private
+router.put('/:id', async (req, res) => {
     try {
-        const deleted = await Karagir.findOneAndDelete({
-            _id: req.params.id,
-            vendorId: req.vendorId
-        });
-        if (!deleted) {
-            return res.status(404).json({ message: 'Karagir entry not found.' });
+        const { id } = req.params;
+        const updateData = { ...req.body };
+
+        // Prevent modification of vendorId, createdAt, entryType, transactionId
+        delete updateData.vendorId;
+        delete updateData.createdAt;
+        delete updateData.entryType; // entryType should not change after creation
+        delete updateData.transactionId; // transactionId should not change after creation
+
+        // If karagirName is being updated, it will be lowercased by the setter in the model
+        if (updateData.karagirName) {
+            updateData.karagirName = updateData.karagirName.toLowerCase();
         }
 
-        // If this entry had a transactionId, remove its pair + linked Item
-        if (deleted.transactionId) {
-            await Karagir.deleteMany({
-                transactionId: deleted.transactionId,
-                _id: { $ne: deleted._id }, // Don't delete the one we just deleted
-                vendorId: req.vendorId
+        const existingEntry = await KaragirLeisure.findOne({ _id: id, vendorId: req.vendorId });
+        if (!existingEntry) {
+            return res.status(404).json({ message: 'Karagir entry not found for update.' });
+        }
+
+        // Apply specific field handling based on entryType during update
+        if (existingEntry.entryType === 'out') {
+            // For 'out' entries, ensure 'in' specific fields are not updated
+            delete updateData.jewelleryName;
+            delete updateData.subtype;
+            delete updateData.huidNo;
+            delete updateData.karatCarat;
+            delete updateData.grossWeight;
+            delete updateData.netWeight;
+            delete updateData.purityReceived;
+            delete updateData.labourCharge;
+            delete updateData.balance;
+            delete updateData.linkedItemId;
+            delete updateData.completesOutEntry;
+            // Convert gramsGiven to float if present
+            if (updateData.gramsGiven !== undefined) {
+                updateData.gramsGiven = parseFloat(updateData.gramsGiven);
+            }
+        } else if (existingEntry.entryType === 'in') {
+            // For 'in' entries, ensure 'out' specific fields are not updated
+            delete updateData.gramsGiven;
+            delete updateData.purityGiven;
+            // Prevent changing linkedItemId or completesOutEntry from client side
+            delete updateData.linkedItemId;
+            delete updateData.completesOutEntry;
+
+            const currentMetalType = updateData.metalType || existingEntry.metalType;
+
+            // Handle HUID No / KaratCarat conditional logic for existing 'in' entry update
+            if (currentMetalType === 'gold') {
+                if (updateData.huidNo === undefined || updateData.huidNo === null || updateData.huidNo === '') {
+                    return res.status(400).json({ message: 'HUID No is required for gold items.', field: 'huidNo' });
+                }
+                if (!/^[a-zA-Z0-9]{6}$/.test(updateData.huidNo)) {
+                    return res.status(400).json({ message: 'HUID No must be 6 alphanumeric characters.', field: 'huidNo' });
+                }
+                updateData.karatCarat = undefined; // Ensure karatCarat is unset
+            } else {
+                if (updateData.karatCarat === undefined || updateData.karatCarat === null || updateData.karatCarat === '') {
+                    return res.status(400).json({ message: 'Karat/Carat is required for silver/others metal types.', field: 'karatCarat' });
+                }
+                updateData.huidNo = undefined; // Ensure huidNo is unset
+            }
+
+            // Convert number fields to float if present
+            ['grossWeight', 'netWeight', 'labourCharge'].forEach(field => {
+                if (updateData[field] !== undefined) {
+                    updateData[field] = parseFloat(updateData[field]);
+                }
             });
-            // Delete items linked to this Karagir entry
-            await Item.deleteMany({ karagirEntryId: deleted._id });
+            // Ensure balance is string
+            if (updateData.balance !== undefined) {
+                updateData.balance = String(updateData.balance);
+            }
+
+            // If linkedItemId exists, attempt to update the corresponding Item
+            if (existingEntry.linkedItemId) {
+                const updatedItemData = {
+                    jewelleryName: updateData.jewelleryName !== undefined ? updateData.jewelleryName : existingEntry.jewelleryName,
+                    metalType: updateData.metalType !== undefined ? updateData.metalType : existingEntry.metalType,
+                    subtype: updateData.subtype !== undefined ? updateData.subtype : existingEntry.subtype,
+                    grossWeight: updateData.grossWeight !== undefined ? updateData.grossWeight : existingEntry.grossWeight,
+                    netWeight: updateData.netWeight !== undefined ? updateData.netWeight : existingEntry.netWeight,
+                    labourCharge: updateData.labourCharge !== undefined ? updateData.labourCharge : existingEntry.labourCharge,
+                    balance: updateData.balance !== undefined ? String(updateData.balance) : existingEntry.balance, // Ensure string
+                    purity: updateData.purityReceived !== undefined ? updateData.purityReceived : existingEntry.purityReceived
+                };
+
+                if (currentMetalType === 'gold') {
+                    updatedItemData.huidNo = updateData.huidNo;
+                    updatedItemData.karatCarat = undefined; // Unset if previously existed
+                } else {
+                    updatedItemData.karatCarat = updateData.karatCarat;
+                    updatedItemData.huidNo = undefined; // Unset if previously existed
+                }
+
+                try {
+                    const updatedItem = await Item.findByIdAndUpdate(
+                        existingEntry.linkedItemId,
+                        updatedItemData,
+                        { new: true, runValidators: true, context: 'query' }
+                    );
+                    if (!updatedItem) {
+                        console.warn(`Linked Item with ID ${existingEntry.linkedItemId} not found during Karagir-In update.`);
+                    } else {
+                        console.log(`Linked Item ${existingEntry.linkedItemId} updated successfully.`);
+                    }
+                } catch (itemErr) {
+                    if (itemErr.code === 11000 && itemErr.keyPattern && itemErr.keyPattern.huidNo) {
+                        return res.status(400).json({ message: 'HUID number already exists for another item. It must be unique.', field: 'huidNo' });
+                    }
+                    console.error('Error updating linked Item from Karagir-In:', itemErr);
+                    return res.status(400).json({ message: `Failed to update linked item: ${itemErr.message}` });
+                }
+            }
         }
 
-        return res.json({ message: 'Karagir entry deleted successfully.' });
+        const updatedKaragirEntry = await KaragirLeisure.findOneAndUpdate(
+            { _id: id, vendorId: req.vendorId },
+            updateData,
+            { new: true, runValidators: true, context: 'query' } // runValidators to apply schema validations on update
+        ).lean();
+
+        if (!updatedKaragirEntry) {
+            return res.status(404).json({ message: 'Karagir entry not found or you do not have permission to update it.' });
+        }
+        res.json(updatedKaragirEntry);
+
     } catch (err) {
-        console.error('Error in DELETE /api/karagirleisures/:id', err);
-        return res.status(500).json({ message: err.message });
+        console.error('Error in PUT /api/karagir/:id', err);
+        if (err.name === 'ValidationError') {
+            const errors = Object.values(err.errors).map(e => ({
+                field: e.path,
+                message: e.message,
+                value: e.value
+            }));
+            return res.status(400).json({ message: 'Validation failed', errors });
+        } else if (err.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid Karagir entry ID format.' });
+        } else if (err.code === 11000) { // Duplicate key error
+            return res.status(400).json({ message: 'Duplicate key error. A unique field might already exist.', field: err.keyPattern ? Object.keys(err.keyPattern)[0] : 'unknown' });
+        }
+        res.status(500).json({ message: err.message || 'Server error: Update failed.' });
     }
 });
 
-/**
- * 6) DELETE /api/karagirleisures
- * - Delete ALL Karagir entries for this vendor (and their linked Items).
- */
-router.delete('/', verify, async (req, res) => {
+// @route   DELETE /api/karagir/:id
+// @desc    Delete a single Karagir entry by ID for the authenticated vendor
+// @access  Private
+router.delete('/:id', async (req, res) => {
     try {
-        const karagirEntriesToDelete = await Karagir.find({ vendorId: req.vendorId });
-        const karagirEntryIds = karagirEntriesToDelete.map(entry => entry._id);
+        const { id } = req.params;
+        const deletedEntry = await KaragirLeisure.findOneAndDelete({ _id: id, vendorId: req.vendorId });
 
-        await Karagir.deleteMany({ vendorId: req.vendorId });
-        await Item.deleteMany({ karagirEntryId: { $in: karagirEntryIds }, vendorId: req.vendorId });
+        if (!deletedEntry) {
+            return res.status(404).json({ message: 'Karagir entry not found or you do not have permission to delete it.' });
+        }
 
-        return res.json({ message: `Deleted all Karagir entries and linked Items.` });
+        // If it was a Karagir-In entry, delete the linked Item as well
+        if (deletedEntry.entryType === 'in' && deletedEntry.linkedItemId) {
+            await Item.findByIdAndDelete(deletedEntry.linkedItemId);
+            console.log(`Deleted linked Item ${deletedEntry.linkedItemId} for Karagir-In entry ${id}`);
+        }
+
+        // If this entry was completing an 'out' entry, reset that 'out' entry's status to 'pending'
+        if (deletedEntry.entryType === 'in' && deletedEntry.completesOutEntry) {
+            await KaragirLeisure.findByIdAndUpdate(deletedEntry.completesOutEntry, { $set: { status: 'pending' } });
+            console.log(`Reset status of Karagir-Out entry ${deletedEntry.completesOutEntry} to pending after deleting its completing IN entry.`);
+        }
+
+        res.json({ message: 'Karagir entry deleted successfully.' });
     } catch (err) {
-        console.error('Error in DELETE /api/karagirleisures (all)', err);
-        return res.status(500).json({ message: err.message });
+        console.error('Error in DELETE /api/karagir/:id', err);
+        if (err.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid Karagir entry ID format.' });
+        }
+        res.status(500).json({ message: err.message || 'Server error: Could not delete Karagir entry.' });
+    }
+});
+
+// @route   DELETE /api/karagir
+// @desc    Delete all Karagir entries for the authenticated vendor (use with caution!)
+// @access  Private
+router.delete('/', async (req, res) => {
+    try {
+        // Find all Karagir-In entries for this vendor to identify linked items
+        const karagirInEntries = await KaragirLeisure.find({ vendorId: req.vendorId, entryType: 'in' });
+        const linkedItemIds = karagirInEntries.map(entry => entry.linkedItemId).filter(id => id); // Filter out null/undefined
+
+        if (linkedItemIds.length > 0) {
+            // Delete all items linked to these Karagir-In entries
+            const itemDeleteResult = await Item.deleteMany({ _id: { $in: linkedItemIds }, vendorId: req.vendorId });
+            console.log(`Deleted ${itemDeleteResult.deletedCount} linked items for vendor ${req.vendorId}.`);
+        }
+
+        // Now delete all Karagir entries (both 'in' and 'out') for the vendor
+        const karagirDeleteResult = await KaragirLeisure.deleteMany({ vendorId: req.vendorId });
+
+        res.json({ message: `Deleted ${karagirDeleteResult.deletedCount} Karagir entries and their linked items successfully.` });
+    } catch (err) {
+        console.error('Error in DELETE /api/karagir (all):', err);
+        res.status(500).json({ message: err.message || 'Server error: Could not delete all Karagir entries.' });
     }
 });
 

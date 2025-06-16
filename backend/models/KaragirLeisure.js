@@ -1,123 +1,162 @@
-// backend/models/KaragirLeisure.js
 const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid'); // Import UUID generator
 
-const karagirLeisureSchema = new mongoose.Schema({
-    actionType: {
-        type: String,
-        required: true,
-        enum: ['in', 'out'] // Ensures only 'in' or 'out' are valid values
+const KaragirLeisureSchema = new mongoose.Schema({
+    vendorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Vendor',
+        required: true
     },
     karagirName: {
         type: String,
         required: true,
-        trim: true // Removes whitespace from both ends of a string
-    },
-    purity: {
-        type: String,
-        required: function() { return this.actionType === 'out'; }
+        trim: true,
+        // --- IMPORTANT CHANGE: Store karagirName in lowercase ---
+        set: (v) => v.toLowerCase()
     },
     metalType: {
         type: String,
         required: true,
-        enum: ['gold', 'silver', 'others'] // Specifies allowed metal types
+        lowercase: true,
+        enum: ['gold', 'silver', 'others']
     },
-    remarks: {
+    remarks: { // Optional remarks field for both in/out
         type: String,
-        default: '' // Provides a default empty string if no remarks are given
-    },
-    balance: {
-        type: String,
-        required: function() { return this.actionType === 'in'; }
-    },
-    // Fields specific to 'out' actionType
-    grams: {
-        type: Number,
-        min: 0, // Grams cannot be negative
-        required: function() { return this.actionType === 'out'; } // Required only when actionType is 'out'
-    },
-    status: {
-        type: String,
-        enum: ['pending', 'completed'], // Only these two statuses are allowed
-        default: 'pending', // Default status for 'out' entries
-        required: function() { return this.actionType === 'out'; } // Required only when actionType is 'out'
-    },
-    // Fields specific to 'in' actionType
-    ornamentName: {
-        type: String,
-        required: function() { return this.actionType === 'in'; } // Required only when actionType is 'in'
-    },
-    labourCharge: {
-        type: Number,
-        min: 0, // Labour charge cannot be negative
-        required: function() { return this.actionType === 'in'; } // Required only when actionType is 'in'
-    },
-    // HUID No: Required only if metalType is 'gold' and actionType is 'in'
-    huidNo: {
-        type: String,
-        trim: true,
-        sparse: true,
-        required: function() { return this.actionType === 'in' && this.metalType === 'gold'; },
-        validate: {
-            validator: function(v) {
-            if (this.actionType === 'in' && this.metalType === 'gold') {
-                return v && /^[a-zA-Z0-9]{6}$/.test(v); // Alphanumeric 6 characters
-            }
-            return true;
-            },
-            message: props => `${props.value} is not a valid 6-digit HUID No for gold!`
-        }
-    },
-    // Karat/Carat: Required if metalType is 'silver' or 'others' and actionType is 'in'
-    karatCarat: {
-        type: String,
-        trim: true,
-        required: function() { return this.actionType === 'in' && (this.metalType === 'silver' || this.metalType === 'others'); }
-    },
-    grossWeight: {
-        type: Number,
-        min: 0, // Gross weight cannot be negative
-        required: function() { return this.actionType === 'in'; } // Required only when actionType is 'in'
-    },
-    netWeight: {
-        type: Number,
-        min: 0, // Net weight cannot be negative
-        required: function() { return this.actionType === 'in'; }, // Required only when actionType is 'in'
-        validate: {
-            validator: function(v) {
-                // If it's an 'in' entry, net weight must be less than or equal to gross weight
-                return this.actionType === 'out' || (v <= this.grossWeight);
-            },
-            message: 'Net weight cannot be greater than gross weight!'
-        }
-    },
-    subtype: {
-        type: String,
-        required: function() { return this.actionType === 'in'; }, // Required only when actionType is 'in'
         trim: true
+    },
+    entryType: { // 'in' or 'out'
+        type: String,
+        required: true,
+        enum: ['in', 'out']
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    status: { // 'pending' (for out entries) or 'completed' (when an in-entry matches an out-entry)
+        type: String,
+        enum: ['pending', 'completed'],
+        default: 'pending' // Default status for Karagir-Out
     },
     transactionId: {
         type: String,
-        required: true, // Each Karagir entry should have a transaction ID
-        unique: true // Ensures uniqueness for transaction linking
+        unique: true, // Ensures each transaction has a unique ID
+        required: true, // This field must always be present
+        default: uuidv4 // Automatically generate a UUID if not provided on creation
     },
-    vendorId: {
+
+    // Fields specific to Karagir-Out entries
+    gramsGiven: {
+        type: Number,
+        required: function() { return this.entryType === 'out'; },
+        min: [0, 'Grams Given cannot be negative'],
+        validate: {
+            validator: function(v) {
+                return this.entryType !== 'out' || (v !== null && v !== undefined && v >= 0);
+            },
+            message: 'Grams Given is required for Karagir-Out entries and must be a non-negative number.'
+        }
+    },
+    purityGiven: {
         type: String,
-        required: true // Links entries to a specific vendor
+        required: function() { return this.entryType === 'out'; },
+        trim: true
+    },
+
+    // Fields specific to Karagir-In entries
+    jewelleryName: {
+        type: String,
+        required: function() { return this.entryType === 'in'; },
+        trim: true
+    },
+    subtype: {
+        type: String,
+        required: function() { return this.entryType === 'in'; },
+        validate: {
+            validator: function(v) {
+                const metal = this.metalType || '';
+                const val = v.toLowerCase();
+                if (metal === 'gold') {
+                    return ['regular gold jewellery', 'stone embedded gold jewellery'].includes(val);
+                } else if (metal === 'silver') {
+                    return ['regular silver jewellery', 'stone embedded silver jewellery'].includes(val);
+                } else if (metal === 'others') {
+                    return ['precious', 'semi-precious'].includes(val);
+                }
+                return false;
+            },
+            message: props => `Invalid subtype '${props.value}' for metal type ${this.metalType || 'unknown'}`
+        }
+    },
+    huidNo: {
+        type: String,
+        trim: true,
+        required: function() { return this.entryType === 'in' && (this.metalType || '').toLowerCase() === 'gold'; },
+        validate: {
+            validator: function(v) {
+                if (this.entryType === 'in' && (this.metalType || '').toLowerCase() === 'gold') {
+                    return /^[a-zA-Z0-9]{6}$/.test(v);
+                }
+                return true;
+            },
+            message: props => `${props.value} is not a valid 6-character alphanumeric HUID number!`
+        },
+        sparse: true
+    },
+    karatCarat: {
+        type: String,
+        trim: true,
+        required: function() { return this.entryType === 'in' && ['silver', 'others'].includes(this.metalType); },
+        validate: {
+            validator: function(v) {
+                if (this.entryType === 'in' && ['silver', 'others'].includes(this.metalType)) {
+                    return v && v.length > 0;
+                }
+                return true;
+            },
+            message: 'Karat/Carat is required for silver/other metal types in Karagir-In entries'
+        }
+    },
+    grossWeight: {
+        type: Number,
+        required: function() { return this.entryType === 'in'; },
+        min: [0, 'Gross Weight cannot be negative']
+    },
+    netWeight: {
+        type: Number,
+        required: function() { return this.entryType === 'in'; },
+        min: [0, 'Net Weight cannot be negative']
+    },
+    purityReceived: {
+        type: String,
+        required: function() { return this.entryType === 'in'; },
+        trim: true
+    },
+    labourCharge: {
+        type: Number,
+        required: function() { return this.entryType === 'in'; },
+        min: [0, 'Labour Charge cannot be negative']
+    },
+    balance: {
+        type: String,
+        default: "0",
+        trim: true
+    },
+    linkedItemId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Item',
+        required: false
+    },
+    completesOutEntry: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'KaragirLeisure',
+        required: false
     }
-}, { timestamps: true }); // Adds createdAt and updatedAt timestamps automatically
+}, {
+    timestamps: false
+});
 
-// It's important to remember that the unique index for 'huidNo' with partialFilterExpression
-// should be created directly in MongoDB to handle null/missing values correctly,
-// as Mongoose's `unique: true` property doesn't support partial indexing directly.
-// Example MongoDB command (as previously discussed):
-// db.your_karagir_collection_name.createIndex(
-//    { huidNo: 1 },
-//    {
-//      unique: true,
-//      partialFilterExpression: { metalType: "gold", huidNo: { $exists: true, $ne: null } }
-//    }
-// )
+KaragirLeisureSchema.index({ vendorId: 1, karagirName: 1, entryType: 1, status: 1 });
+KaragirLeisureSchema.index({ vendorId: 1, createdAt: -1 });
 
-const KaragirLeisure = mongoose.model('KaragirLeisure', karagirLeisureSchema);
-
-module.exports = KaragirLeisure;
+module.exports = mongoose.model('KaragirLeisure', KaragirLeisureSchema);
