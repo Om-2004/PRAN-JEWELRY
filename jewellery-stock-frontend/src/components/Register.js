@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 function Register() {
   const [shopName, setShopName] = useState('');
-  const [HUID_no, setHUIDNo] = useState('');
+  const [bisNumber, setBisNumber] = useState(''); // Renamed from HUID_no
   const [contact, setContact] = useState('');
   const [address, setAddress] = useState('');
   const [type, setType] = useState('');
@@ -10,17 +10,25 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const vendorData = { shopName, HUID_no, contact, address, type };
+    const vendorData = {
+      shopName,
+      bisNumber, // Make sure this matches backend key
+      contact,
+      address,
+      type
+    };
+
     try {
       const response = await fetch('/api/vendors', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(vendorData)
       });
+
       if (response.ok) {
         setMessage('Vendor registered successfully');
         setShopName('');
-        setHUIDNo('');
+        setBisNumber('');
         setContact('');
         setAddress('');
         setType('');
@@ -49,11 +57,11 @@ function Register() {
           />
         </div>
         <div>
-          <label>HUID No:</label><br />
+          <label>BIS Hallmark Registration Number:</label><br />
           <input
             type="text"
-            value={HUID_no}
-            onChange={(e) => setHUIDNo(e.target.value)}
+            value={bisNumber}
+            onChange={(e) => setBisNumber(e.target.value)}
             required
           />
         </div>

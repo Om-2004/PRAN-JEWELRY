@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const VendorSchema = new mongoose.Schema({
-  HUID_no: {
+  bisNumber: {
     type: String,
     required: true,
     unique: true,

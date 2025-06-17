@@ -34,24 +34,24 @@ router.get('/:id', async (req, res) => {
 // @desc    Create a new vendor
 router.post('/', async (req, res) => {
   try {
-    const { shopName, contact, HUID_no, address, type } = req.body;
+    const { shopName, contact, bisNumber, address, type } = req.body;
 
-    if (!shopName || !contact || !HUID_no) {
-      return res.status(400).json({ message: 'Missing required fields: shopName, contact, or HUID_no' });
-    }
+  if (!shopName || !contact || !bisNumber) {
+    return res.status(400).json({ message: 'Missing required fields: shopName, contact, or bisNumber' });
+  }
 
-    const existingVendor = await Vendor.findOne({ HUID_no });
-    if (existingVendor) {
-      return res.status(409).json({ message: 'Vendor with this HUID number already exists' });
-    }
+  const existingVendor = await Vendor.findOne({ bisNumber });
+  if (existingVendor) {
+    return res.status(409).json({ message: 'Vendor with this BIS number already exists' });
+  }
 
-    const newVendor = new Vendor({
-      shopName,
-      contact,
-      HUID_no,
-      address,
-      type
-    });
+  const newVendor = new Vendor({
+    shopName,
+    contact,
+    bisNumber,
+    address,
+    type
+  });
 
     const savedVendor = await newVendor.save();
     res.status(201).json(savedVendor);
