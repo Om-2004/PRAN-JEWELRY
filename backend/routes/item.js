@@ -40,21 +40,21 @@ router.get('/:id', verifyToken, async (req, res) => {
         res.json(transformedItem);
     } catch (err) {
         console.error('Error in GET /api/items/:id', err); // Added detailed logging
-        res.status(500).json({ message: err.message || 'An unexpected error occurred.' });
+        res.status(500).json({ message: 'Invalid ID or an unexpected error occurred.' });
     }
 });
 
 // POST a new item (attach vendorId automatically)
 router.post('/', verifyToken, async (req, res) => {
     try {
-        // Start with the request body, and add vendorId
+        // Start with the request body, and add vendorId and default isActive to true
         const itemData = {
             ...req.body,
-            vendorId: req.vendorId
+            vendorId: req.vendorId,
+            isActive: true // New items are active by default
         };
 
-        // --- Refined logic for metal-specific fields ---
-        // Prioritize explicit huidNo/karatCarat, then fall back to karatOrHUID for compatibility
+        // Refined logic for metal-specific fields
         if (itemData.metalType === 'gold') {
             itemData.huidNo = req.body.huidNo || req.body.karatOrHUID;
             itemData.karatCarat = undefined; // Ensure karatCarat is not saved for gold
@@ -62,16 +62,12 @@ router.post('/', verifyToken, async (req, res) => {
             itemData.karatCarat = req.body.karatCarat || req.body.karatOrHUID;
             itemData.huidNo = undefined; // Ensure huidNo is not saved for silver/others
         } else {
-            // If metalType is invalid or not provided, ensure both are undefined
             itemData.huidNo = undefined;
             itemData.karatCarat = undefined;
         }
 
         // Remove the legacy field if it was passed, as it's now handled
         delete itemData.karatOrHUID;
-
-        // The 'balance' field from req.body will automatically be included in itemData due to spread operator.
-        // Mongoose schema will handle its validation based on its definition in Item.js.
 
         const item = new Item(itemData);
         const newItem = await item.save();
@@ -88,7 +84,7 @@ router.post('/', verifyToken, async (req, res) => {
                 field: e.path,
                 message: e.message
             }));
-            return res.status(400).json({ errors });
+            return res.status(400).json({ message: 'Validation failed', errors });
         } else if (err.code === 11000) {
             // More descriptive error for duplicate HUID
             return res.status(400).json({
@@ -182,11 +178,15 @@ router.put('/:id', verifyToken, async (req, res) => {
 // DELETE an item
 router.delete('/:id', verifyToken, async (req, res) => {
     try {
-        const deletedItem = await Item.findOneAndDelete({ _id: req.params.id, vendorId: req.vendorId });
-        if (!deletedItem) return res.status(404).json({ message: 'Item not found' });
-        res.json({ message: 'Item deleted successfully' });
+        const item = await Item.findOneAndUpdate(
+            { _id: req.params.id, vendorId: req.vendorId },
+            { isActive: false }, // Set isActive to false instead of deleting
+            { new: true }
+        );
+        if (!item) return res.status(404).json({ message: 'Item not found' });
+        res.json({ message: 'Item marked as inactive successfully' });
     } catch (err) {
-        console.error('Error in DELETE /api/items/:id', err); // Added detailed logging
+        console.error('Error in DELETE (soft) /api/items/:id', err);
         res.status(500).json({ message: err.message || 'An unexpected error occurred.' });
     }
 });

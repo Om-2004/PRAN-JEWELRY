@@ -1,239 +1,439 @@
-/* ─────────────────────────────────────────────────────────────────────────────
-   1) Outer container spans full width (no side constraints)
-   ───────────────────────────────────────────────────────────────────────────── */
+/* Basic styling for the main container */
 .customer-manager-container {
-  width: 100%;
-  margin: 20px 0;
-  background: #fafafa;
-  box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    padding: 20px;
+    max-width: 1200px; /* Adjust as needed to match your desired full width */
+    width: 95%; /* Use a percentage for fluid responsiveness */
+    overflow-x: hidden; /* Hide horizontal overflow on the main container */
+    margin: 0 auto; /* Center the container on the page */
+    box-sizing: border-box; /* Ensure padding and border are included in the width */
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   2) FORM: fixed max-width, centered in viewport
-   ───────────────────────────────────────────────────────────────────────────── */
+h3 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+/* Form Type Selection Buttons (New section for 'In'/'Out' form toggles) */
+.customer-form-type-selection {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.customer-form-type-selection button {
+    background-color: #6c757d; /* Default grey for inactive */
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.customer-form-type-selection button.active-form-btn {
+    background-color: #28a745; /* Green for active form */
+    font-weight: bold;
+}
+
+.customer-form-type-selection button:hover:not(.active-form-btn) {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Form Sections Styling */
 .customer-action-form {
-  background: #fff;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  max-width: 800px;
-  margin: 0 auto 10px;
-  box-sizing: border-box;
+    background-color: #f9f9f9;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px; /* Space between form and table */
+    display: grid; /* Use grid for layout */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive columns */
+    gap: 15px;
 }
 
-.customer-common-fields,
-.customer-in-fields,
-.customer-out-fields {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
+.customer-action-form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+    color: #444;
 }
 
-.customer-common-fields input,
-.customer-in-fields input,
-.customer-out-fields input,
-.customer-common-fields select,
-.customer-in-fields select,
-.customer-out-fields select {
-  padding: 6px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  flex: 1 1 120px;
-  font-size: 13px;
-  box-sizing: border-box;
+.customer-action-form input[type="text"],
+.customer-action-form input[type="number"],
+.customer-action-form select,
+.customer-action-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    font-size: 1em;
+    margin-bottom: 10px; /* Space below each input */
+}
+
+.customer-action-form textarea {
+    resize: vertical; /* Allow vertical resizing for remarks */
+    min-height: 80px;
 }
 
 .customer-submit-button {
-  margin-top: 12px;
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  display: block;
+    background-color: #28a745;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    grid-column: 1 / -1; /* Make submit button span all columns */
+    margin-top: 15px;
 }
 
 .customer-submit-button:hover {
-  background-color: #0056b3;
+    background-color: #218838;
+    transform: translateY(-2px);
 }
 
+/* Specific field groups within the form */
+.customer-common-fields,
+.customer-metal-payment-fields,
+.customer-cash-payment-fields,
+.customer-other-payment-fields, /* New class for other payment */
+.customer-item-details-fields, /* Renamed and applies to both in/out items */
+.customer-out-specific-fields { /* Fields only for customer-out */
+    display: contents; /* Allows child elements to flow directly into the parent grid */
+}
+
+.customer-item-details-fields .jewellery-name-group {
+    grid-column: 1 / -1; /* Make jewellery name group span full width */
+    display: flex;
+    flex-direction: column;
+}
+
+.customer-item-details-fields .jewellery-name-group .item-selection-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+    flex-wrap: wrap; /* Allow buttons to wrap */
+}
+
+.customer-item-details-fields .jewellery-name-group .item-selection-buttons button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em; /* Smaller font for these buttons */
+    transition: background-color 0.2s ease;
+}
+
+.customer-item-details-fields .jewellery-name-group .item-selection-buttons button:hover {
+    background-color: #0056b3;
+}
+
+.customer-item-details-fields .jewellery-name-group .item-selection-buttons button.active-toggle {
+    background-color: #28a745; /* Green for active toggle button */
+}
+
+
 /* ─────────────────────────────────────────────────────────────────────────────
-   3) CONTROL BUTTONS: same max-width as form, centered
-   ───────────────────────────────────────────────────────────────────────────── */
+    CONTROL BUTTONS: same max-width as form, centered
+    ───────────────────────────────────────────────────────────────────────────── */
 .customer-control-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 0 auto 20px;
-  max-width: 800px;
-  box-sizing: border-box;
-  justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0 auto 20px;
+    max-width: 1200px; /* Aligned with main container max-width */
+    box-sizing: border-box;
+    justify-content: center;
 }
 
 .customer-control-buttons button {
-  padding: 6px 12px;
-  background-color: #555;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
+    background-color: #6c757d; /* Default grey for inactive */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .customer-control-buttons button:hover {
-  background-color: #333;
+    background-color: #5a6268;
+    transform: translateY(-2px);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   4) TABLE
-   ───────────────────────────────────────────────────────────────────────────── */
+    TABLE
+    ───────────────────────────────────────────────────────────────────────────── */
+.customer-table-container {
+    margin-top: 20px;
+    margin-bottom: 30px;
+    overflow-x: auto; /* Enable horizontal scrolling for the table if content overflows */
+    width: 100%; /* Ensure the container takes full available width */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+}
+
 .customer-table {
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 95vw;
-  max-width: none;
-  border-collapse: collapse;
-  margin-bottom: 30px;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  table-layout: auto;
-  box-sizing: border-box;
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1800px; /* Adjusted min-width as some columns are now 'N/A' for 'in' */
 }
 
 .customer-table th,
 .customer-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
-  font-size: 13px;
-  white-space: normal;
-  word-wrap: break-word;
-  box-sizing: border-box;
+    border: 1px solid #ddd;
+    padding: 12px 8px;
+    text-align: left;
+    white-space: nowrap; /* Prevent text wrapping in cells */
+    font-size: 0.9em;
 }
 
 .customer-table th {
-  background-color: #f2f2f2;
+    background-color: #e9ecef;
+    font-weight: bold;
+    color: #343a40;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
-.customer-table tbody tr:nth-child(even) {
-  background-color: #fafafa;
-}
-
-.customer-table .remarks-col {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  overflow: visible;
+.customer-table .remarks-col,
+.customer-table .customer-address-col,
+.customer-table .other-payment-notes-col {
+    white-space: pre-wrap; /* Allow wrapping for address and remarks */
+    word-wrap: break-word;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   5) BADGES
-   ───────────────────────────────────────────────────────────────────────────── */
+    BADGES
+    ───────────────────────────────────────────────────────────────────────────── */
 .badge {
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: white;
-  font-size: 0.8em;
-  text-transform: uppercase;
-  white-space: nowrap;
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 5px;
+    color: white;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    font-weight: bold;
+    white-space: nowrap;
+    text-align: center;
 }
 
 .badge-info {
-  background-color: #17a2b8;
+    background-color: #17a2b8; /* Cyan for IN */
 }
 .badge-warning {
-  background-color: #ffc107;
-  color: black;
+    background-color: #ffc107; /* Orange for OUT */
+    color: #333; /* Darker text for warning */
 }
 .badge-pending {
-  background-color: #ff9800;
-  color: white;
+    background-color: #ff9800; /* Amber for PENDING */
+    color: white;
 }
 .badge-completed {
-  background-color: #28a745;
-  color: white;
+    background-color: #28a745; /* Green for COMPLETED */
+    color: white;
+}
+.badge-deleted { /* New badge for deleted/inactive items */
+    background-color: #dc3545; /* Red */
+    color: white;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   6) MODAL STYLES
-   ───────────────────────────────────────────────────────────────────────────── */
+    MODAL STYLES (for both update and item selection)
+    ───────────────────────────────────────────────────────────────────────────── */
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
 .modal-content {
-  background: #fff;
-  padding: 16px;
-  border-radius: 4px;
-  width: 340px;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  box-sizing: border-box;
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.modal-content h3 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
 }
 
 .modal-content label {
-  display: block;
-  margin-top: 10px;
-  font-weight: bold;
-  font-size: 14px;
-  color: #333;
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+    color: #444;
 }
 
-.modal-content input,
-.modal-content select {
-  width: 100%;
-  padding: 6px;
-  margin-top: 4px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-  box-sizing: border-box;
+.modal-content input[type="text"],
+.modal-content input[type="number"],
+.modal-content select,
+.modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1em;
+    margin-bottom: 15px;
+}
+
+.modal-content textarea {
+    resize: vertical;
+    min-height: 60px;
 }
 
 .modal-buttons {
-  margin-top: 12px;
-  display: flex;
-  justify-content: space-between;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
 }
 
 .modal-buttons button {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.modal-buttons button:first-child {
-  background-color: #007bff;
-  color: white;
+.modal-buttons button:first-child { /* Save Changes / Submit in modals */
+    background-color: #007bff;
+    color: white;
 }
 .modal-buttons button:first-child:hover {
-  background-color: #0056b3;
+    background-color: #0056b3;
 }
 
-.modal-buttons button:last-child {
-  background-color: #ccc;
-  color: black;
+.modal-buttons button:last-child { /* Cancel button in modals */
+    background-color: #dc3545;
+    color: white;
 }
 .modal-buttons button:last-child:hover {
-  background-color: #aaa;
+    background-color: #c82333;
 }
 
+/* Item Selection Modal specific styles */
+.item-selection-modal .modal-content {
+    max-width: 800px; /* Wider modal for item selection table */
+}
+
+.item-selection-modal .modal-content .search-bar {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.item-selection-modal .modal-content .item-list-section {
+    margin-bottom: 20px;
+}
+
+.item-selection-modal .modal-content .item-list-section h4 {
+    margin-bottom: 10px;
+    color: #555;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.item-selection-modal .modal-content .item-selection-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.item-selection-modal .modal-content .item-selection-table th,
+.item-selection-modal .modal-content .item-selection-table td {
+    border: 1px solid #eee;
+    padding: 8px;
+    text-align: left;
+    font-size: 0.9em;
+    white-space: nowrap;
+    cursor: pointer; /* Indicate clickable rows */
+}
+
+.item-selection-modal .modal-content .item-selection-table th {
+    background-color: #f8f9fa;
+}
+
+.item-selection-modal .modal-content .item-selection-table tbody tr:hover {
+    background-color: #e2f2ff; /* Light blue on hover */
+}
+
+.item-selection-modal .modal-content .item-selection-table tbody tr.disabled-row {
+    background-color: #f2f2f2;
+    color: #999;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.item-selection-modal .modal-content .item-selection-table tbody tr.disabled-row:hover {
+    background-color: #f2f2f2; /* No hover effect for disabled */
+}
+
+
+/* Toastify styles */
 .Toastify__toast-container {
-  z-index: 1100;
+    z-index: 1100;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .customer-manager-container {
+        padding: 10px;
+    }
+
+    .customer-form-type-selection,
+    .customer-control-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .customer-action-form {
+        grid-template-columns: 1fr; /* Single column on small screens */
+    }
+
+    .customer-table th,
+    .customer-table td {
+        font-size: 0.8em;
+        padding: 8px 5px;
+    }
+
+    .modal-content {
+        padding: 20px;
+    }
 }
