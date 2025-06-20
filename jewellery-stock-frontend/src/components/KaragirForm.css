@@ -1,371 +1,559 @@
-/* Basic styling for the main container */
+/* KaragirForm.css - Updated to prevent layout shifting */
+
+/* Main Container - Now properly constrained */
 .karagir-manager {
-    font-family: 'Inter', sans-serif;
-    padding: 20px;
-    /* Increase max-width to give more space for content, similar to ItemsManager screenshot */
-    max-width: 1200px; /* Adjust as needed to match your desired full width */
-    width: 95%; /* Use a percentage for fluid responsiveness */
-    overflow-x: hidden; /* Hide horizontal overflow on the main container */
-    margin: 0 auto; /* Center the container on the page */
-    box-sizing: border-box; /* Ensure padding and border are included in the width */
+  max-width: 1200px;
+  width: 100%;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: rgba(40, 40, 40, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  color: #e0e0e0;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  box-sizing: border-box;
+  transition: all 0.3s ease;
 }
 
-h2 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 25px;
+/* Global scrollbar-reserve fix */
+html {
+  overflow-y: scroll;
 }
 
-/* Action Buttons styling */
+/* Header */
+.karagir-manager h2 {
+  color: #f9d423;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.karagir-manager h2::after {
+  content: '';
+  display: block;
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #f9d423, transparent);
+  margin: 1rem auto 0;
+}
+
+/* Dividers */
+.divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.4), transparent);
+  margin: 2rem 0;
+}
+
+/* Action Buttons */
 .karagir-actions-buttons {
-    display: flex;
-    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
 }
 
 .karagir-actions-buttons button {
-    background-color: #007bff;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(135deg, #d4af37, #f9d423);
+  color: #222;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  min-width: 220px;
+  font-size: 0.95rem;
 }
 
 .karagir-actions-buttons button:hover {
-    background-color: #0056b3;
-    transform: translateY(-2px);
+  background: linear-gradient(135deg, #c19e34, #e8c41a);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
-.karagir-actions-buttons button:active {
-    transform: translateY(0);
-}
-
-/* Form Type Selection Buttons (New section for 'In'/'Out' form toggles) */
+/* Form Type Selection */
 .form-type-selection {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 30px;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .form-type-selection button {
-    background-color: #6c757d; /* Default grey for inactive */
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1.1em;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 0.8rem 1.8rem;
+  background: rgba(212, 175, 55, 0.15);
+  color: #f9d423;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.form-type-selection button:hover {
+  background: rgba(212, 175, 55, 0.25);
 }
 
 .form-type-selection button.active-form-btn {
-    background-color: #28a745; /* Green for active form */
-    font-weight: bold;
+  background: linear-gradient(135deg, #d4af37, #f9d423);
+  color: #222;
+  border: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.form-type-selection button:hover:not(.active-form-btn) {
-    background-color: #5a6268;
-    transform: translateY(-2px);
-}
-
-hr {
-    border: 0;
-    height: 1px;
-    background-color: #eee;
-    margin: 40px 0;
-}
-
-/* Form Sections Styling */
+/* Form Section */
 .form-section {
-    background-color: #f9f9f9;
-    padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    margin-bottom: 30px; /* Space between form and table */
+  background: rgba(30, 30, 30, 0.7);
+  padding: 2rem;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  margin-bottom: 2rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .form-section h3 {
-    text-align: center;
-    color: #555;
-    margin-bottom: 20px;
+  color: #f9d423;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  position: relative;
 }
 
-.form-section form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive columns */
-    gap: 15px;
+.karagir-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
 }
 
-.form-section label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    display: block;
-    color: #444;
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
 }
 
-.form-section input[type="text"],
-.form-section input[type="number"],
-.form-section select,
-.form-section textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-    font-size: 1em;
-    margin-bottom: 10px; /* Space below each input */
+.form-group {
+  margin-bottom: 1rem;
+  width: 100%;
 }
 
-.form-section textarea {
-    resize: vertical; /* Allow vertical resizing for remarks */
-    min-height: 80px;
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #f5f5f5;
+  font-size: 0.95rem;
 }
 
-.form-section button[type="submit"] {
-    background-color: #28a745;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1.1em;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    grid-column: 1 / -1; /* Make submit button span all columns */
-    margin-top: 15px;
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  background-color: rgba(30, 30, 30, 0.9);
+  color: #e0e0e0;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 6px;
 }
 
-.form-section button[type="submit"]:hover {
-    background-color: #218838;
-    transform: translateY(-2px);
+.form-group textarea {
+  min-height: 120px;
+  resize: vertical;
 }
 
-/* Karagir Entries Table Display (General container for table) */
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.submit-btn {
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(135deg, #d4af37, #f9d423);
+  color: #222;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Table Container - Critical fixes here */
 .karagir-entries-table {
-    margin-top: 20px;
-    margin-bottom: 30px;
-    overflow-x: auto; /* Enable horizontal scrolling for the table if content overflows */
-    width: 100%; /* Ensure the container takes full available width */
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    padding: 20px;
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  background: rgba(30, 30, 30, 0.7);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 55, 0.5) transparent;
 }
 
-.karagir-entries-table h3 {
-    text-align: center;
-    color: #555;
-    margin-bottom: 20px;
-}
-
-/* Specific styling for the table itself */
-.karagir-table { /* This is the class added to the <table> element */
-    width: 100%; /* Make the table take 100% of its container's width */
-    border-collapse: collapse; /* Collapse borders for a cleaner look */
-    /* Adjust this min-width based on your actual content to avoid excessive scrolling or squishing */
-    min-width: 1500px; /* Increased min-width for more columns */
+/* Table Styling */
+.karagir-table {
+  width: 100%;
+  min-width: 100%;
+  border-collapse: collapse;
+  background: rgba(40, 40, 40, 0.8);
+  border-radius: 8px;
+  table-layout: auto;
 }
 
 .karagir-table th,
 .karagir-table td {
-    border: 1px solid #ddd;
-    padding: 12px 8px; /* Adjusted padding for better spacing */
-    text-align: left;
-    white-space: nowrap; /* Prevent text wrapping in cells */
-    font-size: 0.9em;
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+  color: #e0e0e0;
+  white-space: nowrap;
 }
 
 .karagir-table th {
-    background-color: #e9ecef;
-    font-weight: bold;
-    color: #343a40;
-    position: sticky; /* Sticky header for long tables */
-    top: 0;
-    z-index: 1; /* Ensure header is above scrolling content */
+  background-color: rgba(212, 175, 55, 0.2);
+  color: #f9d423;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
 }
 
-/* Table action buttons */
-.karagir-table td button {
-    padding: 6px 10px;
-    margin: 2px;
-    border: 1px solid #007bff;
-    background-color: #007bff;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.8em; /* Slightly smaller font for table buttons */
-    transition: background-color 0.2s ease, transform 0.1s ease;
+.karagir-table tr:hover td {
+  background-color: rgba(212, 175, 55, 0.1);
 }
 
-.karagir-table td button:hover {
-    background-color: #0056b3;
-    transform: translateY(-1px);
+.karagir-table button {
+  padding: 0.5rem 1rem;
+  margin-right: 0.5rem;
+  background: rgba(212, 175, 55, 0.2);
+  color: #f9d423;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
-.karagir-table td button:active {
-    transform: translateY(0);
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+  .karagir-table {
+    display: block;
+  }
+  
+  .karagir-table th,
+  .karagir-table td {
+    min-width: 150px;
+  }
 }
 
-/* Item Details / Selected Karagir Entry Details */
+@media (max-width: 768px) {
+  .karagir-manager {
+    padding: 1.5rem;
+    margin: 1rem auto;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .karagir-actions-buttons button {
+    min-width: 100%;
+  }
+  
+  .form-type-selection {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .form-section {
+    padding: 1.5rem;
+  }
+  
+  .karagir-table th,
+  .karagir-table td {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Item Details */
 .item-details {
-    background-color: #fff;
-    padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    margin-top: 30px;
-    border-left: 5px solid #28a745; /* Green border for details section */
+  margin-top: 2rem;
+  padding: 2rem;
+  background: rgba(30, 30, 30, 0.7);
+  border-radius: 8px;
+  border-left: 4px solid #d4af37;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
 }
 
 .item-details h3 {
-    color: #28a745;
-    margin-bottom: 15px;
-    text-align: center;
+  color: #f9d423;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
 }
 
 .item-details p {
-    margin-bottom: 8px;
-    line-height: 1.5;
-    color: #333;
+  margin: 0.8rem 0;
+  line-height: 1.6;
+  color: #e0e0e0;
 }
 
 .item-details strong {
-    color: #000;
+  color: #f9d423;
+  min-width: 150px;
+  display: inline-block;
 }
 
-/* Modal Overlay & Content */
+.item-details button {
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  background: rgba(212, 175, 55, 0.2);
+  color: #f9d423;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.item-details button:hover {
+  background: rgba(212, 175, 55, 0.3);
+  border-color: #f9d423;
+}
+
+/* Modal Styling */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Ensure modal is on top */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
 .modal {
-    background: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh; /* Limit modal height */
-    overflow-y: auto; /* Enable scrolling for modal content */
-    position: relative;
+  background: rgba(40, 40, 40, 0.95);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
 .modal h3 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 25px;
-}
-
-.modal label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    display: block;
-    color: #444;
-}
-
-.modal input[type="text"],
-.modal input[type="number"],
-.modal select,
-.modal textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    box-sizing: border-box;
-    font-size: 1em;
-    margin-bottom: 15px;
-}
-
-.modal textarea {
-    resize: vertical;
-    min-height: 60px;
+  color: #f9d423;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
 .modal-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  background: rgba(40, 40, 40, 0.95);
+  position: sticky;
+  bottom: 0;
 }
 
 .modal-buttons button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.modal-buttons button[type="submit"] {
-    background-color: #007bff;
-    color: white;
+.modal-buttons button:first-child {
+  background: linear-gradient(135deg, #d4af37, #f9d423);
+  color: #222;
+  border: none;
 }
 
-.modal-buttons button[type="submit"]:hover {
-    background-color: #0056b3;
+.modal-buttons button:first-child:hover {
+  background: linear-gradient(135deg, #c19e34, #e8c41a);
 }
 
-.modal-buttons button[type="button"] { /* Cancel button */
-    background-color: #dc3545;
-    color: white;
+.modal-buttons button:last-child {
+  background: transparent;
+  color: #f9d423;
+  border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
-.modal-buttons button[type="button"]:hover {
-    background-color: #c82333;
+.modal-buttons button:last-child:hover {
+  border-color: #f9d423;
+  background: rgba(212, 175, 55, 0.1);
 }
 
 .close-modal-button {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 1.5em;
-    cursor: pointer;
-    color: #666;
-    transition: color 0.2s ease;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.2s ease;
 }
 
 .close-modal-button:hover {
-    color: #333;
+  color: #f9d423;
+}
+
+/* Loading Spinner */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.loading-spinner {
+  border: 4px solid rgba(212, 175, 55, 0.2);
+  border-radius: 50%;
+  border-top: 4px solid #f9d423;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Toast Notifications */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1rem 2rem;
+  border-radius: 6px;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 3000;
+  animation: slideIn 0.3s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toast.success {
+  background: rgba(40, 167, 69, 0.9);
+}
+
+.toast.error {
+  background: rgba(220, 53, 69, 0.9);
+}
+
+@keyframes slideIn {
+  from { bottom: -50px; opacity: 0; }
+  to { bottom: 2rem; opacity: 1; }
 }
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-    .karagir-manager {
-        padding: 10px;
-    }
+  .karagir-manager {
+    padding: 1.5rem;
+    margin: 1rem auto;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .karagir-actions-buttons button {
+    min-width: 100%;
+  }
+  
+  .form-type-selection {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .form-section {
+    padding: 1.5rem;
+  }
+  
+  .karagir-table {
+    font-size: 0.9rem;
+  }
+  
+  .karagir-table th,
+  .karagir-table td {
+    padding: 0.8rem;
+  }
+  
+  .modal {
+    width: 95%;
+    padding: 1.5rem;
+  }
+  
+  .modal-buttons {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .modal-buttons button {
+    width: 100%;
+  }
+}
 
-    .karagir-actions-buttons {
-        flex-direction: column;
-        align-items: stretch;
-    }
+/* Animation for form transitions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-    .form-section form {
-        grid-template-columns: 1fr; /* Single column on small screens */
-    }
+.form-section form {
+  animation: fadeIn 0.3s ease-out;
+}
 
-    .karagir-table th,
-    .karagir-table td {
-        font-size: 0.8em; /* Smaller font for mobile readability */
-        padding: 8px 5px;
-    }
+.karagir-entries-table {
+  overflow-x: auto;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  background: rgba(30, 30, 30, 0.7);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  
+  /* 👇 NEW: Reserve minimum height to avoid layout jump */
+  min-height: 300px; /* adjust as per expected table height */
+  transition: all 0.3s ease;
+  overflow-y: hidden; /* Prevents vertical scrollbar flash during loading */
+  scrollbar-gutter: stable; /* Reserves space for scrollbar */
 }

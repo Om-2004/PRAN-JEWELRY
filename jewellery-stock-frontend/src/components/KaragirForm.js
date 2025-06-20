@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './KaragirForm.css'; // Import the CSS file for styling
+import './KaragirForm.css';
 
 function KaragirForm() {
     // Helper function to get authentication headers from local storage
@@ -7,7 +7,7 @@ function KaragirForm() {
         const token = localStorage.getItem('token');
         return {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // Assuming JWT token is stored as 'token'
+            'Authorization': `Bearer ${token}`
         };
     };
 
@@ -38,28 +38,27 @@ function KaragirForm() {
     // State variables for form data and UI management
     const [karagirOutFormData, setKaragirOutFormData] = useState({ ...emptyOutForm });
     const [karagirInFormData, setKaragirInFormData] = useState({ ...emptyInForm });
-    // State to manage dynamic dropdown options for Karagir-In metal type
     const [currentInMetalType, setCurrentInMetalType] = useState('');
-
-    // State to store fetched karagir entries
     const [karagirEntries, setKaragirEntries] = useState([]);
-    // State to hold details of a selected karagir entry for display
     const [selectedKaragirEntry, setSelectedKaragirEntry] = useState(null);
-    // State to control the visibility of the update modal
     const [showUpdateModal, setShowUpdateModal] = useState(false);
-    // State to store the ID of the entry being updated
     const [updateId, setUpdateId] = useState(null);
-    // State to determine if the update modal is for an 'in' or 'out' entry
     const [isUpdateInEntry, setIsUpdateInEntry] = useState(false);
+    const [activeCreateForm, setActiveCreateForm] = useState('out');
+    const [isLoading, setIsLoading] = useState(false);
+    const [toast, setToast] = useState({ show: false, message: '', type: '' });
 
-    // State to control which form (Out or In) is currently active for creation
-    const [activeCreateForm, setActiveCreateForm] = useState('out'); // 'out' or 'in'
-
-    // Subtype options based on metal type (consistent with backend logic)
+    // Subtype options based on metal type
     const subtypeOptions = {
         gold: ["regular gold jewellery", "stone embedded gold jewellery"],
         silver: ["regular silver jewellery", "stone embedded silver jewellery"],
         others: ["precious", "semi-precious"]
+    };
+
+    // Toast notification helper
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
+        setTimeout(() => setToast({ show: false, message: '', type: '' }), 3000);
     };
 
     // Helper function to reset Karagir-Out form
@@ -74,54 +73,49 @@ function KaragirForm() {
     };
 
     // --- Karagir-Out Form Handlers ---
-    // Handles changes in Karagir-Out form input fields
     const handleOutInputChange = (e) => {
         const { name, value } = e.target;
         setKaragirOutFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    // Handles submission of Karagir-Out form
     const handleCreateOutEntry = async (e) => {
-        e.preventDefault(); // Prevent default form submission behavior
+        e.preventDefault();
+        setIsLoading(true);
         try {
-            // Prepare payload for the API call
             const payload = {
                 ...karagirOutFormData,
-                entryType: 'out', // Explicitly set entry type
-                // Ensure gramsGiven is a number
+                entryType: 'out',
                 gramsGiven: parseFloat(karagirOutFormData.gramsGiven),
             };
 
-            // Make API call to create a new Karagir-Out entry
             const res = await fetch('/api/karagirleisures', {
                 method: 'POST',
                 headers: getAuthHeaders(),
                 body: JSON.stringify(payload)
             });
 
-            const data = await res.json(); // Parse response
+            const data = await res.json();
             if (!res.ok) {
-                // Construct detailed error message from backend response
                 const errorMessage = data.message || (data.errors && data.errors.map(err => err.message).join(', ')) || 'Failed to create Karagir-Out entry.';
                 throw new Error(errorMessage);
             }
-            // Success feedback
-            alert('Karagir-Out entry created successfully!');
-            setKaragirEntries(prev => [data, ...prev]); // Add new entry to state
-            resetOutForm(); // Clear the form
+            
+            showToast('Karagir-Out entry created successfully!');
+            setKaragirEntries(prev => [data, ...prev]);
+            resetOutForm();
         } catch (error) {
             console.error('Error creating Karagir-Out entry:', error);
-            alert(`Error: ${error.message}`); // Show error to user
+            showToast(`Error: ${error.message}`, 'error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     // --- Karagir-In Form Handlers ---
-    // Handles changes in Karagir-In form input fields
     const handleInInputChange = (e) => {
         const { name, value } = e.target;
         if (name === 'metalType') {
-            setCurrentInMetalType(value); // Update metal type state for conditional rendering
-            // Reset subtype, huidNo, karatCarat when metal type changes to avoid invalid combinations
+            setCurrentInMetalType(value);
             setKaragirInFormData(prev => ({
                 ...prev,
                 [name]: value,
@@ -134,11 +128,10 @@ function KaragirForm() {
         }
     };
 
-    // Handles submission of Karagir-In form
     const handleCreateInEntry = async (e) => {
-        e.preventDefault(); // Prevent default form submission behavior
+        e.preventDefault();
+        setIsLoading(true);
         try {
-            // --- Step 1: Check for pending Karagir-Out entries before creating Karagir-In ---
             const pendingOutCheckRes = await fetch(`/api/karagirleisures/pending-out?karagirName=${encodeURIComponent(karagirInFormData.karagirName)}&metalType=${encodeURIComponent(karagirInFormData.metalType)}`, {
                 method: 'GET',
                 headers: getAuthHeaders()
@@ -149,65 +142,57 @@ function KaragirForm() {
                 throw new Error(pendingOutData.message || 'Failed to check pending out entries.');
             }
 
-            // If pending entries exist, show a warning popup and ask for confirmation to proceed
             if (pendingOutData.hasPending) {
-                // IMPORTANT: Replacing window.confirm with a custom modal for consistent UI.
-                // For this example, I'll use a simple alert/confirm, but ideally, this would be a custom React modal.
                 const confirmProceed = window.confirm(
                     `WARNING: Karagir "${karagirInFormData.karagirName}" has ${pendingOutData.count} pending OUT entries for ${karagirInFormData.metalType}. Do you wish to continue and mark one as completed?`
                 );
                 if (!confirmProceed) {
-                    alert('Karagir-In entry creation cancelled by user.');
-                    return; // Stop function if user cancels
+                    showToast('Karagir-In entry creation cancelled by user.', 'error');
+                    return;
                 }
             }
 
-            // --- Step 2: Prepare and submit Karagir-In entry ---
             const payload = {
                 ...karagirInFormData,
-                entryType: 'in', // Explicitly set entry type
-                // Ensure number fields are parsed as floats
+                entryType: 'in',
                 grossWeight: parseFloat(karagirInFormData.grossWeight),
                 netWeight: parseFloat(karagirInFormData.netWeight),
                 labourCharge: parseFloat(karagirInFormData.labourCharge),
-                // Balance should always be a string as per schema
                 balance: String(karagirInFormData.balance || "0")
             };
 
-            // Conditionally remove HUID/KaratCarat from payload if not applicable to metal type
             if (karagirInFormData.metalType !== 'gold') {
                 delete payload.huidNo;
             } else {
                 delete payload.karatCarat;
             }
 
-            // Make API call to create a new Karagir-In entry (which also creates an Item)
             const res = await fetch('/api/karagirleisures', {
                 method: 'POST',
                 headers: getAuthHeaders(),
                 body: JSON.stringify(payload)
             });
 
-            const data = await res.json(); // Parse response
+            const data = await res.json();
             if (!res.ok) {
-                // Construct detailed error message from backend response
                 const errorMessage = data.message || (data.errors && data.errors.map(err => err.message).join(', ')) || 'Failed to create Karagir-In entry.';
                 throw new Error(errorMessage);
             }
-            // Success feedback
-            alert('Karagir-In entry created and Item added to inventory successfully!');
-            setKaragirEntries(prev => [data, ...prev]); // Add new entry to state
-            resetInForm(); // Clear the form
+            
+            showToast('Karagir-In entry created and Item added to inventory successfully!');
+            setKaragirEntries(prev => [data, ...prev]);
+            resetInForm();
         } catch (error) {
             console.error('Error creating Karagir-In entry:', error);
-            alert(`Error: ${error.message}`); // Show error to user
+            showToast(`Error: ${error.message}`, 'error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // --- General Karagir Management Actions (GET, DELETE, UPDATE) ---
-
-    // Fetches all Karagir entries for the authenticated vendor
+    // --- General Karagir Management Actions ---
     const handleGetAllKaragir = async () => {
+        setIsLoading(true);
         try {
             const res = await fetch('/api/karagirleisures', {
                 method: 'GET',
@@ -217,18 +202,20 @@ function KaragirForm() {
             if (!res.ok) {
                 throw new Error(data.message || 'Failed to fetch all Karagir entries.');
             }
-            setKaragirEntries(data); // Update state with all entries
-            setSelectedKaragirEntry(null); // Clear any selected entry details
+            setKaragirEntries(data);
+            setSelectedKaragirEntry(null);
         } catch (error) {
             console.error('Error fetching all Karagir entries:', error);
-            alert(`Error: ${error.message}`);
+            showToast(`Error: ${error.message}`, 'error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // Fetches a single Karagir entry by its ID
     const handleGetKaragirById = async () => {
-        const id = prompt('Enter Karagir Entry _id:'); // Prompt user for ID
-        if (!id) return; // If no ID is entered, do nothing
+        const id = prompt('Enter Karagir Entry _id:');
+        if (!id) return;
+        setIsLoading(true);
         try {
             const res = await fetch(`/api/karagirleisures/${id}`, {
                 method: 'GET',
@@ -238,22 +225,20 @@ function KaragirForm() {
             if (!res.ok) {
                 throw new Error(data.message || 'Karagir entry not found.');
             }
-            setKaragirEntries([data]); // Display only the fetched entry
-            setSelectedKaragirEntry(data); // Set as selected entry for details display
+            setKaragirEntries([data]);
+            setSelectedKaragirEntry(data);
         } catch (error) {
             console.error('Error fetching Karagir entry by ID:', error);
-            alert(`Error: ${error.message}`);
+            showToast(`Error: ${error.message}`, 'error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // Deletes all Karagir entries for the authenticated vendor
     const handleDeleteAllKaragir = async () => {
-        // Confirmation dialog for a destructive action
-        // IMPORTANT: Replacing window.confirm with a custom modal for consistent UI.
         const confirmed = window.confirm('Are you sure you want to DELETE ALL Karagir entries and their linked items? This action cannot be undone.');
-        if (!confirmed) {
-            return;
-        }
+        if (!confirmed) return;
+        setIsLoading(true);
         try {
             const res = await fetch('/api/karagirleisures', {
                 method: 'DELETE',
@@ -263,27 +248,21 @@ function KaragirForm() {
             if (!res.ok) {
                 throw new Error(data.message || 'Failed to delete all Karagir entries.');
             }
-            alert(data.message); // Show success message from backend
-            setKaragirEntries([]); // Clear all entries from state
-            setSelectedKaragirEntry(null); // Clear selected entry
+            showToast(data.message);
+            setKaragirEntries([]);
+            setSelectedKaragirEntry(null);
         } catch (error) {
             console.error('Error deleting all Karagir entries:', error);
-            alert(`Error: ${error.message}`);
+            showToast(`Error: ${error.message}`, 'error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // Deletes a single Karagir entry by its ID
     const handleDeleteKaragirById = async (idToDelete) => {
-        // Get ID either from button click or prompt
         const id = idToDelete || prompt('Enter Karagir Entry _id to delete:');
         if (!id) return;
-
-        // Confirmation dialog
-        // IMPORTANT: Replacing window.confirm with a custom modal for consistent UI.
-        const confirmed = window.confirm(`Are you sure you want to delete Karagir entry ${id} and its linked item (if any)?`);
-        if (!confirmed) {
-            return;
-        }
+        setIsLoading(true);
         try {
             const res = await fetch(`/api/karagirleisures/${id}`, {
                 method: 'DELETE',
@@ -293,27 +272,25 @@ function KaragirForm() {
             if (!res.ok) {
                 throw new Error(data.message || 'Failed to delete Karagir entry.');
             }
-            alert(data.message); // Show success message
-            // Remove the deleted entry from the state
+            showToast(data.message);
             setKaragirEntries(prev => prev.filter(entry => entry._id !== id));
-            // If the deleted entry was currently selected, clear selection
             if (selectedKaragirEntry?._id === id) {
                 setSelectedKaragirEntry(null);
             }
         } catch (error) {
             console.error('Error deleting Karagir entry by ID:', error);
-            alert(`Error: ${error.message}`);
+            showToast(`Error: ${error.message}`, 'error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // Opens the update modal and populates it with selected entry's data
     const handleOpenUpdateModal = (entry) => {
-        setUpdateId(entry._id); // Set ID of entry to be updated
-        setIsUpdateInEntry(entry.entryType === 'in'); // Determine if it's an 'in' or 'out' entry
+        setUpdateId(entry._id);
+        setIsUpdateInEntry(entry.entryType === 'in');
 
-        // Populate form data based on entry type
         if (entry.entryType === 'in') {
-            setCurrentInMetalType(entry.metalType); // Set metal type for dynamic fields
+            setCurrentInMetalType(entry.metalType);
             setKaragirInFormData({
                 karagirName: entry.karagirName || '',
                 metalType: entry.metalType || '',
@@ -321,13 +298,13 @@ function KaragirForm() {
                 jewelleryName: entry.jewelleryName || '',
                 huidNo: entry.huidNo || '',
                 karatCarat: entry.karatCarat || '',
-                grossWeight: entry.grossWeight ?? '', // Use nullish coalescing for numbers that might be 0
+                grossWeight: entry.grossWeight ?? '',
                 netWeight: entry.netWeight ?? '',
                 purityReceived: entry.purityReceived || '',
                 labourCharge: entry.labourCharge ?? '',
                 balance: entry.balance ?? ''
             });
-        } else { // 'out' entry
+        } else {
             setKaragirOutFormData({
                 karagirName: entry.karagirName || '',
                 metalType: entry.metalType || '',
@@ -336,38 +313,31 @@ function KaragirForm() {
                 purityGiven: entry.purityGiven || ''
             });
         }
-        setShowUpdateModal(true); // Show the modal
+        setShowUpdateModal(true);
     };
 
-    // Handles submission of the update form
     const handleUpdateSubmit = async (e) => {
         e.preventDefault();
-        if (!updateId) return; // Ensure an ID is set for update
+        if (!updateId) return;
+        setIsLoading(true);
 
-        let payload = {};
-        // Construct payload based on whether it's an 'in' or 'out' entry
-        if (isUpdateInEntry) {
-            payload = {
-                ...karagirInFormData,
-                entryType: 'in', // Maintain entry type
-                grossWeight: parseFloat(karagirInFormData.grossWeight),
-                netWeight: parseFloat(karagirInFormData.netWeight),
-                labourCharge: parseFloat(karagirInFormData.labourCharge),
-                balance: String(karagirInFormData.balance || "0")
-            };
-            // Conditionally remove HUID/KaratCarat from payload if not applicable to metal type
-            if (karagirInFormData.metalType !== 'gold') {
-                delete payload.huidNo;
+        try {
+            let payload = {};
+            if (isUpdateInEntry) {
+                payload = {
+                    ...karagirInFormData,
+                    entryType: 'in',
+                    grossWeight: parseFloat(karagirInFormData.grossWeight),
+                    netWeight: parseFloat(karagirInFormData.netWeight),
+                    labourCharge: parseFloat(karagirInFormData.labourCharge),
+                    balance: String(karagirInFormData.balance || "0")
+                };
+                if (karagirInFormData.metalType !== 'gold') {
+                    delete payload.huidNo;
+                } else {
+                    delete payload.karatCarat;
+                }
             } else {
-                delete payload.karatCarat;
-            }
-        } else {
-            // --- NEW LOGIC FOR UPDATING KARAGIR-OUT ENTRY ---
-            // 1. Find and delete corresponding Karagir-In entry
-            // 2. Set Karagir-Out entry status to 'pending'
-            try {
-                // Step 1: Find if there's a Karagir-In entry that completes this Karagir-Out entry
-                // Assuming your backend supports filtering by 'completesOutEntry' field
                 const checkInEntryRes = await fetch(`/api/karagirleisures?completesOutEntry=${updateId}`, {
                     method: 'GET',
                     headers: getAuthHeaders()
@@ -379,8 +349,7 @@ function KaragirForm() {
                 }
 
                 if (linkedInEntries && linkedInEntries.length > 0) {
-                    const linkedInEntry = linkedInEntries[0]; // Assuming one-to-one relationship for simplicity
-                    // IMPORTANT: Replace window.confirm with a custom modal in a real app
+                    const linkedInEntry = linkedInEntries[0];
                     const confirmUncomplete = window.confirm(
                         `This Karagir-Out entry is currently marked as completed by Karagir-In entry ID: ${linkedInEntry._id}. ` +
                         `Updating this OUT entry will un-complete it and DELETE the linked IN entry. ` +
@@ -388,14 +357,13 @@ function KaragirForm() {
                     );
 
                     if (!confirmUncomplete) {
-                        alert('Karagir-Out update cancelled by user.');
+                        showToast('Karagir-Out update cancelled by user.', 'error');
                         setShowUpdateModal(false);
                         setUpdateId(null);
                         resetOutForm();
-                        return; // Stop the update process
+                        return;
                     }
 
-                    // If confirmed, delete the linked Karagir-In entry
                     const deleteInRes = await fetch(`/api/karagirleisures/${linkedInEntry._id}`, {
                         method: 'DELETE',
                         headers: getAuthHeaders()
@@ -404,28 +372,18 @@ function KaragirForm() {
                         const deleteData = await deleteInRes.json();
                         throw new Error(deleteData.message || `Failed to delete linked Karagir-In entry ${linkedInEntry._id}.`);
                     }
-                    alert(`Linked Karagir-In entry ${linkedInEntry._id} deleted successfully.`);
-                    // Optimistically update UI by removing the deleted IN entry
+                    showToast(`Linked Karagir-In entry ${linkedInEntry._id} deleted successfully.`);
                     setKaragirEntries(prev => prev.filter(entry => entry._id !== linkedInEntry._id));
                 }
 
-                // Step 2: Prepare payload for updating the Karagir-Out entry
                 payload = {
                     ...karagirOutFormData,
-                    entryType: 'out', // Maintain entry type
+                    entryType: 'out',
                     gramsGiven: parseFloat(karagirOutFormData.gramsGiven),
-                    status: 'pending' // Set status to 'pending' as it's now un-completed
+                    status: 'pending'
                 };
-
-            } catch (error) {
-                console.error('Error handling linked IN entry during OUT update:', error);
-                alert(`Error during Karagir-Out update (linked IN entry handling): ${error.message}`);
-                return; // Stop if an error occurs during linked entry handling
             }
-        }
 
-        try {
-            // Make API call to update the entry
             const res = await fetch(`/api/karagirleisures/${updateId}`, {
                 method: 'PUT',
                 headers: getAuthHeaders(),
@@ -434,28 +392,27 @@ function KaragirForm() {
 
             const data = await res.json();
             if (!res.ok) {
-                // Construct detailed error message
                 const errorMessage = data.message || (data.errors && data.errors.map(err => err.message).join(', ')) || 'Failed to update Karagir entry.';
                 throw new Error(errorMessage);
             }
-            alert('Karagir entry updated successfully!');
-            // Update the specific entry in the local state
+            
+            showToast('Karagir entry updated successfully!');
             setKaragirEntries(prev => prev.map(entry => entry._id === data._id ? data : entry));
-            // If the currently viewed details belong to this updated entry, refresh them
             if (selectedKaragirEntry?._id === data._id) {
                 setSelectedKaragirEntry(data);
             }
-            setShowUpdateModal(false); // Close the modal
-            setUpdateId(null); // Clear update ID
-            resetOutForm(); // Reset forms
+            setShowUpdateModal(false);
+            setUpdateId(null);
+            resetOutForm();
             resetInForm();
         } catch (error) {
             console.error('Error updating Karagir entry:', error);
-            alert(`Error: ${error.message}`);
+            showToast(`Error: ${error.message}`, 'error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // Closes the update modal and resets relevant states
     const handleCloseUpdateModal = () => {
         setShowUpdateModal(false);
         setUpdateId(null);
@@ -464,9 +421,22 @@ function KaragirForm() {
         resetInForm();
     };
 
-    // --- Render Section ---
     return (
         <div className="karagir-manager">
+            {/* Loading Overlay */}
+            {isLoading && (
+                <div className="loading-overlay">
+                    <div className="loading-spinner"></div>
+                </div>
+            )}
+
+            {/* Toast Notification */}
+            {toast.show && (
+                <div className={`toast ${toast.type}`}>
+                    {toast.message}
+                </div>
+            )}
+
             <h2>Karagir Management</h2>
 
             {/* Action Buttons */}
@@ -474,10 +444,10 @@ function KaragirForm() {
                 <button onClick={handleGetAllKaragir}>GET ALL KARAGIR ENTRIES</button>
                 <button onClick={handleGetKaragirById}>GET KARAGIR ENTRY BY ID</button>
                 <button onClick={handleDeleteAllKaragir}>DELETE ALL KARAGIR ENTRIES</button>
-                <button onClick={() => handleDeleteKaragirById()}>DELETE KARAGIR ENTRY BY ID</button> {/* Pass no ID to prompt */}
+                <button onClick={() => handleDeleteKaragirById()}>DELETE KARAGIR ENTRY BY ID</button>
             </div>
 
-            <hr/> {/* Visual separator */}
+            <hr className="divider" />
 
             {/* Form Selection Buttons */}
             <div className="form-type-selection">
@@ -498,122 +468,151 @@ function KaragirForm() {
             {/* Consolidated Form Section */}
             <div className="form-section">
                 {activeCreateForm === 'out' && (
-                    <form onSubmit={handleCreateOutEntry}>
+                    <form onSubmit={handleCreateOutEntry} className="karagir-form">
                         <h3>Create Karagir-Out Entry</h3>
-                        <label>Karagir Name:</label>
-                        <input type="text" name="karagirName" value={karagirOutFormData.karagirName} onChange={handleOutInputChange} required />
+                        <div className="form-columns-container">
+                            <div className="form-column">
+                                <div className="form-group">
+                                    <label>Karagir Name:</label>
+                                    <input type="text" name="karagirName" value={karagirOutFormData.karagirName} onChange={handleOutInputChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label>Metal Type:</label>
+                                    <select name="metalType" value={karagirOutFormData.metalType} onChange={handleOutInputChange} required>
+                                        <option value="">Select Metal Type</option>
+                                        <option value="gold">Gold</option>
+                                        <option value="silver">Silver</option>
+                                        <option value="others">Others</option>
+                                    </select>
+                                </div>
+                            </div>
 
-                        <label>Metal Type:</label>
-                        <select name="metalType" value={karagirOutFormData.metalType} onChange={handleOutInputChange} required>
-                            <option value="">Select Metal Type</option>
-                            <option value="gold">Gold</option>
-                            <option value="silver">Silver</option>
-                            <option value="others">Others</option>
-                        </select>
+                            <div className="vertical-divider"></div>
 
-                        <label>Grams Given:</label>
-                        <input type="number" name="gramsGiven" step="0.01" value={karagirOutFormData.gramsGiven} onChange={handleOutInputChange} required />
-
-                        <label>Purity Given (e.g., 24k, 999):</label>
-                        <input type="text" name="purityGiven" value={karagirOutFormData.purityGiven} onChange={handleOutInputChange} required />
-
-                        <label>Remarks (Optional):</label>
-                        <textarea name="remarks" value={karagirOutFormData.remarks} onChange={handleOutInputChange} rows="3"></textarea>
-
-                        <button type="submit">Create Karagir-Out</button>
+                            <div className="form-column">
+                                <div className="form-group">
+                                    <label>Grams Given:</label>
+                                    <input type="number" name="gramsGiven" step="0.01" value={karagirOutFormData.gramsGiven} onChange={handleOutInputChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label>Purity Given (e.g., 24k, 999):</label>
+                                    <input type="text" name="purityGiven" value={karagirOutFormData.purityGiven} onChange={handleOutInputChange} required />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="form-group full-width">
+                            <label>Remarks (Optional):</label>
+                            <textarea name="remarks" value={karagirOutFormData.remarks} onChange={handleOutInputChange} rows="3"></textarea>
+                        </div>
+                        <button type="submit" className="submit-btn">Create Karagir-Out</button>
                     </form>
                 )}
 
                 {activeCreateForm === 'in' && (
-                    <form onSubmit={handleCreateInEntry}>
+                    <form onSubmit={handleCreateInEntry} className="karagir-form">
                         <h3>Create Karagir-In Entry (Return from Karagir)</h3>
-                        <label>Karagir Name:</label>
-                        <input type="text" name="karagirName" value={karagirInFormData.karagirName} onChange={handleInInputChange} required />
+                        <div className="form-columns-container">
+                            <div className="form-column">
+                                <div className="form-group">
+                                    <label>Karagir Name:</label>
+                                    <input type="text" name="karagirName" value={karagirInFormData.karagirName} onChange={handleInInputChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label>Metal Type:</label>
+                                    <select name="metalType" value={karagirInFormData.metalType} onChange={handleInInputChange} required>
+                                        <option value="">Select Metal Type</option>
+                                        <option value="gold">Gold</option>
+                                        <option value="silver">Silver</option>
+                                        <option value="others">Others</option>
+                                    </select>
+                                </div>
+                                {currentInMetalType && (
+                                    <div className="form-group">
+                                        <label>Subtype:</label>
+                                        <select name="subtype" value={karagirInFormData.subtype} onChange={handleInInputChange} required>
+                                            <option value="">Select Subtype</option>
+                                            {subtypeOptions[currentInMetalType]?.map(option => (
+                                                <option key={option} value={option}>{option}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+                                <div className="form-group">
+                                    <label>Jewellery Name:</label>
+                                    <input type="text" name="jewelleryName" value={karagirInFormData.jewelleryName} onChange={handleInInputChange} required />
+                                </div>
+                            </div>
 
-                        <label>Metal Type:</label>
-                        <select name="metalType" value={karagirInFormData.metalType} onChange={handleInInputChange} required>
-                            <option value="">Select Metal Type</option>
-                            <option value="gold">Gold</option>
-                            <option value="silver">Silver</option>
-                            <option value="others">Others</option>
-                        </select>
+                            <div className="vertical-divider"></div>
 
-                        {/* Conditional rendering for Subtype based on selected Metal Type */}
-                        {currentInMetalType && (
-                            <>
-                                <label>Subtype:</label>
-                                <select name="subtype" value={karagirInFormData.subtype} onChange={handleInInputChange} required>
-                                    <option value="">Select Subtype</option>
-                                    {subtypeOptions[currentInMetalType]?.map(option => (
-                                        <option key={option} value={option}>{option}</option>
-                                    ))}
-                                </select>
-                            </>
-                        )}
+                            <div className="form-column">
+                                {currentInMetalType === 'gold' && (
+                                    <div className="form-group">
+                                        <label>HUID No (6 alphanumeric characters, unique):</label>
+                                        <input
+                                            type="text"
+                                            name="huidNo"
+                                            value={karagirInFormData.huidNo}
+                                            onChange={handleInInputChange}
+                                            pattern="[A-Za-z0-9]{6}"
+                                            title="Enter exactly 6 alphanumeric characters (case-sensitive)"
+                                            required={currentInMetalType === 'gold'}
+                                        />
+                                    </div>
+                                )}
+                                {(currentInMetalType === 'silver' || currentInMetalType === 'others') && (
+                                    <div className="form-group">
+                                        <label>Karat/Carat:</label>
+                                        <input
+                                            type="text"
+                                            name="karatCarat"
+                                            value={karagirInFormData.karatCarat}
+                                            onChange={handleInInputChange}
+                                            required={currentInMetalType === 'silver' || currentInMetalType === 'others'}
+                                        />
+                                    </div>
+                                )}
+                                <div className="form-group">
+                                    <label>Gross Weight:</label>
+                                    <input type="number" name="grossWeight" step="0.01" value={karagirInFormData.grossWeight} onChange={handleInInputChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label>Net Weight:</label>
+                                    <input type="number" name="netWeight" step="0.01" value={karagirInFormData.netWeight} onChange={handleInInputChange} required />
+                                </div>
+                            </div>
+                        </div>
 
-                        <label>Jewellery Name:</label>
-                        <input type="text" name="jewelleryName" value={karagirInFormData.jewelleryName} onChange={handleInInputChange} required />
-
-                        {/* Conditional rendering for HUID No (for Gold) */}
-                        {currentInMetalType === 'gold' && (
-                            <>
-                                <label>HUID No (6 alphanumeric characters, unique):</label>
-                                <input
-                                    type="text"
-                                    name="huidNo"
-                                    value={karagirInFormData.huidNo}
-                                    onChange={handleInInputChange}
-                                    pattern="[A-Za-z0-9]{6}" // HTML5 pattern for 6 alphanumeric characters
-                                    title="Enter exactly 6 alphanumeric characters (case-sensitive)"
-                                    required={currentInMetalType === 'gold'} // HUID is required only for gold
-                                />
-                            </>
-                        )}
-
-                        {/* Conditional rendering for Karat/Carat (for Silver/Others) */}
-                        {(currentInMetalType === 'silver' || currentInMetalType === 'others') && (
-                            <>
-                                <label>Karat/Carat:</label>
-                                <input
-                                    type="text"
-                                    name="karatCarat"
-                                    value={karagirInFormData.karatCarat}
-                                    onChange={handleInInputChange}
-                                    required={currentInMetalType === 'silver' || currentInMetalType === 'others'} // Required for silver/others
-                                />
-                            </>
-                        )}
-
-                        <label>Gross Weight:</label>
-                        <input type="number" name="grossWeight" step="0.01" value={karagirInFormData.grossWeight} onChange={handleInInputChange} required />
-
-                        <label>Net Weight:</label>
-                        <input type="number" name="netWeight" step="0.01" value={karagirInFormData.netWeight} onChange={handleInInputChange} required />
-
-                        <label>Purity Received (e.g., 22k, 916):</label>
-                        <input type="text" name="purityReceived" value={karagirInFormData.purityReceived} onChange={handleInInputChange} required />
-
-                        <label>Labour Charge:</label>
-                        <input type="number" name="labourCharge" step="0.01" value={karagirInFormData.labourCharge} onChange={handleInInputChange} required />
-
-                        <label>Balance:</label>
-                        <input type="text" name="balance" value={karagirInFormData.balance} onChange={handleInInputChange} />
-
-                        <label>Remarks (Optional):</label>
-                        <textarea name="remarks" value={karagirInFormData.remarks} onChange={handleInInputChange} rows="3"></textarea>
-
-                        <button type="submit">Create Karagir-In & Add Item</button>
+                        <div className="form-bottom-section">
+                            <div className="form-group">
+                                <label>Purity Received (e.g., 22k, 916):</label>
+                                <input type="text" name="purityReceived" value={karagirInFormData.purityReceived} onChange={handleInInputChange} required />
+                            </div>
+                            <div className="form-group">
+                                <label>Labour Charge:</label>
+                                <input type="number" name="labourCharge" step="0.01" value={karagirInFormData.labourCharge} onChange={handleInInputChange} required />
+                            </div>
+                            <div className="form-group">
+                                <label>Balance:</label>
+                                <input type="text" name="balance" value={karagirInFormData.balance} onChange={handleInInputChange} />
+                            </div>
+                            <div className="form-group full-width">
+                                <label>Remarks (Optional):</label>
+                                <textarea name="remarks" value={karagirInFormData.remarks} onChange={handleInInputChange} rows="3"></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" className="submit-btn">Create Karagir-In & Add Item</button>
                     </form>
                 )}
             </div>
 
-            <hr/> {/* Visual separator */}
+            <hr className="divider" />
 
-            {/* Karagir Entries Table Display - Moved outside the form-section */}
+            {/* Karagir Entries Table Display */}
             {karagirEntries.length > 0 && (
                 <div className="karagir-entries-table">
                     <h3>All Karagir Entries</h3>
-                    <table className="karagir-table"> {/* Added karagir-table class */}
+                    <table className="karagir-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -622,12 +621,12 @@ function KaragirForm() {
                                 <th>Metal</th>
                                 <th>Status</th>
                                 <th>Grams/Weight</th>
-                                <th>Purity Given</th> {/* Specific to Karagir-Out */}
+                                <th>Purity Given</th>
                                 <th>Ornament Name</th>
-                                <th>Purity Received</th> {/* Specific to Karagir-In */}
+                                <th>Purity Received</th>
                                 <th>Subtype</th>
                                 <th>HUID/Karat</th>
-                                <th>Created At</th> {/* Added Created At column */}
+                                <th>Created At</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -640,7 +639,6 @@ function KaragirForm() {
                                     <td>{entry.metalType}</td>
                                     <td>{entry.status || 'N/A'}</td>
                                     <td>
-                                        {/* Display grams given for 'out' and gross/net for 'in' */}
                                         {entry.entryType === 'out' ? `${entry.gramsGiven}g` : `${entry.grossWeight}g (Gross), ${entry.netWeight}g (Net)`}
                                     </td>
                                     <td>{entry.entryType === 'out' ? (entry.purityGiven || 'N/A') : 'NA'}</td>
@@ -648,13 +646,12 @@ function KaragirForm() {
                                     <td>{entry.entryType === 'in' ? (entry.purityReceived || 'N/A') : 'NA'}</td>
                                     <td>{entry.entryType === 'in' ? (entry.subtype || 'N/A') : 'NA'}</td>
                                     <td>
-                                        {/* Display HUID or Karat/Carat based on metal type for 'in' entries */}
                                         {entry.entryType === 'in'
                                             ? (entry.metalType === 'gold' ? (entry.huidNo || 'N/A') : (entry.karatCarat || 'N/A'))
                                             : 'NA'
                                         }
                                     </td>
-                                    <td>{new Date(entry.createdAt).toLocaleString()}</td> {/* Display formatted date */}
+                                    <td>{new Date(entry.createdAt).toLocaleString()}</td>
                                     <td>
                                         <button onClick={() => setSelectedKaragirEntry(entry)}>View Details</button>
                                         <button onClick={() => handleDeleteKaragirById(entry._id)}>Delete</button>
@@ -667,7 +664,7 @@ function KaragirForm() {
                 </div>
             )}
 
-            <hr/> {/* Visual separator */}
+            <hr className="divider" />
 
             {/* Selected Karagir Entry Details Display */}
             {selectedKaragirEntry && (
@@ -713,116 +710,147 @@ function KaragirForm() {
                 <div className="modal-overlay">
                     <div className="modal">
                         <h3>Update Karagir Entry: {updateId}</h3>
-                        {isUpdateInEntry ? (
-                            // Karagir-In Update Form
-                            <form onSubmit={handleUpdateSubmit}>
-                                <label>Karagir Name:</label>
-                                <input type="text" name="karagirName" value={karagirInFormData.karagirName} onChange={handleInInputChange} required />
+                        <div className="modal-content">
+                            {isUpdateInEntry ? (
+                                <form onSubmit={handleUpdateSubmit}>
+                                    <div className="form-columns-container">
+                                        <div className="form-column">
+                                            <div className="form-group">
+                                                <label>Karagir Name:</label>
+                                                <input type="text" name="karagirName" value={karagirInFormData.karagirName} onChange={handleInInputChange} required />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Metal Type:</label>
+                                                <select name="metalType" value={karagirInFormData.metalType} onChange={handleInInputChange} required>
+                                                    <option value="">Select Metal Type</option>
+                                                    <option value="gold">Gold</option>
+                                                    <option value="silver">Silver</option>
+                                                    <option value="others">Others</option>
+                                                </select>
+                                            </div>
+                                            {currentInMetalType && (
+                                                <div className="form-group">
+                                                    <label>Subtype:</label>
+                                                    <select name="subtype" value={karagirInFormData.subtype} onChange={handleInInputChange} required>
+                                                        <option value="">Select Subtype</option>
+                                                        {subtypeOptions[currentInMetalType]?.map(option => (
+                                                            <option key={option} value={option}>{option}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            )}
+                                            <div className="form-group">
+                                                <label>Jewellery Name:</label>
+                                                <input type="text" name="jewelleryName" value={karagirInFormData.jewelleryName} onChange={handleInInputChange} required />
+                                            </div>
+                                        </div>
 
-                                <label>Metal Type:</label>
-                                <select name="metalType" value={karagirInFormData.metalType} onChange={handleInInputChange} required>
-                                    <option value="">Select Metal Type</option>
-                                    <option value="gold">Gold</option>
-                                    <option value="silver">Silver</option>
-                                    <option value="others">Others</option>
-                                </select>
+                                        <div className="vertical-divider"></div>
 
-                                {currentInMetalType && (
-                                    <>
-                                        <label>Subtype:</label>
-                                        <select name="subtype" value={karagirInFormData.subtype} onChange={handleInInputChange} required>
-                                            <option value="">Select Subtype</option>
-                                            {subtypeOptions[currentInMetalType]?.map(option => (
-                                                <option key={option} value={option}>{option}</option>
-                                            ))}
-                                        </select>
-                                    </>
-                                )}
+                                        <div className="form-column">
+                                            {currentInMetalType === 'gold' && (
+                                                <div className="form-group">
+                                                    <label>HUID No (6 alphanumeric characters, unique):</label>
+                                                    <input
+                                                        type="text"
+                                                        name="huidNo"
+                                                        value={karagirInFormData.huidNo}
+                                                        onChange={handleInInputChange}
+                                                        pattern="[A-Za-z0-9]{6}"
+                                                        title="Enter exactly 6 alphanumeric characters (case-sensitive)"
+                                                        required={currentInMetalType === 'gold'}
+                                                    />
+                                                </div>
+                                            )}
+                                            {(currentInMetalType === 'silver' || currentInMetalType === 'others') && (
+                                                <div className="form-group">
+                                                    <label>Karat/Carat:</label>
+                                                    <input
+                                                        type="text"
+                                                        name="karatCarat"
+                                                        value={karagirInFormData.karatCarat}
+                                                        onChange={handleInInputChange}
+                                                        required={currentInMetalType === 'silver' || currentInMetalType === 'others'}
+                                                    />
+                                                </div>
+                                            )}
+                                            <div className="form-group">
+                                                <label>Gross Weight:</label>
+                                                <input type="number" name="grossWeight" step="0.01" value={karagirInFormData.grossWeight} onChange={handleInInputChange} required />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Net Weight:</label>
+                                                <input type="number" name="netWeight" step="0.01" value={karagirInFormData.netWeight} onChange={handleInInputChange} required />
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                <label>Jewellery Name:</label>
-                                <input type="text" name="jewelleryName" value={karagirInFormData.jewelleryName} onChange={handleInInputChange} required />
+                                    <div className="form-bottom-section">
+                                        <div className="form-group">
+                                            <label>Purity Received (e.g., 22k, 916):</label>
+                                            <input type="text" name="purityReceived" value={karagirInFormData.purityReceived} onChange={handleInInputChange} required />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Labour Charge:</label>
+                                            <input type="number" name="labourCharge" step="0.01" value={karagirInFormData.labourCharge} onChange={handleInInputChange} required />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Balance:</label>
+                                            <input type="text" name="balance" value={karagirInFormData.balance} onChange={handleInInputChange} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Remarks (Optional):</label>
+                                            <textarea name="remarks" value={karagirInFormData.remarks} onChange={handleInInputChange} rows="3"></textarea>
+                                        </div>
+                                    </div>
+                                    <div className="modal-buttons">
+                                        <button type="submit">Update Karagir-In</button>
+                                        <button type="button" onClick={handleCloseUpdateModal}>Cancel</button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <form onSubmit={handleUpdateSubmit}>
+                                    <div className="form-columns-container">
+                                        <div className="form-column">
+                                            <div className="form-group">
+                                                <label>Karagir Name:</label>
+                                                <input type="text" name="karagirName" value={karagirOutFormData.karagirName} onChange={handleOutInputChange} required />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Metal Type:</label>
+                                                <select name="metalType" value={karagirOutFormData.metalType} onChange={handleOutInputChange} required>
+                                                    <option value="">Select Metal Type</option>
+                                                    <option value="gold">Gold</option>
+                                                    <option value="silver">Silver</option>
+                                                    <option value="others">Others</option>
+                                                </select>
+                                            </div>
+                                        </div>
 
-                                {currentInMetalType === 'gold' && (
-                                    <>
-                                        <label>HUID No (6 alphanumeric characters, unique):</label>
-                                        <input
-                                            type="text"
-                                            name="huidNo"
-                                            value={karagirInFormData.huidNo}
-                                            onChange={handleInInputChange}
-                                            pattern="[A-Za-z0-9]{6}"
-                                            title="Enter exactly 6 alphanumeric characters (case-sensitive)"
-                                            required={currentInMetalType === 'gold'}
-                                        />
-                                    </>
-                                )}
+                                        <div className="vertical-divider"></div>
 
-                                {(currentInMetalType === 'silver' || currentInMetalType === 'others') && (
-                                    <>
-                                        <label>Karat/Carat:</label>
-                                        <input
-                                            type="text"
-                                            name="karatCarat"
-                                            value={karagirInFormData.karatCarat}
-                                            onChange={handleInInputChange}
-                                            required={currentInMetalType === 'silver' || currentInMetalType === 'others'}
-                                        />
-                                    </>
-                                )}
-
-                                <label>Gross Weight:</label>
-                                <input type="number" name="grossWeight" step="0.01" value={karagirInFormData.grossWeight} onChange={handleInInputChange} required />
-
-                                <label>Net Weight:</label>
-                                <input type="number" name="netWeight" step="0.01" value={karagirInFormData.netWeight} onChange={handleInInputChange} required />
-
-                                <label>Purity Received (e.g., 22k, 916):</label>
-                                <input type="text" name="purityReceived" value={karagirInFormData.purityReceived} onChange={handleInInputChange} required />
-
-                                <label>Labour Charge:</label>
-                                <input type="number" name="labourCharge" step="0.01" value={karagirInFormData.labourCharge} onChange={handleInInputChange} required />
-
-                                <label>Balance:</label>
-                                <input type="text" name="balance" value={karagirInFormData.balance} onChange={handleInInputChange} />
-
-                                <label>Remarks (Optional):</label>
-                                <textarea name="remarks" value={karagirInFormData.remarks} onChange={handleInInputChange} rows="3"></textarea>
-
-                                <div className="modal-buttons">
-                                    <button type="submit">Update Karagir-In</button>
-                                    <button type="button" onClick={handleCloseUpdateModal}>Cancel</button>
-                                </div>
-                            </form>
-                        ) : (
-                            // Karagir-Out Update Form
-                            <form onSubmit={handleUpdateSubmit}>
-                                <label>Karagir Name:</label>
-                                <input type="text" name="karagirName" value={karagirOutFormData.karagirName} onChange={handleOutInputChange} required />
-
-                                <label>Metal Type:</label>
-                                <select name="metalType" value={karagirOutFormData.metalType} onChange={handleOutInputChange} required>
-                                    <option value="">Select Metal Type</option>
-                                    <option value="gold">Gold</option>
-                                    <option value="silver">Silver</option>
-                                    <option value="others">Others</option>
-                                </select>
-
-                                <label>Grams Given:</label>
-                                <input type="number" name="gramsGiven" step="0.01" value={karagirOutFormData.gramsGiven} onChange={handleOutInputChange} required />
-
-                                <label>Purity Given (e.g., 24k, 999):</label>
-                                <input type="text" name="purityGiven" value={karagirOutFormData.purityGiven} onChange={handleOutInputChange} required />
-
-                                <label>Remarks (Optional):</label>
-                                <textarea name="remarks" value={karagirOutFormData.remarks} onChange={handleOutInputChange} rows="3"></textarea>
-
-                                <div className="modal-buttons">
-                                    <button type="submit">Update Karagir-Out</button>
-                                    <button type="button" onClick={handleCloseUpdateModal}>Cancel</button>
-                                </div>
-                            </form>
-                        )}
-                        <button className="close-modal-button" onClick={handleCloseUpdateModal}>&times;</button>
+                                        <div className="form-column">
+                                            <div className="form-group">
+                                                <label>Grams Given:</label>
+                                                <input type="number" name="gramsGiven" step="0.01" value={karagirOutFormData.gramsGiven} onChange={handleOutInputChange} required />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Purity Given (e.g., 24k, 999):</label>
+                                                <input type="text" name="purityGiven" value={karagirOutFormData.purityGiven} onChange={handleOutInputChange} required />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="form-group full-width">
+                                        <label>Remarks (Optional):</label>
+                                        <textarea name="remarks" value={karagirOutFormData.remarks} onChange={handleOutInputChange} rows="3"></textarea>
+                                    </div>
+                                    <div className="modal-buttons">
+                                        <button type="submit">Update Karagir-Out</button>
+                                        <button type="button" onClick={handleCloseUpdateModal}>Cancel</button>
+                                    </div>
+                                </form>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

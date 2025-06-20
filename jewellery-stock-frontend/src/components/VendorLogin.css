@@ -1,0 +1,166 @@
+/* Shared styles for VendorLogin.css and Register.css */
+
+/* Main Container - INCREASED WIDTH AND PADDING */
+.login-container, /* For VendorLogin.css */
+.register-container { /* For Register.css */
+    max-width: 700px; /* Increased from 500px/600px - Adjust as desired, 700px is a good balance */
+    margin: 3rem auto; /* More vertical margin */
+    padding: 3rem; /* Increased internal padding */
+    background-color: rgba(30, 30, 30, 0.95); /* Slightly darker/more opaque background */
+    border-radius: 15px; /* Slightly more rounded corners */
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6); /* Stronger, more luxurious shadow */
+    border: 1px solid rgba(212, 175, 55, 0.3); /* Subtle gold border */
+    color: #e0e0e0;
+    /* Adding flexbox to the container for better overall element distribution */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center items horizontally within the container */
+    gap: 1.5rem; /* Consistent spacing between major sections like heading, message, form */
+}
+
+/* Heading - MORE PROMINENT */
+.login-container h2,
+.register-container h2 {
+    color: #f9d423;
+    text-align: center;
+    margin-bottom: 0rem; /* Adjusted, as gap will handle spacing */
+    font-size: 2.5rem; /* Larger heading */
+    position: relative;
+    padding-bottom: 0.8rem;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); /* More depth */
+}
+
+.login-container h2::after,
+.register-container h2::after {
+    content: '';
+    display: block;
+    width: 150px; /* Wider underline for heading */
+    height: 4px; /* Thicker underline */
+    background: linear-gradient(90deg, transparent, #f9d423, transparent);
+    margin: 1rem auto 0;
+}
+
+/* Form Container - USE FLEXBOX FOR BETTER SPACING */
+/* Assuming your form has class `login-form` or `register-form` */
+.login-form,
+.register-form {
+    width: 100%; /* Ensure the form itself fills its container */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* Spacing between form groups */
+    max-width: 500px; /* Limit the form elements width within the container if needed */
+    /* If you find inputs are still too wide after increasing max-width of container, adjust this max-width */
+}
+
+/* Form Group Divs - Remove individual margins as gap handles it */
+.login-form > div,
+.register-form > div {
+    margin-bottom: 0; /* Remove old margin to let gap control spacing */
+    width: 100%; /* Ensure each input div takes full available width */
+    text-align: left; /* Align labels/inputs within their group */
+}
+
+
+/* Labels - BOLDER AND SLIGHTLY LARGER */
+.login-form label,
+.register-form label {
+    display: block;
+    margin-bottom: 0.6rem; /* Slightly more space for label */
+    font-weight: 600; /* Bolder */
+    color: #f5f5f5; /* Slightly lighter text for labels */
+    font-size: 1.05rem; /* Slightly larger font */
+}
+
+/* Inputs - REFINED PADDING, BORDER, AND BACKGROUND */
+.login-form input,
+.register-form input {
+    width: 100%; /* Important: Ensure inputs fill their parent div */
+    padding: 14px 15px; /* More padding for better aesthetics */
+    border: 1px solid rgba(212, 175, 55, 0.4); /* Clearer gold-tinted border */
+    border-radius: 8px; /* Slightly more rounded */
+    font-size: 1.1rem; /* Larger font size */
+    background-color: rgba(60, 60, 60, 0.9); /* Slightly lighter dark background */
+    color: #e0e0e0;
+    transition: all 0.3s ease;
+    box-sizing: border-box; /* Essential to prevent padding from expanding width */
+}
+
+/* Input Focus State - ENHANCED GLOW */
+.login-form input:focus,
+.register-form input:focus {
+    outline: none;
+    border-color: #f9d423; /* Brighter gold on focus */
+    box-shadow: 0 0 0 4px rgba(249, 212, 35, 0.3); /* Prominent glow effect */
+    background-color: rgba(70, 70, 70, 0.9); /* Even lighter background on focus */
+}
+
+/* Button Styling - MORE SUBSTANTIAL */
+.login-form button,
+.register-form button {
+    width: 100%;
+    max-width: 500px; /* Ensure button doesn't exceed form element width */
+    padding: 1.2rem 2rem; /* Larger padding for button */
+    margin-top: 1rem; /* Space above the button */
+    background: linear-gradient(135deg, #d4af37, #f9d423); /* Gold gradient */
+    color: #222; /* Dark text */
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2rem; /* Larger font size */
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* More prominent shadow */
+}
+
+.login-form button:hover,
+.register-form button:hover {
+    background: linear-gradient(135deg, #c19e34, #e8c41a);
+    transform: translateY(-3px); /* Lift effect */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Message Styling (No changes needed, these look good) */
+.message {
+    text-align: center;
+    margin: 1rem 0;
+    padding: 0.8rem;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.message.success {
+    background-color: rgba(40, 167, 69, 0.2);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.message.error {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #f44336;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .login-container,
+    .register-container {
+        padding: 2rem;
+        margin: 1.5rem auto;
+        max-width: 90%; /* Allow it to take more width on smaller screens */
+    }
+    
+    .login-container h2,
+    .register-container h2 {
+        font-size: 2rem; /* Adjust heading size */
+    }
+
+    .login-container h2::after,
+    .register-container h2::after {
+        width: 100px; /* Adjust underline width */
+    }
+
+    .login-form,
+    .register-form {
+        max-width: 100%; /* Allow form to stretch to container width */
+    }
+}

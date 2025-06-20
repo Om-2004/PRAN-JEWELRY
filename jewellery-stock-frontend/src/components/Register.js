@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import './Register.css';
 
 function Register() {
   const [shopName, setShopName] = useState('');
-  const [bisNumber, setBisNumber] = useState(''); // Renamed from HUID_no
+  const [bisNumber, setBisNumber] = useState('');
   const [contact, setContact] = useState('');
   const [address, setAddress] = useState('');
   const [type, setType] = useState('');
@@ -12,7 +13,7 @@ function Register() {
     e.preventDefault();
     const vendorData = {
       shopName,
-      bisNumber, // Make sure this matches backend key
+      bisNumber,
       contact,
       address,
       type
@@ -43,12 +44,16 @@ function Register() {
   };
 
   return (
-    <div>
+    <div className="register-container">
       <h2>Register Vendor</h2>
-      {message && <p>{message}</p>}
-      <form onSubmit={handleSubmit}>
+      {message && (
+        <div className={`message ${message.includes('successfully') ? 'success' : 'error'}`}>
+          {message}
+        </div>
+      )}
+      <form className="register-form" onSubmit={handleSubmit}>
         <div>
-          <label>Shop Name:</label><br />
+          <label>Shop Name</label>
           <input
             type="text"
             value={shopName}
@@ -57,7 +62,7 @@ function Register() {
           />
         </div>
         <div>
-          <label>BIS Hallmark Registration Number:</label><br />
+          <label>BIS Hallmark Registration Number</label>
           <input
             type="text"
             value={bisNumber}
@@ -66,7 +71,7 @@ function Register() {
           />
         </div>
         <div>
-          <label>Contact:</label><br />
+          <label>Contact</label>
           <input
             type="text"
             value={contact}
@@ -75,7 +80,7 @@ function Register() {
           />
         </div>
         <div>
-          <label>Address:</label><br />
+          <label>Address</label>
           <input
             type="text"
             value={address}
@@ -84,7 +89,7 @@ function Register() {
           />
         </div>
         <div>
-          <label>Type:</label><br />
+          <label>Type</label>
           <input
             type="text"
             value={type}

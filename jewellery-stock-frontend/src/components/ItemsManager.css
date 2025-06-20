@@ -1,137 +1,397 @@
 /* ──────────────────────────────────────────────────────────────────────────── */
-/* A) ACTION BUTTONS (top row)                                               */
+/* ITEMS MANAGER - Luxury Dark Theme                                            */
 /* ──────────────────────────────────────────────────────────────────────────── */
-.action-buttons {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  justify-content: center;
+
+/* ──────────────────────────────────────────────────────────────────────────── */
+/* A) MAIN CONTAINER STYLING                                                    */
+/* ──────────────────────────────────────────────────────────────────────────── */
+.items-manager-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: rgba(30, 30, 30, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  color: #e0e0e0;
+  border: 1px solid rgba(212, 175, 55, 0.2);
 }
-.action-buttons button {
-  padding: 6px 12px;
-  font-size: 14px;
-  cursor: pointer;
+
+.items-manager-container h2 {
+  color: #f9d423;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.items-manager-container h2::after {
+  content: '';
+  display: block;
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #f9d423, transparent);
+  margin: 1rem auto 0;
 }
 
 /* ──────────────────────────────────────────────────────────────────────────── */
-/* B) ITEMS TABLE - UPDATED FOR WIDER COLUMNS AND LARGER FONT                 */
+/* B) ACTION BUTTONS - Gold Themed                                              */
 /* ──────────────────────────────────────────────────────────────────────────── */
+.items-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+
+.items-action-buttons button {
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(135deg, #d4af37, #f9d423);
+  color: #222;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  min-width: 200px;
+}
+
+.items-action-buttons button:hover {
+  background: linear-gradient(135deg, #c19e34, #e8c41a);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────── */
+/* C) ITEMS TABLE - Luxury Dark Theme                                           */
+/* ──────────────────────────────────────────────────────────────────────────── */
+.items-table-container {
+  overflow-x: auto;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  background: rgba(40, 40, 40, 0.7);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
 .items-table {
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 95vw;
-  max-width: none;
+  width: 100%;
   border-collapse: collapse;
-  margin-bottom: 30px;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  table-layout: auto;
-  font-size: 14px; /* Increased base font size for table */
+  background: rgba(40, 40, 40, 0.8);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .items-table th,
 .items-table td {
-  border: 1px solid #ddd;
-  padding: 10px; /* Slightly increased padding */
+  padding: 1rem;
   text-align: left;
-  white-space: normal;
-  word-wrap: break-word;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+  color: #e0e0e0;
 }
 
 .items-table th {
-  background-color: #f2f2f2;
-  font-weight: bold;
-  font-size: 15px; /* Slightly larger for headers */
+  background-color: rgba(212, 175, 55, 0.2);
+  color: #f9d423;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
 }
 
-/* Specific column adjustments */
-.items-table th:nth-child(7), /* Balance column */
-.items-table td:nth-child(7) {
-  width: 200px;
-  min-width: 150px;
+.items-table tr:hover td {
+  background-color: rgba(212, 175, 55, 0.1);
 }
 
-.items-table th:nth-child(8), /* Actions column */
-.items-table td:nth-child(8) {
-  width: 240px;
-  min-width: 200px;
+.items-table td:first-child {
+  border-left: 3px solid transparent;
+}
+
+.items-table tr:hover td:first-child {
+  border-left: 3px solid #d4af37;
+}
+
+/* Table action buttons - UPDATED TO STAY IN ONE LINE */
+.items-table .action-buttons {
+  display: flex;
+  gap: 0.5rem;
   white-space: nowrap;
 }
 
 .items-table button {
-  margin-right: 4px;
-  padding: 5px 10px; /* Slightly larger buttons */
-  font-size: 13px; /* Increased from 12px */
+  padding: 0.5rem 0.8rem; /* Slightly smaller padding */
+  background: rgba(212, 175, 55, 0.2);
+  color: #f9d423;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
   cursor: pointer;
-  display: inline-block;
+  transition: all 0.2s ease;
+  font-size: 0.85rem; /* Slightly smaller font */
+}
+
+.items-table button:hover {
+  background: rgba(212, 175, 55, 0.3);
+  border-color: #f9d423;
+}
+
+.items-table-container {
+  overflow-x: auto;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  background: rgba(40, 40, 40, 0.7);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(40, 40, 40, 0.8);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Action buttons cell - ensures enough space */
+.items-table td:has(button) {
+  min-width: 250px;
+}
+
+/* Action buttons container */
+.items-table .action-buttons {
+  display: flex;
+  gap: 0.8rem; /* Increased from 0.5rem to 0.8rem for more space */
   white-space: nowrap;
 }
 
-/* ──────────────────────────────────────────────────────────────────────────── */
-/* C) SELECTED ITEM DETAILS                                                   */
-/* ──────────────────────────────────────────────────────────────────────────── */
-.item-details {
-  margin-top: 20px;
-  padding: 12px;
-  border: 1px solid #ccc;
+/* Individual buttons */
+.items-table button {
+  padding: 0.5rem 0.8rem;
+  background: rgba(212, 175, 55, 0.2);
+  color: #f9d423;
+  border: 1px solid rgba(212, 175, 55, 0.3);
   border-radius: 4px;
-  background-color: #fbfbfb;
-  font-size: 14px;
-  line-height: 1.4;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  margin: 0 0.1rem; /* Added slight margin for extra spacing */
+}
+
+.items-table button:hover {
+  background: rgba(212, 175, 55, 0.3);
+  border-color: #f9d423;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .items-table .action-buttons {
+    gap: 0.5rem; /* Slightly less gap on mobile */
+    flex-direction: row; /* Keep horizontal on mobile */
+    flex-wrap: wrap;
+  }
+  
+  .items-table button {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    margin: 0; /* Remove margin on mobile */
+  }
 }
 
 /* ──────────────────────────────────────────────────────────────────────────── */
-/* D) MODAL OVERLAY                                                           */
+/* D) ITEM DETAILS - Luxury Card                                                */
 /* ──────────────────────────────────────────────────────────────────────────── */
-.modal-overlay {
+.item-details-card {
+  margin-top: 2rem;
+  padding: 2rem;
+  background: rgba(30, 30, 30, 0.7);
+  border-radius: 8px;
+  border-left: 4px solid #d4af37;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+}
+
+.item-details-card h3 {
+  color: #f9d423;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.item-details-card p {
+  margin: 0.8rem 0;
+  line-height: 1.6;
+  color: #e0e0e0;
+}
+
+.item-details-card strong {
+  color: #f9d423;
+  min-width: 150px;
+  display: inline-block;
+}
+
+.item-details-card button {
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  background: rgba(212, 175, 55, 0.2);
+  color: #f9d423;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.item-details-card button:hover {
+  background: rgba(212, 175, 55, 0.3);
+  border-color: #f9d423;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────── */
+/* E) MODALS - Luxury Dark Theme                                                */
+/* ──────────────────────────────────────────────────────────────────────────── */
+.items-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 
-/* ──────────────────────────────────────────────────────────────────────────── */
-/* E) MODAL CONTENT                                                           */
-/* ──────────────────────────────────────────────────────────────────────────── */
-.modal {
-  background: white;
-  padding: 20px;
-  width: 320px;
-  border-radius: 5px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+.items-modal {
+  background: rgba(40, 40, 40, 0.95);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  border: 1px solid rgba(212, 175, 55, 0.3);
 }
-.modal h3 {
+
+.items-modal h3 {
+  color: #f9d423;
   margin-top: 0;
-  margin-bottom: 12px;
-  font-size: 18px;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
-.modal label {
+
+.items-modal label {
   display: block;
-  margin-top: 10px;
+  margin-bottom: 0.5rem;
   font-weight: 500;
+  color: #f5f5f5;
 }
-.modal input {
+
+.items-modal input,
+.items-modal select,
+.items-modal textarea {
   width: 100%;
-  padding: 6px;
-  margin-top: 4px;
-  box-sizing: border-box;
+  padding: 0.8rem 1rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid #555;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  color: #e0e0e0;
+  margin-bottom: 1rem;
 }
-.modal-buttons {
+
+.items-modal input:focus,
+.items-modal select:focus,
+.items-modal textarea:focus {
+  outline: none;
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.items-modal-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 12px;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
 }
-.modal-buttons button {
-  padding: 6px 14px;
-  font-size: 14px;
+
+.items-modal-buttons button {
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.items-modal-buttons button:first-child {
+  background: linear-gradient(135deg, #d4af37, #f9d423);
+  color: #222;
+  border: none;
+}
+
+.items-modal-buttons button:first-child:hover {
+  background: linear-gradient(135deg, #c19e34, #e8c41a);
+}
+
+.items-modal-buttons button:last-child {
+  background: transparent;
+  color: #f9d423;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.items-modal-buttons button:last-child:hover {
+  border-color: #f9d423;
+  background: rgba(212, 175, 55, 0.1);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────── */
+/* F) RESPONSIVE ADJUSTMENTS                                                    */
+/* ──────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .items-manager-container {
+    padding: 1.5rem;
+  }
+  
+  .items-action-buttons button {
+    min-width: 100%;
+  }
+  
+  .items-table th,
+  .items-table td {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  /* Stack buttons vertically on small screens */
+  .items-table .action-buttons {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  
+  .items-modal {
+    width: 95%;
+    padding: 1.5rem;
+  }
+  
+  .items-modal-buttons {
+    flex-direction: column;
+  }
+  
+  .items-modal-buttons button {
+    width: 100%;
+  }
+}
+
+/* Animation for smooth transitions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.items-table-container,
+.item-details-card,
+.items-modal {
+  animation: fadeIn 0.3s ease-out;
 }

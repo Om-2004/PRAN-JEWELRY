@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './VendorLogin.css';
 
 function VendorLogin() {
   const [shopName, setShopName] = useState('');
-  const [bisNumber, setBisNumber] = useState('');  // Updated from HUID_no
+  const [bisNumber, setBisNumber] = useState('');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
@@ -13,7 +14,7 @@ function VendorLogin() {
       const response = await fetch('/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shopName, bisNumber }) // Updated key here too
+        body: JSON.stringify({ shopName, bisNumber })
       });
       const data = await response.json();
       if (response.ok) {
@@ -34,12 +35,16 @@ function VendorLogin() {
   };
 
   return (
-    <div>
+    <div className="login-container">
       <h2>Vendor Login</h2>
-      {message && <p>{message}</p>}
-      <form onSubmit={handleLogin}>
+      {message && (
+        <div className={`message ${message.includes('Successful') ? 'success' : 'error'}`}>
+          {message}
+        </div>
+      )}
+      <form className="login-form" onSubmit={handleLogin}>
         <div>
-          <label>Shop Name:</label><br />
+          <label>Shop Name</label>
           <input
             type="text"
             value={shopName}
@@ -48,7 +53,7 @@ function VendorLogin() {
           />
         </div>
         <div>
-          <label>BIS Hallmark Registration Number:</label><br />
+          <label>BIS Hallmark Registration Number</label>
           <input
             type="text"
             value={bisNumber}

@@ -1,25 +1,23 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-
 import Home from './components/Home';
+import SplashScreen from './components/SplashScreen';
 import Register from './components/Register';
 import VendorLogin from './components/VendorLogin';
 import VendorDashboard from './components/VendorDashboard';
+import './App.css';
 
 function App() {
   return (
-    <div style={{ maxWidth: '600px', margin: 'auto', padding: '20px' }}>
+    <div className="app-container">
       <Routes>
-        {/* Home page */}
+        {/* Initial route - only place where sound plays */}
+        <Route path="/splash" element={<SplashScreen />} />
+        
+        {/* Main routes (sound completely disabled) */}
         <Route path="/" element={<Home />} />
-
-        {/* Registration page */}
         <Route path="/register" element={<Register />} />
-
-        {/* Login page */}
         <Route path="/login" element={<VendorLogin />} />
-
-        {/* Dashboard (protected) */}
         <Route path="/dashboard" element={<VendorDashboard />} />
       </Routes>
     </div>

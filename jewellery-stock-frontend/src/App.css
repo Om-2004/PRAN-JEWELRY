@@ -1,52 +1,58 @@
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
-  margin: 0;
+.form-card {
+    max-width: 600px; /* Adjust as needed for desired width */
+    margin: 50px auto;
+    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid #d4af37;
+    text-align: center; /* Center content within the form card */
 }
 
-nav {
-  background-color: #fff;
-  padding: 10px;
-}
-nav ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 15px;
-}
-nav a {
-  text-decoration: none;
-  color: #007bff;
-  font-weight: bold;
+.form-card h2, .form-card h1 {
+    text-align: center;
+    color: #d4af37; /* Consistent gold color */
+    margin-bottom: 20px;
 }
 
-.container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 20px;
-  background: white;
-  border: 1px solid #ccc;
+.form-card input[type="text"],
+.form-card input[type="password"],
+.form-card input[type="email"],
+.form-card input[type="number"] { /* Target specific input types for better control */
+    width: 100%; /* This is crucial for Login/Register forms */
+    padding: 12px 10px;
+    margin: 10px 0;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #f9f9f9;
 }
-.container h2, .container h1 {
-  text-align: center;
+
+.form-card button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    background-color: #d4af37; /* Gold button */
+    color: #000; /* Black text */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
-.container input {
-  width: 100%;
-  padding: 8px;
-  margin: 8px 0;
-  box-sizing: border-box;
+
+.form-card button:hover {
+    background-color: #b38f2a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
-.container button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-.container p {
-  margin-top: 10px;
-  color: green;
-  text-align: center;
+
+.form-card p {
+    margin-top: 15px;
+    color: green;
+    text-align: center;
+    font-weight: 500;
 }
