@@ -2,14 +2,10 @@ const express = require('express');
 const router = express.Router();
 const verifyToken = require('../middleware/auth');
 const CustomerTransaction = require('../models/Customer');
-const Item = require('../models/Item'); // Still needed for Customer-Out
+const Item = require('../models/Item');
 const mongoose = require('mongoose');
 
-/**
- * 1) POST /api/customers
- * - Customer-In  => Records a transaction without touching inventory
- * - Customer-Out => Marks purchased Item as inactive in inventory
- */
+// POST - Create new customer transaction
 router.post('/', verifyToken, async (req, res) => {
     try {
         const {
@@ -17,7 +13,7 @@ router.post('/', verifyToken, async (req, res) => {
             customerName,
             customerAddress,
             customerContact,
-            metalType, // This is only for item-related metalType in Customer-Out
+            metalType,
             paymentForm,
             purity,
             grams_given,
@@ -30,10 +26,11 @@ router.post('/', verifyToken, async (req, res) => {
             netWeight,
             itemMetalPurity,
             remarks,
-            customerBalance
+            customerBalance,
+            isManualEntry = false // New field for manual entries
         } = req.body;
 
-        // ── Basic validations ───────────────────────────────────────────────────────
+        // Basic validations
         if (!['in', 'out'].includes(actionType)) {
             return res.status(400).json({ message: 'Invalid actionType.' });
         }
@@ -44,61 +41,58 @@ router.post('/', verifyToken, async (req, res) => {
             return res.status(400).json({ message: 'Invalid paymentForm.' });
         }
 
-        // Conditional validation for payment forms
+        // Payment form specific validations
         if (['gold', 'silver'].includes(paymentForm)) {
             if (purity === undefined || grams_given === undefined || equivalentAmount === undefined) {
-                return res.status(400).json({ message: 'Missing metal payment details (purity, grams_given, equivalentAmount).' });
+                return res.status(400).json({ message: 'Missing metal payment details.' });
             }
         } else if (['cash', 'cheque'].includes(paymentForm)) {
             if (cashAmount === undefined) {
-                return res.status(400).json({ message: 'Missing cash/cheque payment details (cashAmount).' });
+                return res.status(400).json({ message: 'Missing cash/cheque payment details.' });
             }
         } else if (paymentForm === 'other') {
-            if (!otherPaymentNotes || typeof otherPaymentNotes !== 'string' || otherPaymentNotes.trim() === '') {
+            if (!otherPaymentNotes || otherPaymentNotes.trim() === '') {
                 return res.status(400).json({ message: 'Specify details for "Other" payment form.' });
             }
         }
 
         let linkedItemId = null;
-        let transactionGroupId = new mongoose.Types.ObjectId().toHexString(); // Always create a unique group ID
+        const transactionGroupId = new mongoose.Types.ObjectId().toHexString();
 
-        if (actionType === 'in') {
-            // Customer-In: No item creation or inventory interaction
-            // Only capture basic customer and payment details
-            // Item-related fields will be null/undefined in the transaction record
-        } else { // actionType === 'out'
-            // Customer-Out: Requires item details to find and mark as inactive in inventory
-            if (!jewelleryName || !subtype || grossWeight === undefined || netWeight === undefined || !itemMetalPurity || !metalType) {
+        if (actionType === 'out') {
+            // Validate item details for OUT transactions
+            if (!jewelleryName || !subtype || grossWeight === undefined || 
+                netWeight === undefined || !itemMetalPurity || !metalType) {
                 return res.status(400).json({ message: 'Missing item details for OUT transaction.' });
             }
 
-            // Find the actual item in active inventory by its details and mark as inactive (soft delete)
-            const itemToMarkInactive = await Item.findOneAndUpdate(
-                {
-                    jewelleryName,
-                    subtype,
-                    metalType, // Match on metalType for the item
-                    vendorId: req.vendorId,
-                    isActive: true // Only mark active items as inactive
-                },
-                { isActive: false },
-                { new: true }
-            );
+            // Only check inventory if it's NOT a manual entry
+            if (!isManualEntry) {
+                const itemToMarkInactive = await Item.findOneAndUpdate(
+                    {
+                        jewelleryName,
+                        subtype,
+                        metalType,
+                        vendorId: req.vendorId,
+                        isActive: true
+                    },
+                    { isActive: false },
+                    { new: true }
+                );
 
-            if (!itemToMarkInactive) {
-                return res.status(400).json({ message: 'Requested item not found in active inventory for purchase.' });
+                if (!itemToMarkInactive) {
+                    return res.status(400).json({ message: 'Requested item not found in active inventory.' });
+                }
+                linkedItemId = itemToMarkInactive._id;
             }
-            linkedItemId = itemToMarkInactive._id;
         }
 
-        // Save the CustomerTransaction itself
+        // Create the transaction
         const customerTx = new CustomerTransaction({
             actionType,
             customerName,
             customerAddress,
             customerContact,
-            // metalType is for the item being transacted (only relevant for 'out')
-            // For 'in' transactions, metalType will be null in the DB
             metalType: actionType === 'out' ? metalType : null,
             paymentForm,
             purity: purity !== undefined ? purity : null,
@@ -106,19 +100,20 @@ router.post('/', verifyToken, async (req, res) => {
             equivalentAmount: equivalentAmount !== undefined ? equivalentAmount : null,
             cashAmount: cashAmount !== undefined ? cashAmount : null,
             otherPaymentNotes: otherPaymentNotes || null,
-            // Item details are only for 'out' transactions
             jewelleryName: actionType === 'out' ? jewelleryName : null,
             subtype: actionType === 'out' ? subtype : null,
             grossWeight: actionType === 'out' ? grossWeight : null,
             netWeight: actionType === 'out' ? netWeight : null,
             itemMetalPurity: actionType === 'out' ? itemMetalPurity : null,
             remarks,
-            customerBalance: actionType === 'out' ? (customerBalance || "0") : null, // Only for 'out'
-            linkedItemId: linkedItemId, // Will be null for 'in'
-            status: 'completed', // All transactions are 'completed' as there's no pending/linking logic now
+            customerBalance: actionType === 'out' ? (customerBalance || "0") : null,
+            linkedItemId,
+            isManualEntry: actionType === 'out' ? isManualEntry : false,
+            status: 'completed',
             transactionGroupId,
             vendorId: req.vendorId
         });
+
         const savedTx = await customerTx.save();
         return res.status(201).json({
             message: `Customer-${actionType} recorded.`,
@@ -137,10 +132,7 @@ router.post('/', verifyToken, async (req, res) => {
     }
 });
 
-/**
- * 2) GET /api/customers
- * - Return all customer transactions for this vendor
- */
+// GET - All customer transactions
 router.get('/', verifyToken, async (req, res) => {
     try {
         const all = await CustomerTransaction
@@ -153,10 +145,7 @@ router.get('/', verifyToken, async (req, res) => {
     }
 });
 
-/**
- * 3) GET /api/customers/:id
- * - Return one customer transaction by ID
- */
+// GET - Single customer transaction
 router.get('/:id', verifyToken, async (req, res) => {
     try {
         const one = await CustomerTransaction.findOne({
@@ -173,15 +162,10 @@ router.get('/:id', verifyToken, async (req, res) => {
     }
 });
 
-/**
- * 4) PUT /api/customers/:id
- * - Update a customer transaction.
- * - Only allow update of relevant fields based on actionType.
- */
+// PUT - Update customer transaction (FIXED VERSION)
 router.put('/:id', verifyToken, async (req, res) => {
     try {
         const update = { ...req.body };
-
         const existing = await CustomerTransaction.findOne({
             _id: req.params.id,
             vendorId: req.vendorId
@@ -190,52 +174,87 @@ router.put('/:id', verifyToken, async (req, res) => {
             return res.status(404).json({ message: 'Transaction not found.' });
         }
 
-        // --- Logic for updating fields based on actionType ---
+        // Prevent changing isManualEntry flag and actionType
+        if ('isManualEntry' in update) delete update.isManualEntry;
+        if ('actionType' in update) delete update.actionType;
+
         if (existing.actionType === 'in') {
-            // For Customer-In, only allow updating basic customer, payment, and remarks fields
+            // For Customer-In: Allow updating all fields except item-related ones
             const allowedFields = [
                 'customerName', 'customerAddress', 'customerContact',
                 'paymentForm', 'purity', 'grams_given', 'equivalentAmount',
                 'cashAmount', 'otherPaymentNotes', 'remarks'
             ];
+            
+            // Clear null values to prevent '-' display
+            for (const field of ['purity', 'grams_given', 'equivalentAmount', 'cashAmount', 'otherPaymentNotes']) {
+                if (update[field] === null || update[field] === '') {
+                    update[field] = undefined; // Will be saved as null in DB
+                }
+            }
+
+            // Handle payment form change
+            if (update.paymentForm && update.paymentForm !== existing.paymentForm) {
+                update.purity = undefined;
+                update.grams_given = undefined;
+                update.equivalentAmount = undefined;
+                update.cashAmount = undefined;
+                update.otherPaymentNotes = undefined;
+            }
+
+            // Remove disallowed fields
             for (const key in update) {
                 if (!allowedFields.includes(key)) {
-                    delete update[key]; // Remove disallowed fields from update payload
+                    delete update[key];
                 }
             }
-            // Ensure payment form specific fields are cleared if paymentForm changes
-            if (update.paymentForm !== existing.paymentForm) {
-                update.purity = null;
-                update.grams_given = null;
-                update.equivalentAmount = null;
-                update.cashAmount = null;
-                update.otherPaymentNotes = null;
-            }
-        } else { // existing.actionType === 'out'
-            // For Customer-Out, item details are read-only as they point to an inactive item.
-            // Only allow updating customer, payment, remarks, and customerBalance fields.
-            const forbiddenItemFields = ['jewelleryName', 'subtype', 'grossWeight', 'netWeight', 'itemMetalPurity', 'metalType'];
-            for (let f of forbiddenItemFields) {
-                if (update[f] !== undefined && update[f] !== existing[f]) {
-                    return res.status(400).json({ message: `Cannot change item details (${f}) on a Customer-Out transaction.` });
+        } else { // Customer-Out
+            // For Customer-Out: Allow updating all fields except item details if not manual
+            if (!existing.isManualEntry) {
+                // For non-manual entries, item details are read-only
+                const forbiddenItemFields = [
+                    'jewelleryName', 'subtype', 'grossWeight', 
+                    'netWeight', 'itemMetalPurity', 'metalType'
+                ];
+                for (let f of forbiddenItemFields) {
+                    if (update[f] !== undefined && update[f] !== existing[f]) {
+                        return res.status(400).json({ 
+                            message: `Cannot change item details (${f}) on inventory-linked Customer-Out.` 
+                        });
+                    }
                 }
             }
-            // Ensure payment form specific fields are cleared if paymentForm changes
-            if (update.paymentForm !== existing.paymentForm) {
-                update.purity = null;
-                update.grams_given = null;
-                update.equivalentAmount = null;
-                update.cashAmount = null;
-                update.otherPaymentNotes = null;
+
+            // Handle payment form change
+            if (update.paymentForm && update.paymentForm !== existing.paymentForm) {
+                update.purity = undefined;
+                update.grams_given = undefined;
+                update.equivalentAmount = undefined;
+                update.cashAmount = undefined;
+                update.otherPaymentNotes = undefined;
+            }
+
+            // Clear null values for customerBalance
+            if ('customerBalance' in update && (update.customerBalance === null || update.customerBalance === '')) {
+                update.customerBalance = '0';
             }
         }
 
         // Apply updates
         Object.assign(existing, update);
         const saved = await existing.save();
+        
+        // Convert null values to empty strings for response to prevent '-' display
+        const responseTx = saved.toObject();
+        for (const key in responseTx) {
+            if (responseTx[key] === null) {
+                responseTx[key] = '';
+            }
+        }
+
         return res.status(200).json({
             message: 'Customer transaction updated successfully.',
-            updated: saved
+            updated: responseTx
         });
     } catch (err) {
         console.error('PUT /api/customers/:id error:', err);
@@ -251,11 +270,7 @@ router.put('/:id', verifyToken, async (req, res) => {
     }
 });
 
-/**
- * 5) DELETE /api/customers/:id
- * - Delete a single customer transaction.
- * - If a Customer-Out, re-activate its corresponding Item.
- */
+// DELETE - Single customer transaction
 router.delete('/:id', verifyToken, async (req, res) => {
     try {
         const toDelete = await CustomerTransaction.findOneAndDelete({
@@ -266,8 +281,8 @@ router.delete('/:id', verifyToken, async (req, res) => {
             return res.status(404).json({ message: 'Transaction not found.' });
         }
 
-        // If it was a Customer-Out and had a linked Item, mark that Item as active again
-        if (toDelete.actionType === 'out' && toDelete.linkedItemId) {
+        // Reactivate item if it was a non-manual Customer-Out
+        if (toDelete.actionType === 'out' && toDelete.linkedItemId && !toDelete.isManualEntry) {
             await Item.findByIdAndUpdate(toDelete.linkedItemId, { isActive: true });
         }
 
@@ -278,17 +293,15 @@ router.delete('/:id', verifyToken, async (req, res) => {
     }
 });
 
-/**
- * 6) DELETE /api/customers
- * - Delete all customer transactions for this vendor (and re-activate linked Items from Customer-Out).
- */
+// DELETE - All customer transactions
 router.delete('/', verifyToken, async (req, res) => {
     try {
-        // Find all Customer-Out entries to re-activate their linked items
+        // Find all non-manual Customer-Out entries to reactivate items
         const allOuts = await CustomerTransaction.find({
             actionType: 'out',
             vendorId: req.vendorId,
-            linkedItemId: { $exists: true, $ne: null } // Ensure linkedItemId exists and is not null
+            linkedItemId: { $exists: true, $ne: null },
+            isManualEntry: false
         });
 
         for (let tx of allOuts) {

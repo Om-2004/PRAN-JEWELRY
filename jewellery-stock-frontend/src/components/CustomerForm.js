@@ -150,13 +150,14 @@ function CustomerForm() {
             // Add item-related fields ONLY if actionType is 'out'
             if (actionType === 'out') {
                 Object.assign(payload, {
-                    metalType: formData.metalType, // Item's metal type
+                    metalType: formData.metalType,
                     jewelleryName: formData.jewelleryName,
                     subtype: formData.subtype,
                     grossWeight: parseFloat(formData.grossWeight),
                     netWeight: parseFloat(formData.netWeight),
                     itemMetalPurity: formData.itemMetalPurity,
-                    customerBalance: formData.customerBalance
+                    customerBalance: formData.customerBalance,
+                    isManualEntry: isManualItemEntryForOut // Add this flag to indicate manual entry
                 });
             }
 
@@ -167,8 +168,8 @@ function CustomerForm() {
             );
             toast.success('Customer entry submitted', { autoClose: 2000 });
             fetchAllCustomers(); // Refresh customer list
-            if (actionType === 'out') {
-                fetchAllItems(); // Refresh items list if an item was removed
+            if (actionType === 'out' && !isManualItemEntryForOut) {
+                fetchAllItems(); // Only refresh items list if it was from inventory
             }
             setFormData({ ...emptyFormData }); // Reset form
             setActionType('in'); // Reset action type to 'in' after submission
@@ -226,34 +227,25 @@ function CustomerForm() {
 
     // ────────────────────────────────────────────────────────────────────────────────
     const handleUpdateById = async () => {
-        const id = prompt('Enter Customer _id to update:');
+        const id = prompt('Enter Customer transaction _id:');
         if (!id) return;
         try {
             const res = await axios.get(`/api/customers/${id}`, { headers: getAuthHeaders() });
             const data = res.data;
+
+            // Convert null values to empty strings for form display
+            const processedData = {};
+            for (const key in data) {
+                processedData[key] = data[key] === null ? '' : data[key];
+            }
 
             // Determine if it was a manual entry for 'out'
             const wasManualOut = data.actionType === 'out' && !data.linkedItemId;
             setIsManualItemEntryForOut(wasManualOut);
 
             setFormData({
-                customerName: data.customerName || '',
-                customerAddress: data.customerAddress || '',
-                customerContact: data.customerContact || '',
-                metalType: data.metalType || '', // This will be null for 'in'
-                paymentForm: data.paymentForm || '',
-                purity: data.purity ?? '',
-                grams_given: data.grams_given ?? '',
-                equivalentAmount: data.equivalentAmount ?? '',
-                cashAmount: data.cashAmount ?? '',
-                otherPaymentNotes: data.otherPaymentNotes || '',
-                jewelleryName: data.jewelleryName || '',
-                subtype: data.subtype || '',
-                grossWeight: data.grossWeight ?? '',
-                netWeight: data.netWeight ?? '',
-                itemMetalPurity: data.itemMetalPurity || '',
-                remarks: data.remarks || '',
-                customerBalance: data.customerBalance || '' // This will be null for 'in'
+                ...emptyFormData,
+                ...processedData
             });
             setUpdateId(data._id);
             setActionType(data.actionType);
@@ -267,50 +259,57 @@ function CustomerForm() {
     // ────────────────────────────────────────────────────────────────────────────────
     const handleUpdateSubmit = async () => {
         if (!updateId) return;
-        const payload = {
-            actionType, // Use the actionType from the state of the modal (could be changed by user in modal)
-            customerName: formData.customerName,
-            customerAddress: formData.customerAddress,
-            customerContact: formData.customerContact,
-            paymentForm: formData.paymentForm,
-            remarks: formData.remarks,
-            // Conditional payment fields
-            ...(formData.paymentForm === 'gold' || formData.paymentForm === 'silver' ? {
-                purity: formData.purity,
-                grams_given: parseFloat(formData.grams_given),
-                equivalentAmount: parseFloat(formData.equivalentAmount)
-            } : {}),
-            ...(formData.paymentForm === 'cash' || formData.paymentForm === 'cheque' ? {
-                cashAmount: parseFloat(formData.cashAmount)
-            } : {}),
-            ...(formData.paymentForm === 'other' ? {
-                otherPaymentNotes: formData.otherPaymentNotes
-            } : {}),
-        };
-
-        // Add item-related fields ONLY if actionType is 'out' for update
-        if (actionType === 'out') {
-            Object.assign(payload, {
-                metalType: formData.metalType,
-                jewelleryName: formData.jewelleryName,
-                subtype: formData.subtype,
-                grossWeight: parseFloat(formData.grossWeight),
-                netWeight: parseFloat(formData.netWeight),
-                itemMetalPurity: formData.itemMetalPurity,
-                customerBalance: formData.customerBalance
-            });
-        }
-
         try {
-            await axios.put(
+            // Prepare the payload with proper null handling
+            const payload = {
+                actionType,
+                customerName: formData.customerName || null,
+                customerAddress: formData.customerAddress || null,
+                customerContact: formData.customerContact || null,
+                paymentForm: formData.paymentForm,
+                remarks: formData.remarks || null,
+                // Convert empty strings to null for numeric fields
+                purity: formData.purity || null,
+                grams_given: formData.grams_given ? parseFloat(formData.grams_given) : null,
+                equivalentAmount: formData.equivalentAmount ? parseFloat(formData.equivalentAmount) : null,
+                cashAmount: formData.cashAmount ? parseFloat(formData.cashAmount) : null,
+                otherPaymentNotes: formData.otherPaymentNotes || null,
+            };
+
+            // Add item-related fields ONLY if actionType is 'out'
+            if (actionType === 'out') {
+                Object.assign(payload, {
+                    metalType: formData.metalType || null,
+                    jewelleryName: formData.jewelleryName || null,
+                    subtype: formData.subtype || null,
+                    grossWeight: formData.grossWeight ? parseFloat(formData.grossWeight) : null,
+                    netWeight: formData.netWeight ? parseFloat(formData.netWeight) : null,
+                    itemMetalPurity: formData.itemMetalPurity || null,
+                    customerBalance: formData.customerBalance || null,
+                    isManualEntry: isManualItemEntryForOut
+                })  ;
+            }
+
+            const response = await axios.put(
                 `/api/customers/${updateId}`,
                 payload,
                 { headers: getAuthHeaders() }
             );
+
+            // Handle the response data to ensure proper display
+            const updatedData = response.data.updated;
+            const processedData = {};
+            for (const key in updatedData) {
+                processedData[key] = updatedData[key] === null ? '' : updatedData[key];
+            }
+
             toast.success('Entry updated', { autoClose: 2000 });
             setShowUpdateModal(false);
             setUpdateId(null);
             fetchAllCustomers();
+            if (actionType === 'out' && !isManualItemEntryForOut) {
+                fetchAllItems();
+            }
             setFormData({ ...emptyFormData });
         } catch (err) {
             console.error('Error updating Customer entry:', err);
@@ -363,16 +362,14 @@ function CustomerForm() {
 
             <h3>Customer In-Out Management</h3>
 
-            {/* ───────────────────────────────────────────────────────────────────────── */}
-            {/* A) Form Type Selection Buttons */}
-            {/* ───────────────────────────────────────────────────────────────────────── */}
+            {/* Form Type Selection Buttons */}
             <div className="customer-form-type-selection">
-                <button
+    <button
                     className={actionType === 'in' ? 'active-form-btn' : ''}
                     onClick={() => {
                         setActionType('in');
                         setFormData({ ...emptyFormData });
-                        setIsManualItemEntryForOut(false); // Reset manual entry state
+                        setIsManualItemEntryForOut(false);
                     }}
                 >
                     Customer In
@@ -382,7 +379,7 @@ function CustomerForm() {
                     onClick={() => {
                         setActionType('out');
                         setFormData({ ...emptyFormData });
-                        setIsManualItemEntryForOut(false); // Default to selection for OUT
+                        setIsManualItemEntryForOut(false);
                         fetchAllItems();
                     }}
                 >
@@ -390,11 +387,9 @@ function CustomerForm() {
                 </button>
             </div>
 
-            {/* ───────────────────────────────────────────────────────────────────────── */}
-            {/* B) Main Form Section: Action dropdown + fields + “Submit Customer Entry” */}
-            {/* ───────────────────────────────────────────────────────────────────────── */}
+            {/* Main Form Section */}
             <form className="customer-action-form" onSubmit={handleSubmit}>
-                {/* ── Common fields (always present) ─────────────────────────────────── */}
+                {/* Common fields */}
                 <div className="customer-common-fields">
                     <label>Customer Name:</label>
                     <input type="text" name="customerName" placeholder="Customer Name"
@@ -419,7 +414,7 @@ function CustomerForm() {
                     </select>
                 </div>
 
-                {/* ── Conditional Payment Fields ────────────────────────────────────── */}
+                {/* Conditional Payment Fields */}
                 {(formData.paymentForm === 'gold' || formData.paymentForm === 'silver') && (
                     <div className="customer-metal-payment-fields">
                         <label>Purity (of metal given):</label>
@@ -620,108 +615,126 @@ function CustomerForm() {
                             </tr>
                         </thead>
                         <tbody>
-                            {customerList.map((entry) => (
+                        {customerList.map((entry) => {
+                            // Helper function to display values properly
+                            const displayValue = (value, isForOutOnly = false) => {
+                                if (isForOutOnly && entry.actionType !== 'out') return 'N/A';
+                                if (value === null || value === undefined) return 'N/A';
+                                if (typeof value === 'number') return value;
+                                return value;
+                            };
+
+                            // Special handling for payment-related fields
+                            const displayPaymentValue = (value, paymentTypes) => {
+                                if (!paymentTypes.includes(entry.paymentForm)) return 'N/A';
+                                if (value === null || value === undefined || value === '') return 'N/A';
+                                if (typeof value === 'number') return value;
+                                return value;
+                            };
+
+                            return (
                                 <tr key={entry._id}>
                                     <td>{entry._id}</td>
-                                    <td>{entry.transactionGroupId || '—'}</td>
+                                    <td>{displayValue(entry.transactionGroupId)}</td>
                                     <td>
                                         <span className={entry.actionType === 'out' ? 'badge badge-warning' : 'badge badge-info'}>
                                             {entry.actionType.toUpperCase()}
                                         </span>
                                     </td>
                                     <td>
-                                        <span className={'badge badge-completed'}> {/* Always completed now */}
+                                        <span className={'badge badge-completed'}>
                                             COMPLETED
                                         </span>
                                     </td>
-                                    <td>{entry.customerName}</td>
-                                    <td className="customer-address-col">{entry.customerAddress}</td>
-                                    <td>{entry.customerContact}</td>
-                                    {/* Display 'N/A' for item-related fields in 'in' transactions */}
-                                    <td>{entry.actionType === 'out' ? (entry.metalType || '—') : 'N/A'}</td>
-                                    <td>{entry.paymentForm}</td>
-                                    <td>{['gold', 'silver'].includes(entry.paymentForm) ? (entry.purity || '—') : 'N/A'}</td>
-                                    <td>{['gold', 'silver'].includes(entry.paymentForm) ? (entry.grams_given || '—') : 'N/A'}</td>
-                                    <td>{['gold', 'silver'].includes(entry.paymentForm) ? (entry.equivalentAmount || '—') : 'N/A'}</td>
-                                    <td>{['cash', 'cheque'].includes(entry.paymentForm) ? (entry.cashAmount || '—') : 'N/A'}</td>
-                                    <td className="other-payment-notes-col">{entry.paymentForm === 'other' ? (entry.otherPaymentNotes || '—') : 'N/A'}</td>
-                                    <td>{entry.actionType === 'out' ? (entry.jewelleryName || '—') : 'N/A'}</td>
-                                    <td>{entry.actionType === 'out' ? (entry.subtype || '—') : 'N/A'}</td>
-                                    <td>{entry.actionType === 'out' ? (entry.grossWeight || '—') : 'N/A'}</td>
-                                    <td>{entry.actionType === 'out' ? (entry.netWeight || '—') : 'N/A'}</td>
-                                    <td>{entry.actionType === 'out' ? (entry.itemMetalPurity || '—') : 'N/A'}</td>
-                                    <td>{entry.actionType === 'out' ? (entry.customerBalance || '—') : 'N/A'}</td>
-                                    <td className="remarks-col">{entry.remarks}</td>
+                                    <td>{displayValue(entry.customerName)}</td>
+                                    <td className="customer-address-col">{displayValue(entry.customerAddress)}</td>
+                                    <td>{displayValue(entry.customerContact)}</td>
+                                    <td>{displayValue(entry.metalType, true)}</td>
+                                    <td>{displayValue(entry.paymentForm)}</td>
+                                    <td>{displayPaymentValue(entry.purity, ['gold', 'silver'])}</td>
+                                    <td>{displayPaymentValue(entry.grams_given, ['gold', 'silver'])}</td>
+                                    <td>{displayPaymentValue(entry.equivalentAmount, ['gold', 'silver'])}</td>
+                                    <td>{displayPaymentValue(entry.cashAmount, ['cash', 'cheque'])}</td>
+                                    <td className="other-payment-notes-col">{displayPaymentValue(entry.otherPaymentNotes, ['other'])}</td>
+                                    <td>{displayValue(entry.jewelleryName, true)}</td>
+                                    <td>{displayValue(entry.subtype, true)}</td>
+                                    <td>{displayValue(entry.grossWeight, true)}</td>
+                                    <td>{displayValue(entry.netWeight, true)}</td>
+                                    <td>{displayValue(entry.itemMetalPurity, true)}</td>
+                                    <td>{displayValue(entry.customerBalance, true)}</td>
+                                    <td className="remarks-col">{displayValue(entry.remarks)}</td>
                                     <td>{new Date(entry.createdAt).toLocaleString()}</td>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        )}
 
             {/* ───────────────────────────────────────────────────────────────────────── */}
             {/* E) Update Modal (shown when showUpdateModal = true) */}
             {/* ───────────────────────────────────────────────────────────────────────── */}
-            {showUpdateModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <h3>Update Customer Entry: {updateId}</h3>
+        {showUpdateModal && (
+            <div className="modal-overlay">
+                <div className="modal-content">
+                    <h3>Update Customer Entry: {updateId}</h3>
 
-                        <label>Action Type:</label>
-                        <select
-                            name="actionType"
-                            value={actionType}
-                            onChange={(e) => setActionType(e.target.value)}
-                            disabled // Action type cannot be changed during update
-                        >
-                            <option value="in">In</option>
-                            <option value="out">Out</option>
-                        </select>
+                    <label>Action Type:</label>
+                    <select
+                        name="actionType"
+                        value={actionType}
+                        onChange={(e) => setActionType(e.target.value)}
+                        disabled
+                    >
+                        <option value="in">In</option>
+                        <option value="out">Out</option>
+                    </select>
 
-                        <label>Customer Name:</label>
-                        <input type="text" name="customerName" value={formData.customerName} onChange={handleInputChange} />
+                    <label>Customer Name:</label>
+                    <input type="text" name="customerName" value={formData.customerName} onChange={handleInputChange} />
 
-                        <label>Address:</label>
-                        <input type="text" name="customerAddress" value={formData.customerAddress} onChange={handleInputChange} />
+                    <label>Address:</label>
+                    <input type="text" name="customerAddress" value={formData.customerAddress} onChange={handleInputChange} />
 
-                        <label>Contact:</label>
-                        <input type="text" name="customerContact" value={formData.customerContact} onChange={handleInputChange} />
+                    <label>Contact:</label>
+                    <input type="text" name="customerContact" value={formData.customerContact} onChange={handleInputChange} />
 
-                        <label>Payment Form:</label>
-                        <select name="paymentForm" value={formData.paymentForm} onChange={handlePaymentFormChange}>
-                            <option value="">Select Payment Form</option>
-                            <option value="gold">Gold</option>
-                            <option value="silver">Silver</option>
-                            <option value="cash">Cash</option>
-                            <option value="cheque">Cheque</option>
-                            <option value="other">Other</option>
-                        </select>
+                    <label>Payment Form:</label>
+                    <select name="paymentForm" value={formData.paymentForm} onChange={handlePaymentFormChange}>
+                        <option value="">Select Payment Form</option>
+                        <option value="gold">Gold</option>
+                        <option value="silver">Silver</option>
+                        <option value="cash">Cash</option>
+                        <option value="cheque">Cheque</option>
+                        <option value="other">Other</option>
+                    </select>
 
-                        {(formData.paymentForm === 'gold' || formData.paymentForm === 'silver') && (
-                            <>
-                                <label>Purity (Grams Given):</label>
-                                <input type="text" name="purity" value={formData.purity} onChange={handleInputChange} />
-                                <label>Grams Given:</label>
-                                <input type="number" name="grams_given" step="0.01" value={formData.grams_given} onChange={handleInputChange} />
-                                <label>Equivalent Amount:</label>
-                                <input type="number" name="equivalentAmount" step="0.01" value={formData.equivalentAmount} onChange={handleInputChange} />
-                            </>
-                        )}
+                    {/* Conditional Payment Fields in Modal */}
+                    {(formData.paymentForm === 'gold' || formData.paymentForm === 'silver') && (
+                        <>
+                            <label>Purity (Grams Given):</label>
+                            <input type="text" name="purity" value={formData.purity} onChange={handleInputChange} />
+                            <label>Grams Given:</label>
+                            <input type="number" name="grams_given" step="0.01" value={formData.grams_given} onChange={handleInputChange} />
+                            <label>Equivalent Amount:</label>
+                            <input type="number" name="equivalentAmount" step="0.01" value={formData.equivalentAmount} onChange={handleInputChange} />
+                        </>
+                    )}
 
-                        {(formData.paymentForm === 'cash' || formData.paymentForm === 'cheque') && (
-                            <>
-                                <label>Cash Amount:</label>
-                                <input type="number" name="cashAmount" step="0.01" value={formData.cashAmount} onChange={handleInputChange} />
-                            </>
-                        )}
+                    {(formData.paymentForm === 'cash' || formData.paymentForm === 'cheque') && (
+                        <>
+                            <label>Cash Amount:</label>
+                            <input type="number" name="cashAmount" step="0.01" value={formData.cashAmount} onChange={handleInputChange} />
+                        </>
+                    )}
 
-                        {formData.paymentForm === 'other' && (
-                            <>
-                                <label>If Other, Specify:</label>
-                                <input type="text" name="otherPaymentNotes" value={formData.otherPaymentNotes} onChange={handleInputChange} />
-                            </>
-                        )}
+                    {formData.paymentForm === 'other' && (
+                        <>
+                            <label>If Other, Specify:</label>
+                            <input type="text" name="otherPaymentNotes" value={formData.otherPaymentNotes} onChange={handleInputChange} />
+                        </>
+                    )}
 
                         {/* Item details in update modal: Only for 'out' transactions */}
                         {actionType === 'out' && (

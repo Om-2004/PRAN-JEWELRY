@@ -18,51 +18,48 @@ const CustomerTransactionSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    // metalType here specifically refers to the metal type of the JEWELLERY ITEM
-    // It's required for 'out' transactions, but not directly for 'in' where no item is handled.
     metalType: {
         type: String,
-        enum: ['gold', 'silver', 'others', null], // Allow null for 'in' transactions where no item is involved
-        required: false // Not required at the schema level, handled by route logic
+        enum: ['gold', 'silver', 'others', null],
+        required: false
     },
     paymentForm: {
         type: String,
         enum: ['cash', 'cheque', 'gold', 'silver', 'other'],
         required: true
     },
-    purity: String, // Purity of metal given (for paymentForm: gold/silver)
-    grams_given: Number, // Grams given (for paymentForm: gold/silver)
-    equivalentAmount: Number, // Equivalent amount (for paymentForm: gold/silver)
-    cashAmount: Number, // Cash amount (for paymentForm: cash/cheque)
-    otherPaymentNotes: String, // For paymentForm: other
-
-    // Item-specific fields, now only applicable for Customer-Out
+    purity: String,
+    grams_given: Number,
+    equivalentAmount: Number,
+    cashAmount: Number,
+    otherPaymentNotes: String,
     jewelleryName: { type: String, required: false },
     subtype: { type: String, required: false },
     grossWeight: { type: Number, required: false },
     netWeight: { type: Number, required: false },
-    itemMetalPurity: { type: String, required: false }, // HUID or Karat/Carat of the item
-
+    itemMetalPurity: { type: String, required: false },
     remarks: String,
-    customerBalance: { type: String, required: false }, // Only for Customer-Out
-
-    linkedItemId: { // Link to the actual Item document in the inventory for OUT transactions
+    customerBalance: { type: String, required: false },
+    linkedItemId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Item',
         required: false
     },
+    isManualEntry: {  // New field to track manual entries
+        type: Boolean,
+        default: false
+    },
     status: {
         type: String,
         enum: ['pending', 'completed'],
-        default: 'completed' // Default to completed, as 'in' no longer links to 'out' with a pending status
+        default: 'completed'
     },
-    transactionGroupId: { // Always create a unique group ID, which handles indexing
+    transactionGroupId: {
         type: String,
         required: true,
         unique: true,
         default: () => new mongoose.Types.ObjectId().toHexString()
     },
-
     vendorId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Vendor',
@@ -70,7 +67,7 @@ const CustomerTransactionSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// Removed the redundant index definition for transactionGroupId here.
+// Indexes
 CustomerTransactionSchema.index({ vendorId: 1, createdAt: -1 });
 CustomerTransactionSchema.index({ customerName: 1, metalType: 1, jewelleryName: 1 });
 

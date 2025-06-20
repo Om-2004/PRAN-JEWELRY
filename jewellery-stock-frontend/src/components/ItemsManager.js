@@ -137,32 +137,6 @@ function ItemsManager() {
             .finally(() => setIsLoading(false));
     };
 
-    const handleDeleteById = () => {
-        const id = prompt('Enter Item _id to delete:');
-        if (!id) return;
-        setIsLoading(true);
-        fetch(`/api/items/${id}`, {
-            method: 'DELETE',
-            headers: getAuthHeaders()
-        })
-            .then(async (res) => {
-                if (!res.ok) {
-                    const data = await res.json();
-                    throw new Error(data.message || 'Delete failed');
-                }
-                setItems((prev) => prev.filter((item) => item._id !== id));
-                if (selectedItem && selectedItem._id === id) {
-                    setSelectedItem(null);
-                }
-                showToast('Item deleted successfully!');
-            })
-            .catch((err) => {
-                console.error('Error deleting item:', err);
-                showToast(`Could not delete item: ${err.message}`, 'error');
-            })
-            .finally(() => setIsLoading(false));
-    };
-
     const handleUpdateById = () => {
         const id = prompt('Enter Item _id to update:');
         if (!id) return;
@@ -226,28 +200,35 @@ function ItemsManager() {
     };
 
     const handleDelete = (id) => {
+        if (!window.confirm('Permanently delete this item?')) return;
+    
         setIsLoading(true);
         fetch(`/api/items/${id}`, {
             method: 'DELETE',
             headers: getAuthHeaders()
         })
-            .then(async (res) => {
-                if (!res.ok) {
-                    const data = await res.json();
-                    throw new Error(data.message || 'Delete failed');
-                }
-                setItems((prev) => prev.filter((item) => item._id !== id));
-                if (selectedItem && selectedItem._id === id) {
-                    setSelectedItem(null);
-                }
-                showToast('Item deleted successfully!');
-            })
-            .catch((err) => {
-                console.error('Error deleting item:', err);
-                showToast(`Could not delete item: ${err.message}`, 'error');
-            })
-            .finally(() => setIsLoading(false));
+        .then(async (res) => {
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.message || 'Delete failed');
+            }
+            setItems(prev => prev.filter(item => item._id !== id));
+            if (selectedItem?._id === id) setSelectedItem(null);
+            showToast('Item permanently deleted');
+        })
+        .catch(err => {
+            console.error('Delete error:', err);
+            showToast(`Delete failed: ${err.message}`, 'error');
+        })
+        .finally(() => setIsLoading(false));
     };
+
+    const handleDeleteById = () => {
+        const id = prompt('Enter Item _id to delete:');
+        if (!id) return;
+        handleDelete(id); // Reuse the same delete logic
+    };
+
 
     const handleUpdate = (item) => {
         setMetalType(item.metalType);
@@ -286,6 +267,13 @@ function ItemsManager() {
 
     const handleUpdateSubmit = () => {
         if (!updateId) return;
+
+        if (formData.metalType === 'gold' && 
+            (!formData.huidNo || !/^[A-Za-z0-9]{6}$/.test(formData.huidNo))) {
+            showToast('HUID must be exactly 6 alphanumeric characters', 'error');
+            return;
+        }
+
         setIsLoading(true);
 
         const payload = {
@@ -491,7 +479,7 @@ function ItemsManager() {
                                                     value={formData.huidNo}
                                                     onChange={handleInputChange}
                                                     pattern="[A-Za-z0-9]{6}"
-                                                    title="6 alphanumeric characters"
+                                                    title="Exactly 6 alphanumeric characters"
                                                     required
                                                 />
                                             </>

@@ -106,8 +106,7 @@ router.put('/:id', verifyToken, async (req, res) => {
         // Start with the request body
         const updateData = { ...req.body };
 
-        // --- Refined logic for metal-specific fields during update ---
-        // We need to know the existing metalType to correctly handle updates
+        // Check if the item exists and get current metalType
         const existingItem = await Item.findById(req.params.id);
         if (!existingItem) {
             return res.status(404).json({ message: 'Item not found for update.' });
@@ -115,44 +114,64 @@ router.put('/:id', verifyToken, async (req, res) => {
 
         const currentMetalType = req.body.metalType || existingItem.metalType;
 
+        // Handle metal-specific fields
         if (currentMetalType === 'gold') {
-            updateData.huidNo = req.body.huidNo || req.body.karatOrHUID; // Prioritize explicit, then legacy
-            updateData.karatCarat = undefined; // Ensure karatCarat is unset if changing to gold or staying gold
-        } else if (currentMetalType === 'silver' || currentMetalType === 'others') {
-            updateData.karatCarat = req.body.karatCarat || req.body.karatOrHUID; // Prioritize explicit, then legacy
-            updateData.huidNo = undefined; // Ensure huidNo is unset if changing to silver/others or staying so
+            const newHuidNo = req.body.huidNo || req.body.karatOrHUID;
+            
+            // Check if HUID is being changed and validate
+            if (newHuidNo && newHuidNo !== existingItem.huidNo) {
+                if (!/^[A-Za-z0-9]{6}$/.test(newHuidNo)) {
+                    return res.status(400).json({
+                        message: 'HUID must be exactly 6 alphanumeric characters',
+                        field: 'huidNo'
+                    });
+                }
+                
+                // Check for duplicate HUID
+                const existingWithHuid = await Item.findOne({ 
+                    huidNo: newHuidNo,
+                    metalType: 'gold',
+                    _id: { $ne: req.params.id } // Exclude current item
+                });
+                
+                if (existingWithHuid) {
+                    return res.status(400).json({
+                        message: 'HUID number must be unique for gold items',
+                        field: 'huidNo'
+                    });
+                }
+            }
+            
+            updateData.huidNo = newHuidNo;
+            updateData.karatCarat = undefined;
+        } else {
+            updateData.karatCarat = req.body.karatCarat || req.body.karatOrHUID;
+            updateData.huidNo = undefined;
         }
-        // If metalType is changed (and not explicitly handled by a new huidNo/karatCarat field),
-        // we might need more complex logic. For simplicity, we assume metalType is either sent
-        // or remains the same. The Mongoose schema's conditional requirements will still apply.
 
-        // Remove the legacy field if it was passed, as it's now handled
+        // Remove legacy field
         delete updateData.karatOrHUID;
 
-        // The 'balance' field from req.body will automatically be included in updateData.
-        // Mongoose schema will handle its validation based on its definition in Item.js.
-
+        // Perform the update
         const updatedItem = await Item.findOneAndUpdate(
             { _id: req.params.id, vendorId: req.vendorId },
             updateData,
             {
                 new: true,
                 runValidators: true,
-                context: 'query', // Added for proper validation context
-                setDefaultsOnInsert: true // Ensure defaults are applied (relevant for upserts, but good practice)
+                context: 'query',
+                setDefaultsOnInsert: true
             }
-        ).lean(); // Use lean() for better performance
+        ).lean();
 
         if (!updatedItem) return res.status(404).json({ message: 'Item not found' });
 
-        // Transform response for backward compatibility (karatOrHUID)
+        // Transform response for backward compatibility
         updatedItem.karatOrHUID = updatedItem.metalType === 'gold' ? updatedItem.huidNo : updatedItem.karatCarat;
-
         res.json(updatedItem);
     } catch (err) {
-        console.error('Error in PUT /api/items/:id', err); // Added detailed logging
+        console.error('Error in PUT /api/items/:id', err);
         if (err.name === 'ValidationError') {
-            // Improved error formatting
             const errors = Object.values(err.errors).map(e => ({
                 field: e.path,
                 message: e.message,
@@ -178,16 +197,21 @@ router.put('/:id', verifyToken, async (req, res) => {
 // DELETE an item
 router.delete('/:id', verifyToken, async (req, res) => {
     try {
-        const item = await Item.findOneAndUpdate(
-            { _id: req.params.id, vendorId: req.vendorId },
-            { isActive: false }, // Set isActive to false instead of deleting
-            { new: true }
-        );
-        if (!item) return res.status(404).json({ message: 'Item not found' });
-        res.json({ message: 'Item marked as inactive successfully' });
+        const deletedItem = await Item.findOneAndDelete({ 
+            _id: req.params.id, 
+            vendorId: req.vendorId 
+        });
+        
+        if (!deletedItem) {
+            return res.status(404).json({ message: 'Item not found' });
+        }
+        
+        res.json({ message: 'Item permanently deleted' });
     } catch (err) {
-        console.error('Error in DELETE (soft) /api/items/:id', err);
-        res.status(500).json({ message: err.message || 'An unexpected error occurred.' });
+        console.error('Error in DELETE /api/items/:id', err);
+        res.status(500).json({ 
+            message: err.message || 'Deletion failed' 
+        });
     }
 });
 
