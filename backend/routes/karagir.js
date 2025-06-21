@@ -283,9 +283,33 @@ router.put('/:id', async (req, res) => {
             delete updateData.balance;
             delete updateData.linkedItemId;
             delete updateData.completesOutEntry;
+            
             // Convert gramsGiven to float if present
             if (updateData.gramsGiven !== undefined) {
                 updateData.gramsGiven = parseFloat(updateData.gramsGiven);
+            }
+
+            // If this 'out' entry was completed by an 'in' entry, we need to delete that 'in' entry and its linked item
+            if (existingEntry.status === 'completed') {
+                const completingInEntry = await KaragirLeisure.findOne({
+                    completesOutEntry: existingEntry._id,
+                    vendorId: req.vendorId
+                });
+
+                if (completingInEntry) {
+                    // Delete the linked item first
+                    if (completingInEntry.linkedItemId) {
+                        await Item.findByIdAndDelete(completingInEntry.linkedItemId);
+                        console.log(`Deleted linked Item ${completingInEntry.linkedItemId} for Karagir-In entry ${completingInEntry._id}`);
+                    }
+                    
+                    // Then delete the 'in' entry
+                    await KaragirLeisure.findByIdAndDelete(completingInEntry._id);
+                    console.log(`Deleted completing Karagir-In entry ${completingInEntry._id} for Karagir-Out entry ${id}`);
+                }
+                
+                // Reset status to pending since we removed the completing entry
+                updateData.status = 'pending';
             }
         } else if (existingEntry.entryType === 'in') {
             // For 'in' entries, ensure 'out' specific fields are not updated
@@ -364,6 +388,37 @@ router.put('/:id', async (req, res) => {
                     return res.status(400).json({ message: `Failed to update linked item: ${itemErr.message}` });
                 }
             }
+
+            // If this 'in' entry completes an 'out' entry, update the 'out' entry's fields if needed
+            if (existingEntry.completesOutEntry) {
+                const outEntryToUpdate = await KaragirLeisure.findById(existingEntry.completesOutEntry);
+                if (outEntryToUpdate) {
+                    // Update relevant fields in the 'out' entry based on 'in' entry changes
+                    const outUpdate = {};
+                    
+                    // If metal type changed in 'in' entry, update in 'out' entry
+                    if (updateData.metalType && updateData.metalType !== existingEntry.metalType) {
+                        outUpdate.metalType = updateData.metalType;
+                    }
+                    
+                    // If karagir name changed in 'in' entry, update in 'out' entry
+                    if (updateData.karagirName && updateData.karagirName !== existingEntry.karagirName) {
+                        outUpdate.karagirName = updateData.karagirName;
+                    }
+                    
+                    // If there are any updates to make to the 'out' entry
+                    if (Object.keys(outUpdate).length > 0) {
+                        await KaragirLeisure.findByIdAndUpdate(
+                            existingEntry.completesOutEntry,
+                            outUpdate,
+                            { new: true, runValidators: true }
+                        );
+                        console.log(`Updated linked Karagir-Out entry ${existingEntry.completesOutEntry} with new data`);
+                    }
+                }
+            }
+        } else {
+            return res.status(400).json({ message: 'Invalid entryType. Must be "in" or "out".' });
         }
 
         const updatedKaragirEntry = await KaragirLeisure.findOneAndUpdate(

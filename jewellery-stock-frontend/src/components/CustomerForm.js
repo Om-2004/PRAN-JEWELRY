@@ -672,9 +672,9 @@ function CustomerForm() {
             </div>
         )}
 
-            {/* ───────────────────────────────────────────────────────────────────────── */}
-            {/* E) Update Modal (shown when showUpdateModal = true) */}
-            {/* ───────────────────────────────────────────────────────────────────────── */}
+        {/* ───────────────────────────────────────────────────────────────────────── */}
+        {/* E) Update Modal (shown when showUpdateModal = true) */}
+        {/* ───────────────────────────────────────────────────────────────────────── */}
         {showUpdateModal && (
             <div className="modal-overlay">
                 <div className="modal-content">

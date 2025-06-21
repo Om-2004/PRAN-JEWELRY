@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './KaragirForm.css';
 
 function KaragirForm() {
@@ -35,7 +35,7 @@ function KaragirForm() {
         balance: ''
     };
 
-    // State variables for form data and UI management
+    // State variables
     const [karagirOutFormData, setKaragirOutFormData] = useState({ ...emptyOutForm });
     const [karagirInFormData, setKaragirInFormData] = useState({ ...emptyInForm });
     const [currentInMetalType, setCurrentInMetalType] = useState('');
@@ -47,6 +47,36 @@ function KaragirForm() {
     const [activeCreateForm, setActiveCreateForm] = useState('out');
     const [isLoading, setIsLoading] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
+
+    useEffect(() => {
+        if (selectedKaragirEntry) {
+            if (selectedKaragirEntry.entryType === 'in') {
+                setCurrentInMetalType(selectedKaragirEntry.metalType);
+                setKaragirInFormData({
+                    karagirName: selectedKaragirEntry.karagirName,
+                    metalType: selectedKaragirEntry.metalType,
+                    subtype: selectedKaragirEntry.subtype,
+                    jewelleryName: selectedKaragirEntry.jewelleryName,
+                    huidNo: selectedKaragirEntry.huidNo || '',
+                    karatCarat: selectedKaragirEntry.karatCarat || '',
+                    grossWeight: selectedKaragirEntry.grossWeight,
+                    netWeight: selectedKaragirEntry.netWeight,
+                    purityReceived: selectedKaragirEntry.purityReceived,
+                    labourCharge: selectedKaragirEntry.labourCharge,
+                    balance: selectedKaragirEntry.balance,
+                    remarks: selectedKaragirEntry.remarks || ''
+                });
+            } else {
+                setKaragirOutFormData({
+                    karagirName: selectedKaragirEntry.karagirName,
+                    metalType: selectedKaragirEntry.metalType,
+                    gramsGiven: selectedKaragirEntry.gramsGiven,
+                    purityGiven: selectedKaragirEntry.purityGiven,
+                    remarks: selectedKaragirEntry.remarks || ''
+                });
+            }
+        }
+    }, [selectedKaragirEntry]);
 
     // Subtype options based on metal type
     const subtypeOptions = {
@@ -72,12 +102,29 @@ function KaragirForm() {
         setCurrentInMetalType('');
     };
 
-    // --- Karagir-Out Form Handlers ---
+    // --- Form Handlers ---
     const handleOutInputChange = (e) => {
         const { name, value } = e.target;
         setKaragirOutFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleInInputChange = (e) => {
+        const { name, value } = e.target;
+        if (name === 'metalType') {
+            setCurrentInMetalType(value);
+            setKaragirInFormData(prev => ({
+                ...prev,
+                [name]: value,
+                subtype: '',
+                huidNo: '',
+                karatCarat: ''
+            }));
+        } else {
+            setKaragirInFormData(prev => ({ ...prev, [name]: value }));
+        }
+    };
+
+    // --- CRUD Operations ---
     const handleCreateOutEntry = async (e) => {
         e.preventDefault();
         setIsLoading(true);
@@ -108,23 +155,6 @@ function KaragirForm() {
             showToast(`Error: ${error.message}`, 'error');
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    // --- Karagir-In Form Handlers ---
-    const handleInInputChange = (e) => {
-        const { name, value } = e.target;
-        if (name === 'metalType') {
-            setCurrentInMetalType(value);
-            setKaragirInFormData(prev => ({
-                ...prev,
-                [name]: value,
-                subtype: '',
-                huidNo: '',
-                karatCarat: ''
-            }));
-        } else {
-            setKaragirInFormData(prev => ({ ...prev, [name]: value }));
         }
     };
 
@@ -190,7 +220,6 @@ function KaragirForm() {
         }
     };
 
-    // --- General Karagir Management Actions ---
     const handleGetAllKaragir = async () => {
         setIsLoading(true);
         try {
@@ -288,31 +317,7 @@ function KaragirForm() {
     const handleOpenUpdateModal = (entry) => {
         setUpdateId(entry._id);
         setIsUpdateInEntry(entry.entryType === 'in');
-
-        if (entry.entryType === 'in') {
-            setCurrentInMetalType(entry.metalType);
-            setKaragirInFormData({
-                karagirName: entry.karagirName || '',
-                metalType: entry.metalType || '',
-                subtype: entry.subtype || '',
-                jewelleryName: entry.jewelleryName || '',
-                huidNo: entry.huidNo || '',
-                karatCarat: entry.karatCarat || '',
-                grossWeight: entry.grossWeight ?? '',
-                netWeight: entry.netWeight ?? '',
-                purityReceived: entry.purityReceived || '',
-                labourCharge: entry.labourCharge ?? '',
-                balance: entry.balance ?? ''
-            });
-        } else {
-            setKaragirOutFormData({
-                karagirName: entry.karagirName || '',
-                metalType: entry.metalType || '',
-                remarks: entry.remarks || '',
-                gramsGiven: entry.gramsGiven ?? '',
-                purityGiven: entry.purityGiven || ''
-            });
-        }
+        setSelectedKaragirEntry(entry);
         setShowUpdateModal(true);
     };
 
@@ -322,91 +327,131 @@ function KaragirForm() {
         setIsLoading(true);
 
         try {
-            let payload = {};
             if (isUpdateInEntry) {
-                payload = {
-                    ...karagirInFormData,
-                    entryType: 'in',
+                // Handle Karagir-In update
+                const payload = {
+                    karagirName: karagirInFormData.karagirName,
+                    metalType: karagirInFormData.metalType,
+                    jewelleryName: karagirInFormData.jewelleryName,
+                    subtype: karagirInFormData.subtype,
                     grossWeight: parseFloat(karagirInFormData.grossWeight),
                     netWeight: parseFloat(karagirInFormData.netWeight),
+                    purityReceived: karagirInFormData.purityReceived,
                     labourCharge: parseFloat(karagirInFormData.labourCharge),
-                    balance: String(karagirInFormData.balance || "0")
+                    balance: String(karagirInFormData.balance || "0"),
+                    remarks: karagirInFormData.remarks || '',
+                    ...(karagirInFormData.metalType === 'gold' 
+                        ? { huidNo: karagirInFormData.huidNo } 
+                        : { karatCarat: karagirInFormData.karatCarat })
                 };
-                if (karagirInFormData.metalType !== 'gold') {
-                    delete payload.huidNo;
-                } else {
-                    delete payload.karatCarat;
+
+                // First update the linked item
+                if (selectedKaragirEntry?.linkedItemId) {
+                    const itemRes = await fetch(`/api/items/${selectedKaragirEntry.linkedItemId}`, {
+                        method: 'PUT',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({
+                            jewelleryName: payload.jewelleryName,
+                            metalType: payload.metalType,
+                            subtype: payload.subtype,
+                            grossWeight: payload.grossWeight,
+                            netWeight: payload.netWeight,
+                            purity: payload.purityReceived,
+                            labourCharge: payload.labourCharge,
+                            balance: payload.balance,
+                            ...(payload.metalType === 'gold' 
+                                ? { huidNo: payload.huidNo } 
+                                : { karatCarat: payload.karatCarat })
+                        })
+                    });
+                    if (!itemRes.ok) throw new Error('Failed to update linked item');
                 }
-            } else {
-                const checkInEntryRes = await fetch(`/api/karagirleisures?completesOutEntry=${updateId}`, {
-                    method: 'GET',
-                    headers: getAuthHeaders()
+
+                // Then update the Karagir-In entry
+                const res = await fetch(`/api/karagirleisures/${updateId}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
                 });
-                const linkedInEntries = await checkInEntryRes.json();
 
-                if (!checkInEntryRes.ok) {
-                    throw new Error(linkedInEntries.message || 'Failed to check for linked IN entries.');
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.message || 'Failed to update Karagir-In entry');
                 }
 
-                if (linkedInEntries && linkedInEntries.length > 0) {
-                    const linkedInEntry = linkedInEntries[0];
-                    const confirmUncomplete = window.confirm(
-                        `This Karagir-Out entry is currently marked as completed by Karagir-In entry ID: ${linkedInEntry._id}. ` +
-                        `Updating this OUT entry will un-complete it and DELETE the linked IN entry. ` +
-                        `Do you wish to proceed?`
-                    );
+                const updatedData = await res.json();
+                setKaragirEntries(prev => prev.map(e => e._id === updateId ? updatedData : e));
+                setSelectedKaragirEntry(updatedData);
+                showToast('Karagir-In entry updated successfully!');
+            } else {
+                // Handle Karagir-Out update
+                const payload = {
+                    karagirName: karagirOutFormData.karagirName,
+                    metalType: karagirOutFormData.metalType,
+                    gramsGiven: parseFloat(karagirOutFormData.gramsGiven),
+                    purityGiven: karagirOutFormData.purityGiven,
+                    remarks: karagirOutFormData.remarks || ''
+                };
 
-                    if (!confirmUncomplete) {
-                        showToast('Karagir-Out update cancelled by user.', 'error');
-                        setShowUpdateModal(false);
-                        setUpdateId(null);
-                        resetOutForm();
+                // Check if this is a completed out entry
+                if (selectedKaragirEntry?.status === 'completed') {
+                    const confirm = window.confirm(
+                        'Updating a completed Karagir-Out entry will delete the linked Karagir-In entry and its item. Continue?'
+                    );
+                    if (!confirm) {
+                        showToast('Update cancelled', 'warning');
                         return;
                     }
 
-                    const deleteInRes = await fetch(`/api/karagirleisures/${linkedInEntry._id}`, {
-                        method: 'DELETE',
+                    // Find and delete the linked Karagir-In and item
+                    const inEntries = await fetch(`/api/karagirleisures?completesOutEntry=${updateId}`, {
                         headers: getAuthHeaders()
-                    });
-                    if (!deleteInRes.ok) {
-                        const deleteData = await deleteInRes.json();
-                        throw new Error(deleteData.message || `Failed to delete linked Karagir-In entry ${linkedInEntry._id}.`);
+                    }).then(res => res.json());
+
+                    if (inEntries.length > 0) {
+                        // Delete linked item
+                        if (inEntries[0].linkedItemId) {
+                            await fetch(`/api/items/${inEntries[0].linkedItemId}`, {
+                                method: 'DELETE',
+                                headers: getAuthHeaders()
+                            });
+                        }
+                        // Delete Karagir-In entry
+                        await fetch(`/api/karagirleisures/${inEntries[0]._id}`, {
+                            method: 'DELETE',
+                            headers: getAuthHeaders()
+                        });
+                        // Update local state
+                        setKaragirEntries(prev => prev.filter(e => 
+                            e._id !== inEntries[0]._id && e.linkedItemId !== inEntries[0].linkedItemId
+                        ));
                     }
-                    showToast(`Linked Karagir-In entry ${linkedInEntry._id} deleted successfully.`);
-                    setKaragirEntries(prev => prev.filter(entry => entry._id !== linkedInEntry._id));
+
+                    // Reset status to pending
+                    payload.status = 'pending';
                 }
 
-                payload = {
-                    ...karagirOutFormData,
-                    entryType: 'out',
-                    gramsGiven: parseFloat(karagirOutFormData.gramsGiven),
-                    status: 'pending'
-                };
+                // Update the Karagir-Out entry
+                const res = await fetch(`/api/karagirleisures/${updateId}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.message || 'Failed to update Karagir-Out entry');
+                }
+
+                const updatedData = await res.json();
+                setKaragirEntries(prev => prev.map(e => e._id === updateId ? updatedData : e));
+                setSelectedKaragirEntry(updatedData);
+                showToast('Karagir-Out entry updated successfully!');
             }
 
-            const res = await fetch(`/api/karagirleisures/${updateId}`, {
-                method: 'PUT',
-                headers: getAuthHeaders(),
-                body: JSON.stringify(payload)
-            });
-
-            const data = await res.json();
-            if (!res.ok) {
-                const errorMessage = data.message || (data.errors && data.errors.map(err => err.message).join(', ')) || 'Failed to update Karagir entry.';
-                throw new Error(errorMessage);
-            }
-            
-            showToast('Karagir entry updated successfully!');
-            setKaragirEntries(prev => prev.map(entry => entry._id === data._id ? data : entry));
-            if (selectedKaragirEntry?._id === data._id) {
-                setSelectedKaragirEntry(data);
-            }
             setShowUpdateModal(false);
-            setUpdateId(null);
-            resetOutForm();
-            resetInForm();
         } catch (error) {
-            console.error('Error updating Karagir entry:', error);
+            console.error('Update failed:', error);
             showToast(`Error: ${error.message}`, 'error');
         } finally {
             setIsLoading(false);
@@ -421,6 +466,7 @@ function KaragirForm() {
         resetInForm();
     };
 
+    // ... (rest of the component JSX remains exactly the same)
     return (
         <div className="karagir-manager">
             {/* Loading Overlay */}
