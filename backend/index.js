@@ -23,5 +23,12 @@ app.use('/api/karagirleisures', require('./routes/karagir'));
 app.use('/api/vendors', require('./routes/vendor'));
 app.use('/api/customers', require('./routes/customer'));
 
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "jewellery-stock-frontend/build")));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "jewellery-stock-frontend/build", "index.html"));
+  });
+}
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
