@@ -1,131 +1,216 @@
-/* Home.css - Full Updated Version */
+/*
+ * Home.css - Full Updated Version
+ * This file styles the main Home component, focusing on a responsive layout
+ * for the container, headings, and action buttons across all device sizes.
+ */
+
+/* Main container for the home page content */
 .home-container {
-    max-width: 900px;
-    margin: 4rem auto;
-    padding: 4rem;
-    text-align: center;
-    background-color: rgba(30, 30, 30, 0.95);
-    border-radius: 18px;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
-    border: 2px solid rgba(212, 175, 55, 0.4);
-    color: #e0e0e0;
-    
-    /* Splash screen transition */
+    /*
+     * Responsive max-width:
+     * - Minimum: 300px (prevents content from being too narrow on very small screens)
+     * - Preferred: 90vw (takes 90% of viewport width)
+     * - Maximum: 800px (adjusted slightly from 900px to encourage better scaling on wider tablets/laptops)
+     */
+    max-width: clamp(300px, 90vw, 800px);
+    /*
+     * Responsive margin:
+     * - Top/Bottom: Scales from 2rem to 6rem based on viewport height, then caps at 4rem.
+     * Ensures vertical spacing is appropriate for different screen heights.
+     * - Left/Right: auto for horizontal centering.
+     */
+    margin: clamp(2rem, 5vh, 4rem) auto;
+    /*
+     * Responsive padding:
+     * - Minimum: 2rem (for small screens)
+     * - Preferred: 5vw (scales with viewport width)
+     * - Maximum: 4rem (for large screens)
+     */
+    padding: clamp(2rem, 5vw, 4rem);
+    text-align: center; /* Center align text content */
+    background-color: rgba(30, 30, 30, 0.95); /* Semi-transparent dark background */
+    border-radius: 18px; /* Rounded corners */
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.7); /* Deep shadow for depth */
+    border: 2px solid rgba(212, 175, 55, 0.4); /* Subtle gold border */
+    color: #e0e0e0; /* Light text color */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+
+    /* Splash screen transition properties */
     opacity: 0;
     animation: fadeIn 1s ease-out forwards;
     animation-delay: 0.5s;
-    transition: box-shadow 0.5s ease;
+    transition: box-shadow 0.5s ease; /* Smooth transition for box shadow on hover */
 }
 
+/* Hover effect for the home container */
 .home-container:hover {
-  box-shadow: 0 0 70px rgba(212, 175, 55, 0.6);
+    box-shadow: 0 0 70px rgba(212, 175, 55, 0.6); /* Enhanced gold glow on hover */
 }
 
+/* Keyframe animation for fading in the home container */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
+/* Main heading style */
 .home-container h1 {
-    color: #f9d423;
-    margin-bottom: 2.5rem;
-    font-size: 3.5rem;
-    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
-    letter-spacing: 2px;
-    position: relative;
-    padding-bottom: 1rem;
+    color: #f9d423; /* Bright gold color */
+    /*
+     * Responsive margin-bottom:
+     * - Minimum: 1.5rem
+     * - Preferred: 4vw
+     * - Maximum: 2.5rem
+     */
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+    /*
+     * Responsive font size for the heading:
+     * - Minimum: 2rem (for small mobiles)
+     * - Preferred: 6vw (scales fluidly)
+     * - Maximum: 3.5rem (for large desktops)
+     */
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5); /* Text shadow for depth */
+    letter-spacing: 2px; /* Spacing between letters */
+    position: relative; /* For positioning the ::after pseudo-element */
+    padding-bottom: 1rem; /* Space for the underline */
 }
 
+/* Underline effect for the main heading */
 .home-container h1::after {
-    content: '';
-    display: block;
-    width: 200px;
-    height: 5px;
-    background: linear-gradient(90deg, transparent, #f9d423, transparent);
-    margin: 1.5rem auto 0;
+    content: ''; /* Required for pseudo-elements */
+    display: block; /* Makes it a block-level element */
+    /*
+     * Responsive width for the underline:
+     * - Minimum: 100px
+     * - Preferred: 30vw
+     * - Maximum: 200px
+     */
+    width: clamp(100px, 30vw, 200px);
+    height: 5px; /* Height of the underline */
+    background: linear-gradient(90deg, transparent, #f9d423, transparent); /* Gradient gold line */
+    margin: clamp(1rem, 2vw, 1.5rem) auto 0; /* Responsive top margin, horizontally centered */
 }
 
+/* Container for action buttons */
 .home-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    margin-top: 3rem;
-    flex-wrap: wrap;
+    display: flex; /* Use flexbox for button layout */
+    justify-content: center; /* Center buttons horizontally */
+    /*
+     * Responsive gap between buttons:
+     * - Minimum: 1rem
+     * - Preferred: 3vw
+     * - Maximum: 2rem
+     */
+    gap: clamp(1rem, 3vw, 2rem);
+    /*
+     * Responsive margin-top for button container:
+     * - Minimum: 2rem
+     * - Preferred: 4vw
+     * - Maximum: 3rem
+     */
+    margin-top: clamp(2rem, 4vw, 3rem);
+    flex-wrap: wrap; /* Allows buttons to wrap to the next line on smaller screens */
 }
 
+/* Individual button styles */
 .home-button {
-    padding: 1.2rem 2.5rem;
-    background: linear-gradient(135deg, #d4af37, #f9d423);
-    color: #222;
-    text-decoration: none;
-    border-radius: 10px;
-    font-weight: bold;
-    font-size: 1.3rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-    min-width: 200px;
-    text-align: center;
-    border: none;
+    /*
+     * Responsive padding for buttons:
+     * - Minimum vertical: 0.8rem, Max vertical: 1.2rem
+     * - Minimum horizontal: 1.5rem, Max horizontal: 2.5rem
+     */
+    padding: clamp(0.8rem, 2vw, 1.2rem) clamp(1.5rem, 4vw, 2.5rem);
+    background: linear-gradient(135deg, #d4af37, #f9d423); /* Gold gradient background */
+    color: #222; /* Dark text color */
+    text-decoration: none; /* Remove underline for links */
+    border-radius: 10px; /* Rounded corners */
+    font-weight: bold; /* Bold text */
+    /*
+     * Responsive font size for buttons:
+     * - Minimum: 0.9rem
+     * - Preferred: 2.8vw
+     * - Maximum: 1.3rem
+     */
+    font-size: clamp(0.9rem, 2.8vw, 1.3rem);
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Button shadow */
+    /*
+     * Responsive min-width for buttons:
+     * - Minimum: 120px (ensures buttons are not too small on mobile)
+     * - Preferred: 40vw (scales with viewport)
+     * - Maximum: 200px (prevents overly wide buttons on larger screens)
+     */
+    min-width: clamp(120px, 40vw, 200px);
+    text-align: center; /* Center text within buttons */
+    border: none; /* No border */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
+/* Hover effect for buttons */
 .home-button:hover {
-    background: linear-gradient(135deg, #c19e34, #e8c41a);
-    transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-    animation: subtlePulse 2s infinite;
+    background: linear-gradient(135deg, #c19e34, #e8c41a); /* Darker gold gradient on hover */
+    transform: translateY(-4px); /* Lift effect */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4); /* Enhanced shadow */
+    animation: subtlePulse 2s infinite; /* Subtle pulsating animation */
 }
 
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .home-container {
-        padding: 3rem;
-        margin: 2rem auto;
-        max-width: 90%;
-
-    }
-
-    .home-container h1 {
-        font-size: 2.5rem;
-    }
-
-    .home-container h1::after {
-        width: 150px;
-    }
-
-    .home-buttons {
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .home-button {
-        min-width: 80%;
-        font-size: 1.1rem;
-        padding: 1rem 2rem;
-    }
-}
-
-/* 1. Smoother background transition */
+/* Background for the Home component, likely distinct from global body background */
 .home-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url('../../../JEWELLERY-PHOTO.webp') no-repeat center center;
-  background-size: cover;
-  z-index: -1;
-  opacity: 0;
-  animation: bgFadeIn 1.5s ease-out forwards;
-  animation-delay: 0.8s;
+    position: fixed; /* Fixed to viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Uses the same jewellery photo as the body, ensure path is correct from this CSS file */
+    background: url('../../../JEWELLERY-PHOTO.webp') no-repeat center center;
+    background-size: cover; /* Ensures it covers the entire area */
+    z-index: -1; /* Puts it behind other content */
+    opacity: 0; /* Starts invisible for fade-in effect */
+    animation: bgFadeIn 1.5s ease-out forwards;
+    animation-delay: 0.8s; /* Delayed fade-in */
 }
 
+/* Keyframe animation for background fading in */
 @keyframes bgFadeIn {
-  from { opacity: 0; }
-  to { opacity: 0.8; } /* Adjust opacity as needed */
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 0.8;
+    } /* Adjust opacity as needed */
 }
 
+/* Keyframe animation for subtle button pulse on hover */
 @keyframes subtlePulse {
-  0% { transform: translateY(-4px); }
-  50% { transform: translateY(-6px); }
-  100% { transform: translateY(-4px); }
+    0% {
+        transform: translateY(-4px);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+    100% {
+        transform: translateY(-4px);
+    }
 }
+
+/*
+ * The media queries previously defined are now largely covered by
+ * the clamp() functions, making the design more fluid.
+ * Specific breakpoints can still be added here if highly distinct
+ * layout changes are required beyond fluid scaling.
+ */
+/*
+@media (max-width: 768px) {
+    // Already handled by clamp, but can be used for specific overrides
+}
+@media (max-width: 480px) {
+    // Further specific adjustments for very small mobiles if needed
+}
+*/

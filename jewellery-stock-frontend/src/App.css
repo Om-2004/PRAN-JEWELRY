@@ -1,58 +1,122 @@
+/*
+ * form-card.css
+ * This file contains common styles for form containers (e.g., login, register).
+ * It ensures responsiveness across different screen sizes, from mobile to desktop.
+ */
+
+/* Styles for the main form container card */
 .form-card {
-    max-width: 600px; /* Adjust as needed for desired width */
-    margin: 50px auto;
-    padding: 30px;
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 15px;
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
-    border: 1px solid #d4af37;
-    text-align: center; /* Center content within the form card */
+    /*
+     * Max-width: Fluidly adjust based on viewport.
+     * - Minimum: 300px (to prevent too narrow forms on small mobiles)
+     * - Preferred: 90vw (takes 90% of viewport width)
+     * - Maximum: 500px (prevents overly wide forms on large screens, original was 600px,
+     * adjusted slightly for a more compact look if desired)
+     */
+    max-width: clamp(300px, 90vw, 500px);
+    /*
+     * Margin: Centers horizontally using auto, and provides responsive vertical spacing.
+     * - Top/Bottom: 5vh (scales with viewport height, for vertical centering/spacing)
+     * - Left/Right: auto (for horizontal centering)
+     */
+    margin: 5vh auto;
+    /* Padding: Responsive padding inside the card. */
+    padding: clamp(20px, 5vw, 30px);
+    background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white background */
+    border-radius: 15px; /* Rounded corners */
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.3); /* Soft shadow for depth */
+    border: 1px solid #d4af37; /* Gold border */
+    text-align: center; /* Center content within the card */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
-.form-card h2, .form-card h1 {
-    text-align: center;
+/* Styles for headings within the form card */
+.form-card h2,
+.form-card h1 {
+    text-align: center; /* Center align headings */
     color: #d4af37; /* Consistent gold color */
-    margin-bottom: 20px;
+    margin-bottom: 20px; /* Space below headings */
+    /*
+     * Responsive font size for headings.
+     * - Minimum: 1.5rem
+     * - Preferred: 5vw (scales with viewport width)
+     * - Maximum: 2.2rem
+     */
+    font-size: clamp(1.5rem, 5vw, 2.2rem);
 }
 
+/* Styles for various input types within the form card */
 .form-card input[type="text"],
 .form-card input[type="password"],
 .form-card input[type="email"],
-.form-card input[type="number"] { /* Target specific input types for better control */
-    width: 100%; /* This is crucial for Login/Register forms */
-    padding: 12px 10px;
-    margin: 10px 0;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
-    background-color: #f9f9f9;
+.form-card input[type="number"] {
+    width: 100%; /* Inputs take full width of their parent */
+    padding: 12px 10px; /* Ample padding inside inputs for better touch target */
+    margin: 10px 0; /* Vertical margin for spacing between inputs */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    border: 1px solid #ccc; /* Light grey border */
+    border-radius: 8px; /* Rounded corners for inputs */
+    font-size: 1rem; /* Base font size for input text */
+    background-color: #f9f9f9; /* Off-white background */
 }
 
+/* Styles for buttons within the form card */
 .form-card button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 20px;
-    background-color: #d4af37; /* Gold button */
+    width: 100%; /* Buttons take full width of their parent */
+    padding: 12px; /* Padding inside buttons */
+    margin-top: 20px; /* Space above buttons */
+    background-color: #d4af37; /* Gold button background */
     color: #000; /* Black text */
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border: none; /* No border */
+    border-radius: 8px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-weight: bold; /* Bold text */
+    /*
+     * Responsive font size for buttons.
+     * - Minimum: 1rem
+     * - Preferred: 3vw (scales with viewport width)
+     * - Maximum: 1.1rem
+     */
+    font-size: clamp(1rem, 3vw, 1.1rem);
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
 }
 
+/* Hover effect for buttons */
 .form-card button:hover {
-    background-color: #b38f2a;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    background-color: #b38f2a; /* Darker gold on hover */
+    transform: translateY(-2px); /* Slight lift effect */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
 }
 
+/* Styles for paragraph text within the form card (e.g., success messages) */
 .form-card p {
-    margin-top: 15px;
-    color: green;
-    text-align: center;
-    font-weight: 500;
+    margin-top: 15px; /* Space above paragraph */
+    color: green; /* Green color for success messages */
+    text-align: center; /* Center align text */
+    font-weight: 500; /* Medium font weight */
+    /* Responsive font size for paragraphs. */
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+}
+
+/* Media query for very small screens (e.g., older/smaller mobile devices)
+ * to fine-tune spacing if default clamp() values are not ideal.
+ * This can be used for more specific adjustments if needed.
+ */
+@media (max-width: 320px) {
+    .form-card {
+        padding: 15px; /* Slightly reduced padding on very small screens */
+    }
+
+    .form-card h2, .form-card h1 {
+        margin-bottom: 15px;
+    }
+
+    .form-card input {
+        margin: 8px 0;
+    }
+
+    .form-card button {
+        margin-top: 15px;
+    }
 }

@@ -1,397 +1,658 @@
-/* ──────────────────────────────────────────────────────────────────────────── */
-/* ITEMS MANAGER - Luxury Dark Theme                                            */
-/* ──────────────────────────────────────────────────────────────────────────── */
+/*
+ * ItemsManager.css
+ * This file contains comprehensive styles for the Items Manager section,
+ * ensuring it is fully responsive and adapts beautifully across all screen sizes.
+ * It utilizes fluid units (vw, vh), clamp() for adaptable sizing and spacing,
+ * and strategic media queries for layout shifts.
+ */
 
 /* ──────────────────────────────────────────────────────────────────────────── */
 /* A) MAIN CONTAINER STYLING                                                    */
 /* ──────────────────────────────────────────────────────────────────────────── */
 .items-manager-container {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: rgba(30, 30, 30, 0.9);
-  border-radius: 12px;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-  color: #e0e0e0;
-  border: 1px solid rgba(212, 175, 55, 0.2);
+    /*
+     * Responsive max-width:
+     * - Minimum: 320px (ensures content is not too narrow on smallest phones)
+     * - Preferred: 95vw (fluidly takes 95% of viewport width)
+     * - Maximum: 1200px (caps the width on very large screens for readability)
+     */
+    max-width: clamp(320px, 95vw, 1200px);
+    /*
+     * Responsive vertical margin:
+     * - Minimum: 1rem (for compact spacing on small screens)
+     * - Preferred: 3vh (scales with viewport height)
+     * - Maximum: 2rem (limits excessive vertical margin on large screens)
+     */
+    margin: clamp(1rem, 3vh, 2rem) auto; /* Centers horizontally, fluid vertical spacing */
+    /*
+     * Responsive internal padding:
+     * - Minimum: 1rem (ensures content isn't squashed on small screens)
+     * - Preferred: 3vw (scales with viewport width)
+     * - Maximum: 2rem (prevents overly large padding on wide screens)
+     */
+    padding: clamp(1rem, 3vw, 2rem);
+    background-color: rgba(30, 30, 30, 0.9); /* Semi-transparent dark background */
+    border-radius: 12px; /* Rounded corners */
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); /* Prominent shadow for depth */
+    color: #e0e0e0; /* Light text color for contrast */
+    border: 1px solid rgba(212, 175, 55, 0.2); /* Subtle gold border */
+    box-sizing: border-box; /* Ensures padding and border are included in total size */
 }
 
+/* Heading for the Items Manager */
 .items-manager-container h2 {
-  color: #f9d423;
-  text-align: center;
-  margin-bottom: 2rem;
-  font-size: 2rem;
-  position: relative;
-  padding-bottom: 1rem;
+    color: #f9d423; /* Bright gold color */
+    text-align: center; /* Center align text */
+    /*
+     * Responsive margin-bottom:
+     * - Minimum: 1rem
+     * - Preferred: 3vw
+     * - Maximum: 2rem
+     */
+    margin-bottom: clamp(1rem, 3vw, 2rem);
+    /*
+     * Responsive font-size:
+     * - Minimum: 1.5rem (readable on small mobiles)
+     * - Preferred: 4vw (scales fluidly)
+     * - Maximum: 2rem (caps size on larger screens)
+     */
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    position: relative; /* For positioning the ::after pseudo-element */
+    padding-bottom: 1rem; /* Space for the underline */
 }
 
+/* Underline effect for the heading */
 .items-manager-container h2::after {
-  content: '';
-  display: block;
-  width: 100px;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #f9d423, transparent);
-  margin: 1rem auto 0;
+    content: ''; /* Required for pseudo-element */
+    display: block; /* Makes it a block-level element */
+    /*
+     * Responsive width for the underline:
+     * - Minimum: 60px
+     * - Preferred: 15vw
+     * - Maximum: 100px
+     */
+    width: clamp(60px, 15vw, 100px);
+    height: 3px; /* Thickness of the underline */
+    background: linear-gradient(90deg, transparent, #f9d423, transparent); /* Gold gradient line */
+    margin: 1rem auto 0; /* Vertically spaced, horizontally centered */
 }
 
 /* ──────────────────────────────────────────────────────────────────────────── */
 /* B) ACTION BUTTONS - Gold Themed                                              */
 /* ──────────────────────────────────────────────────────────────────────────── */
 .items-action-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  justify-content: center;
+    display: flex; /* Enables Flexbox for button layout */
+    flex-wrap: wrap; /* Allows buttons to wrap to the next line on smaller screens */
+    /*
+     * Responsive gap between buttons:
+     * - Minimum: 0.8rem
+     * - Preferred: 2vw
+     * - Maximum: 1rem
+     */
+    gap: clamp(0.8rem, 2vw, 1rem);
+    /*
+     * Responsive margin-bottom:
+     * - Minimum: 1.5rem
+     * - Preferred: 3vw
+     * - Maximum: 2rem
+     */
+    margin-bottom: clamp(1.5rem, 3vw, 2rem);
+    justify-content: center; /* Center align buttons within the container */
 }
 
 .items-action-buttons button {
-  padding: 0.8rem 1.5rem;
-  background: linear-gradient(135deg, #d4af37, #f9d423);
-  color: #222;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  min-width: 200px;
+    /*
+     * Responsive padding for buttons:
+     * - Vertical: clamp(0.6rem, 1.5vw, 0.8rem)
+     * - Horizontal: clamp(1rem, 3vw, 1.5rem)
+     */
+    padding: clamp(0.6rem, 1.5vw, 0.8rem) clamp(1rem, 3vw, 1.5rem);
+    background: linear-gradient(135deg, #d4af37, #f9d423); /* Gold gradient */
+    color: #222; /* Dark text */
+    border: none; /* No border */
+    border-radius: 6px; /* Rounded corners */
+    font-weight: 600; /* Semi-bold text */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: all 0.3s ease; /* Smooth transition */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
+    /*
+     * Responsive min-width for buttons:
+     * - Minimum: 140px (ensures buttons are not too small on mobiles)
+     * - Preferred: 40vw (scales fluidly)
+     * - Maximum: 200px (caps width on larger screens)
+     */
+    min-width: clamp(140px, 40vw, 200px);
+    /*
+     * Responsive font-size:
+     * - Minimum: 0.9rem
+     * - Preferred: 2.5vw
+     * - Maximum: 1rem
+     */
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    text-align: center; /* Center text within buttons */
+    box-sizing: border-box; /* Includes padding and border in total size */
 }
 
 .items-action-buttons button:hover {
-  background: linear-gradient(135deg, #c19e34, #e8c41a);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #c19e34, #e8c41a); /* Darker gold on hover */
+    transform: translateY(-2px); /* Slight lift effect */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
 }
 
 /* ──────────────────────────────────────────────────────────────────────────── */
 /* C) ITEMS TABLE - Luxury Dark Theme                                           */
 /* ──────────────────────────────────────────────────────────────────────────── */
 .items-table-container {
-  overflow-x: auto;
-  margin-bottom: 2rem;
-  border-radius: 8px;
-  background: rgba(40, 40, 40, 0.7);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+    overflow-x: auto; /* Enables horizontal scrolling for tables on small screens */
+    /*
+     * Responsive margin-bottom:
+     * - Minimum: 1.5rem
+     * - Preferred: 3vw
+     * - Maximum: 2rem
+     */
+    margin-bottom: clamp(1.5rem, 3vw, 2rem);
+    border-radius: 8px; /* Rounded corners for the container */
+    background: rgba(40, 40, 40, 0.7); /* Semi-transparent dark background */
+    border: 1px solid rgba(212, 175, 55, 0.2); /* Subtle gold border */
+    box-sizing: border-box;
 }
 
 .items-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: rgba(40, 40, 40, 0.8);
-  border-radius: 8px;
-  overflow: hidden;
+    width: 100%; /* Ensures table takes full width of its container */
+    border-collapse: collapse; /* Collapses table borders */
+    background: rgba(40, 40, 40, 0.8); /* Slightly darker background for the table itself */
+    border-radius: 8px; /* Rounded corners */
+    overflow: hidden; /* Ensures rounded corners are applied */
 }
 
+/* Table headers and data cells */
 .items-table th,
 .items-table td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-  color: #e0e0e0;
+    /*
+     * Responsive padding:
+     * - Minimum: 0.6rem
+     * - Preferred: 2vw
+     * - Maximum: 1rem
+     */
+    padding: clamp(0.6rem, 2vw, 1rem);
+    text-align: left; /* Left align text */
+    border-bottom: 1px solid rgba(212, 175, 55, 0.1); /* Subtle gold border at the bottom */
+    color: #e0e0e0; /* Light text color */
+    /*
+     * Responsive font-size:
+     * - Minimum: 0.8rem
+     * - Preferred: 2vw
+     * - Maximum: 0.95rem
+     */
+    font-size: clamp(0.8rem, 2vw, 0.95rem);
 }
 
+/* Table headers specific styles */
 .items-table th {
-  background-color: rgba(212, 175, 55, 0.2);
-  color: #f9d423;
-  font-weight: 600;
-  position: sticky;
-  top: 0;
+    background-color: rgba(212, 175, 55, 0.2); /* Gold-tinted background */
+    color: #f9d423; /* Bright gold text */
+    font-weight: 600; /* Semi-bold */
+    position: sticky; /* Makes header sticky on vertical scroll */
+    top: 0; /* Sticks to the top of the container */
+    z-index: 1; /* Ensures header is above scrolling content */
 }
 
+/* Hover effect for table rows */
 .items-table tr:hover td {
-  background-color: rgba(212, 175, 55, 0.1);
+    background-color: rgba(212, 175, 55, 0.1); /* Subtle gold background on row hover */
 }
 
+/* First column border for visual emphasis */
 .items-table td:first-child {
-  border-left: 3px solid transparent;
+    border-left: 3px solid transparent; /* Transparent border by default */
 }
 
+/* Gold border on hover for the first column */
 .items-table tr:hover td:first-child {
-  border-left: 3px solid #d4af37;
+    border-left: 3px solid #d4af37; /* Gold border on row hover */
 }
 
-/* Table action buttons - UPDATED TO STAY IN ONE LINE */
+/* Table action buttons cell - ensures enough space for buttons */
+.items-table td:has(.action-buttons) {
+    /*
+     * Responsive min-width for action button cell:
+     * - Minimum: 150px (ensures space for a couple of buttons on mobile)
+     * - Preferred: 20vw (scales fluidly)
+     * - Maximum: 250px (caps width on larger screens)
+     */
+    min-width: clamp(150px, 20vw, 250px);
+}
+
+/* Action buttons container within table cells */
 .items-table .action-buttons {
-  display: flex;
-  gap: 0.5rem;
-  white-space: nowrap;
+    display: flex; /* Enables Flexbox for buttons */
+    /*
+     * Responsive gap between buttons:
+     * - Minimum: 0.4rem
+     * - Preferred: 1vw
+     * - Maximum: 0.8rem
+     */
+    gap: clamp(0.4rem, 1vw, 0.8rem);
+    white-space: nowrap; /* Prevents buttons from wrapping within the cell */
+    flex-wrap: wrap; /* Allows buttons to wrap within the cell if space is truly minimal,
+                        though min-width on td should often prevent this */
+    justify-content: center; /* Centers buttons horizontally if they wrap */
 }
 
+/* Individual table action buttons */
 .items-table button {
-  padding: 0.5rem 0.8rem; /* Slightly smaller padding */
-  background: rgba(212, 175, 55, 0.2);
-  color: #f9d423;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.85rem; /* Slightly smaller font */
+    /*
+     * Responsive padding:
+     * - Vertical: clamp(0.4rem, 1vw, 0.5rem)
+     * - Horizontal: clamp(0.6rem, 1.5vw, 0.8rem)
+     */
+    padding: clamp(0.4rem, 1vw, 0.5rem) clamp(0.6rem, 1.5vw, 0.8rem);
+    background: rgba(212, 175, 55, 0.2); /* Gold-tinted background */
+    color: #f9d423; /* Bright gold text */
+    border: 1px solid rgba(212, 175, 55, 0.3); /* Subtle gold border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: all 0.2s ease; /* Smooth transition */
+    /*
+     * Responsive font-size:
+     * - Minimum: 0.75rem
+     * - Preferred: 1.8vw
+     * - Maximum: 0.85rem
+     */
+    font-size: clamp(0.75rem, 1.8vw, 0.85rem);
+    white-space: nowrap; /* Prevents text wrap inside button */
+    /* Removed margin: 0 0.1rem; to rely on gap property for spacing */
+    box-sizing: border-box;
 }
 
 .items-table button:hover {
-  background: rgba(212, 175, 55, 0.3);
-  border-color: #f9d423;
-}
-
-.items-table-container {
-  overflow-x: auto;
-  margin-bottom: 2rem;
-  border-radius: 8px;
-  background: rgba(40, 40, 40, 0.7);
-  border: 1px solid rgba(212, 175, 55, 0.2);
-}
-
-.items-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: rgba(40, 40, 40, 0.8);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-/* Action buttons cell - ensures enough space */
-.items-table td:has(button) {
-  min-width: 250px;
-}
-
-/* Action buttons container */
-.items-table .action-buttons {
-  display: flex;
-  gap: 0.8rem; /* Increased from 0.5rem to 0.8rem for more space */
-  white-space: nowrap;
-}
-
-/* Individual buttons */
-.items-table button {
-  padding: 0.5rem 0.8rem;
-  background: rgba(212, 175, 55, 0.2);
-  color: #f9d423;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  margin: 0 0.1rem; /* Added slight margin for extra spacing */
-}
-
-.items-table button:hover {
-  background: rgba(212, 175, 55, 0.3);
-  border-color: #f9d423;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .items-table .action-buttons {
-    gap: 0.5rem; /* Slightly less gap on mobile */
-    flex-direction: row; /* Keep horizontal on mobile */
-    flex-wrap: wrap;
-  }
-  
-  .items-table button {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.8rem;
-    margin: 0; /* Remove margin on mobile */
-  }
+    background: rgba(212, 175, 55, 0.3); /* Darker gold background on hover */
+    border-color: #f9d423; /* Brighter gold border on hover */
 }
 
 /* ──────────────────────────────────────────────────────────────────────────── */
 /* D) ITEM DETAILS - Luxury Card                                                */
 /* ──────────────────────────────────────────────────────────────────────────── */
 .item-details-card {
-  margin-top: 2rem;
-  padding: 2rem;
-  background: rgba(30, 30, 30, 0.7);
-  border-radius: 8px;
-  border-left: 4px solid #d4af37;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+    /*
+     * Responsive margin-top:
+     * - Minimum: 1.5rem
+     * - Preferred: 3vw
+     * - Maximum: 2rem
+     */
+    margin-top: clamp(1.5rem, 3vw, 2rem);
+    /*
+     * Responsive padding:
+     * - Minimum: 1.5rem
+     * - Preferred: 3vw
+     * - Maximum: 2rem
+     */
+    padding: clamp(1.5rem, 3vw, 2rem);
+    background: rgba(30, 30, 30, 0.7); /* Semi-transparent dark background */
+    border-radius: 8px; /* Rounded corners */
+    border-left: 4px solid #d4af37; /* Prominent gold left border */
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2); /* Soft shadow */
+    box-sizing: border-box;
 }
 
+/* Item details card heading */
 .item-details-card h3 {
-  color: #f9d423;
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.8rem;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    color: #f9d423; /* Bright gold text */
+    margin-top: 0;
+    /*
+     * Responsive margin-bottom:
+     * - Minimum: 1rem
+     * - Preferred: 2vw
+     * - Maximum: 1.5rem
+     */
+    margin-bottom: clamp(1rem, 2vw, 1.5rem);
+    /*
+     * Responsive padding-bottom:
+     * - Minimum: 0.5rem
+     * - Preferred: 1vw
+     * - Maximum: 0.8rem
+     */
+    padding-bottom: clamp(0.5rem, 1vw, 0.8rem);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3); /* Subtle gold bottom border */
+    /*
+     * Responsive font-size:
+     * - Minimum: 1.2rem
+     * - Preferred: 2.5vw
+     * - Maximum: 1.5rem
+     */
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
 }
 
+/* Paragraph text within item details card */
 .item-details-card p {
-  margin: 0.8rem 0;
-  line-height: 1.6;
-  color: #e0e0e0;
+    /*
+     * Responsive margin:
+     * - Vertical: clamp(0.6rem, 1.5vw, 0.8rem)
+     * - Horizontal: 0
+     */
+    margin: clamp(0.6rem, 1.5vw, 0.8rem) 0;
+    line-height: 1.6; /* Line height for readability */
+    color: #e0e0e0; /* Light text color */
+    /*
+     * Responsive font-size:
+     * - Minimum: 0.85rem
+     * - Preferred: 1.8vw
+     * - Maximum: 1rem
+     */
+    font-size: clamp(0.85rem, 1.8vw, 1rem);
 }
 
+/* Strong text (labels/keys) within item details card */
 .item-details-card strong {
-  color: #f9d423;
-  min-width: 150px;
-  display: inline-block;
+    color: #f9d423; /* Bright gold color */
+    /*
+     * Responsive min-width for strong tag:
+     * - Minimum: 100px
+     * - Preferred: 15vw
+     * - Maximum: 150px
+     */
+    min-width: clamp(100px, 15vw, 150px);
+    display: inline-block; /* Allows min-width to apply */
 }
 
+/* Button within item details card */
 .item-details-card button {
-  margin-top: 1rem;
-  padding: 0.6rem 1.2rem;
-  background: rgba(212, 175, 55, 0.2);
-  color: #f9d423;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+    /*
+     * Responsive margin-top:
+     * - Minimum: 0.8rem
+     * - Preferred: 2vw
+     * - Maximum: 1rem
+     */
+    margin-top: clamp(0.8rem, 2vw, 1rem);
+    /*
+     * Responsive padding:
+     * - Vertical: clamp(0.5rem, 1vw, 0.6rem)
+     * - Horizontal: clamp(1rem, 2vw, 1.2rem)
+     */
+    padding: clamp(0.5rem, 1vw, 0.6rem) clamp(1rem, 2vw, 1.2rem);
+    background: rgba(212, 175, 55, 0.2); /* Gold-tinted background */
+    color: #f9d423; /* Bright gold text */
+    border: 1px solid rgba(212, 175, 55, 0.3); /* Subtle gold border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: all 0.2s ease; /* Smooth transition */
+    /*
+     * Responsive font-size:
+     * - Minimum: 0.8rem
+     * - Preferred: 1.8vw
+     * - Maximum: 0.9rem
+     */
+    font-size: clamp(0.8rem, 1.8vw, 0.9rem);
+    box-sizing: border-box;
 }
 
 .item-details-card button:hover {
-  background: rgba(212, 175, 55, 0.3);
-  border-color: #f9d423;
+    background: rgba(212, 175, 55, 0.3); /* Darker gold on hover */
+    border-color: #f9d423; /* Brighter gold border on hover */
 }
 
 /* ──────────────────────────────────────────────────────────────────────────── */
 /* E) MODALS - Luxury Dark Theme                                                */
 /* ──────────────────────────────────────────────────────────────────────────── */
 .items-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+    position: fixed; /* Fixed to the viewport */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8); /* Dark, semi-transparent overlay */
+    display: flex; /* Enables Flexbox for centering modal */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    z-index: 1000; /* Ensures modal is on top */
 }
 
 .items-modal {
-  background: rgba(40, 40, 40, 0.95);
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
-  width: 90%;
-  max-width: 600px;
-  max-height: 80vh;
-  overflow-y: auto;
-  border: 1px solid rgba(212, 175, 55, 0.3);
+    background: rgba(40, 40, 40, 0.95); /* Dark, near-opaque background */
+    /*
+     * Responsive padding:
+     * - Minimum: 1.5rem
+     * - Preferred: 4vw
+     * - Maximum: 2rem
+     */
+    padding: clamp(1.5rem, 4vw, 2rem);
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5); /* Prominent shadow */
+    /*
+     * Responsive width:
+     * - Minimum: 280px (ensures modal isn't too small on mobiles)
+     * - Preferred: 90vw (takes 90% of viewport width)
+     * - Maximum: 600px (caps width on larger screens)
+     */
+    width: clamp(280px, 90vw, 600px);
+    /*
+     * Responsive max-height:
+     * - Minimum: 50vh (ensures it's not too short)
+     * - Preferred: 80vh (takes 80% of viewport height)
+     * - Maximum: 80vh (caps height)
+     */
+    max-height: clamp(50vh, 80vh, 80vh); /* Ensures it fits within typical screen heights */
+    overflow-y: auto; /* Enables vertical scrolling if content overflows */
+    border: 1px solid rgba(212, 175, 55, 0.3); /* Subtle gold border */
+    box-sizing: border-box;
 }
 
+/* Modal heading */
 .items-modal h3 {
-  color: #f9d423;
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  text-align: center;
+    color: #f9d423; /* Bright gold text */
+    margin-top: 0;
+    /*
+     * Responsive margin-bottom:
+     * - Minimum: 1rem
+     * - Preferred: 2.5vw
+     * - Maximum: 1.5rem
+     */
+    margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
+    text-align: center; /* Center align text */
+    /*
+     * Responsive font-size:
+     * - Minimum: 1.3rem
+     * - Preferred: 3vw
+     * - Maximum: 1.6rem
+     */
+    font-size: clamp(1.3rem, 3vw, 1.6rem);
 }
 
+/* Modal labels */
 .items-modal label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #f5f5f5;
+    display: block; /* Makes labels block-level for proper stacking */
+    /*
+     * Responsive margin-bottom:
+     * - Minimum: 0.4rem
+     * - Preferred: 1vw
+     * - Maximum: 0.5rem
+     */
+    margin-bottom: clamp(0.4rem, 1vw, 0.5rem);
+    font-weight: 500; /* Medium font weight */
+    color: #f5f5f5; /* Light text color */
+    /*
+     * Responsive font-size:
+     * - Minimum: 0.85rem
+     * - Preferred: 1.8vw
+     * - Maximum: 0.95rem
+     */
+    font-size: clamp(0.85rem, 1.8vw, 0.95rem);
 }
 
+/* Modal input fields, selects, and textareas */
 .items-modal input,
 .items-modal select,
 .items-modal textarea {
-  width: 100%;
-  padding: 0.8rem 1rem;
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid #555;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  color: #e0e0e0;
-  margin-bottom: 1rem;
+    width: 100%; /* Takes full width of parent */
+    /*
+     * Responsive padding:
+     * - Vertical: clamp(0.6rem, 1.5vw, 0.8rem)
+     * - Horizontal: clamp(0.8rem, 2vw, 1rem)
+     */
+    padding: clamp(0.6rem, 1.5vw, 0.8rem) clamp(0.8rem, 2vw, 1rem);
+    background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
+    border: 1px solid #555; /* Dark border */
+    border-radius: 6px; /* Rounded corners */
+    /*
+     * Responsive font-size:
+     * - Minimum: 0.9rem
+     * - Preferred: 2vw
+     * - Maximum: 1rem
+     */
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    transition: all 0.3s ease; /* Smooth transition for focus */
+    color: #e0e0e0; /* Light text color */
+    /*
+     * Responsive margin-bottom:
+     * - Minimum: 0.8rem
+     * - Preferred: 2vw
+     * - Maximum: 1rem
+     */
+    margin-bottom: clamp(0.8rem, 2vw, 1rem);
+    box-sizing: border-box;
 }
 
+/* Modal input focus state */
 .items-modal input:focus,
 .items-modal select:focus,
 .items-modal textarea:focus {
-  outline: none;
-  border-color: #d4af37;
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
-  background-color: rgba(255, 255, 255, 0.15);
+    outline: none; /* Removes default outline */
+    border-color: #d4af37; /* Gold border on focus */
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3); /* Gold glow effect */
+    background-color: rgba(255, 255, 255, 0.15); /* Slightly lighter background on focus */
 }
 
+/* Modal buttons container */
 .items-modal-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(212, 175, 55, 0.2);
+    display: flex; /* Enables Flexbox for buttons */
+    justify-content: flex-end; /* Align buttons to the right */
+    /*
+     * Responsive gap between buttons:
+     * - Minimum: 0.8rem
+     * - Preferred: 2vw
+     * - Maximum: 1rem
+     */
+    gap: clamp(0.8rem, 2vw, 1rem);
+    /*
+     * Responsive padding-top:
+     * - Minimum: 1rem
+     * - Preferred: 2.5vw
+     * - Maximum: 1.5rem
+     */
+    padding-top: clamp(1rem, 2.5vw, 1.5rem);
+    border-top: 1px solid rgba(212, 175, 55, 0.2); /* Subtle gold top border */
+    flex-wrap: wrap; /* Allows buttons to wrap on smaller screens */
 }
 
+/* Generic modal button styles */
 .items-modal-buttons button {
-  padding: 0.8rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+    /*
+     * Responsive padding:
+     * - Vertical: clamp(0.6rem, 1.5vw, 0.8rem)
+     * - Horizontal: clamp(1rem, 2.5vw, 1.5rem)
+     */
+    padding: clamp(0.6rem, 1.5vw, 0.8rem) clamp(1rem, 2.5vw, 1.5rem);
+    border-radius: 6px; /* Rounded corners */
+    font-weight: 600; /* Semi-bold text */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: all 0.2s ease; /* Smooth transition */
+    /*
+     * Responsive font-size:
+     * - Minimum: 0.85rem
+     * - Preferred: 1.8vw
+     * - Maximum: 0.95rem
+     */
+    font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+    box-sizing: border-box;
 }
 
+/* Primary modal button (e.g., Save/Add) */
 .items-modal-buttons button:first-child {
-  background: linear-gradient(135deg, #d4af37, #f9d423);
-  color: #222;
-  border: none;
+    background: linear-gradient(135deg, #d4af37, #f9d423); /* Gold gradient */
+    color: #222; /* Dark text */
+    border: none; /* No border */
 }
 
 .items-modal-buttons button:first-child:hover {
-  background: linear-gradient(135deg, #c19e34, #e8c41a);
+    background: linear-gradient(135deg, #c19e34, #e8c41a); /* Darker gold on hover */
 }
 
+/* Secondary modal button (e.g., Cancel) */
 .items-modal-buttons button:last-child {
-  background: transparent;
-  color: #f9d423;
-  border: 1px solid rgba(212, 175, 55, 0.3);
+    background: transparent; /* Transparent background */
+    color: #f9d423; /* Gold text */
+    border: 1px solid rgba(212, 175, 55, 0.3); /* Subtle gold border */
 }
 
 .items-modal-buttons button:last-child:hover {
-  border-color: #f9d423;
-  background: rgba(212, 175, 55, 0.1);
+    border-color: #f9d423; /* Brighter gold border on hover */
+    background: rgba(212, 175, 55, 0.1); /* Subtle gold background on hover */
 }
 
 /* ──────────────────────────────────────────────────────────────────────────── */
-/* F) RESPONSIVE ADJUSTMENTS                                                    */
+/* F) RESPONSIVE ADJUSTMENTS (Specific Breakpoints)                             */
 /* ──────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .items-manager-container {
-    padding: 1.5rem;
-  }
-  
-  .items-action-buttons button {
-    min-width: 100%;
-  }
-  
-  .items-table th,
-  .items-table td {
-    padding: 0.8rem;
-    font-size: 0.9rem;
-  }
-  
-  /* Stack buttons vertically on small screens */
-  .items-table .action-buttons {
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-  
-  .items-modal {
-    width: 95%;
-    padding: 1.5rem;
-  }
-  
-  .items-modal-buttons {
-    flex-direction: column;
-  }
-  
-  .items-modal-buttons button {
-    width: 100%;
-  }
+    .items-manager-container {
+        padding: clamp(1rem, 3vw, 1.5rem); /* Slightly reduced padding on tablets */
+    }
+
+    /* Action buttons are already handled by flex-wrap, but specific min-width for full-width */
+    .items-action-buttons button {
+        min-width: clamp(100px, 90%, 200px); /* Adjust to take more width on smaller screens */
+    }
+
+    .items-table th,
+    .items-table td {
+        padding: clamp(0.5rem, 1.5vw, 0.8rem); /* More compact padding for table cells */
+        font-size: clamp(0.75rem, 1.8vw, 0.9rem); /* Adjust font size for readability */
+    }
+
+    /* Stack table action buttons vertically on small screens for better touch targets */
+    .items-table .action-buttons {
+        flex-direction: column; /* Stack buttons vertically */
+        gap: clamp(0.2rem, 0.8vw, 0.5rem); /* Smaller gap when stacked */
+        /* Ensure buttons within action-buttons are full width */
+        width: 100%;
+    }
+
+    .items-table .action-buttons button {
+        width: 100%; /* Make individual action buttons full width when stacked */
+        margin: 0; /* Remove any external margin as gap handles spacing */
+        padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.6rem, 1.5vw, 0.8rem); /* Adjusted padding */
+        font-size: clamp(0.7rem, 1.6vw, 0.8rem); /* Adjusted font size */
+    }
+
+    .items-modal {
+        width: clamp(90vw, 95%, 95vw); /* Ensure modal takes almost full width on mobiles */
+        padding: clamp(1rem, 3vw, 1.5rem); /* Reduced modal padding */
+    }
+
+    .items-modal-buttons {
+        flex-direction: column; /* Stack modal buttons vertically */
+        gap: clamp(0.5rem, 1.5vw, 1rem); /* Consistent gap when stacked */
+    }
+
+    .items-modal-buttons button {
+        width: 100%; /* Make modal buttons full width when stacked */
+    }
 }
 
 /* Animation for smooth transitions */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
+/* Apply fade-in animation to specific elements when they appear */
 .items-table-container,
 .item-details-card,
 .items-modal {
-  animation: fadeIn 0.3s ease-out;
+    animation: fadeIn 0.3s ease-out;
 }

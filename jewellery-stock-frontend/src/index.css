@@ -1,29 +1,74 @@
+/*
+ * index.css
+ * This file contains global styles for the application, including body defaults
+ * and the main app container's responsive layout.
+ */
+
+/* Global body styles for a consistent background and typography */
 body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: 
-    url('../../JEWELLERY-PHOTO.webp') no-repeat center center fixed;
-  background-size: cover;
-  min-height: 100vh;
-  color: #e0e0e0;
+    margin: 0;
+    padding: 0;
+    /* Using 'Inter' for modern UI feel, with sans-serif as fallback */
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /*
+     * Sets the background image, ensures it covers the entire viewport,
+     * is centered, and remains fixed during scrolling.
+     * The path assumes JEWELLERY-PHOTO.webp is two levels up from the CSS file.
+     */
+    background: url('../../JEWELLERY-PHOTO.webp') no-repeat center center fixed;
+    background-size: cover; /* Ensures the background image covers the entire element */
+    min-height: 100vh; /* Guarantees the body takes at least the full viewport height */
+    color: #e0e0e0; /* Light text color for contrast against a dark background */
+    /* Smooth scrolling for anchor links (if any) */
+    scroll-behavior: smooth;
 }
 
+/* Styles for the main application container */
 .app-container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  box-sizing: border-box;
-  min-height: 100vh;
-  /* Remove these two lines to eliminate the white blurry effect */
-  /* background-color: rgba(255, 255, 255, 0.15); */
-  /* backdrop-filter: blur(10px); */
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  z-index: 1;
-  border-left: 1px solid rgba(212, 175, 55, 0.3);
-  border-right: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 12px;
+    width: 100%; /* Takes full width available */
+    max-width: 1200px; /* Limits the maximum width for larger screens */
+    margin: 0 auto; /* Centers the container horizontally */
+    /*
+     * Responsive padding using clamp():
+     * - Minimum padding: 15px (for very small screens)
+     * - Preferred padding: 4vw (scales with viewport width)
+     * - Maximum padding: 20px (for larger screens)
+     * This ensures padding is never too small or too large.
+     */
+    padding: clamp(15px, 4vw, 20px);
+    box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+    min-height: 100vh; /* Ensures the container also spans the full viewport height */
+    /*
+     * The following lines were commented out in your original code,
+     * suggesting you intentionally removed a blur effect. Keeping them commented out.
+     * background-color: rgba(255, 255, 255, 0.15);
+     * backdrop-filter: blur(10px);
+     */
+    display: flex; /* Enables Flexbox for layout control */
+    flex-direction: column; /* Stacks children vertically */
+    position: relative; /* Allows for z-index and positioning of children */
+    z-index: 1; /* Ensures content is above any background layers */
+    /* Aesthetic borders with a subtle gold-like color */
+    border-left: 1px solid rgba(212, 175, 55, 0.3);
+    border-right: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 12px; /* Rounded corners for the container */
 }
+
+/*
+ * Media queries can be added here later for more specific layout adjustments
+ * at different screen sizes if needed, though clamp() and flexbox handle
+ * much of the basic responsiveness.
+ */
+/*
+@media (max-width: 768px) {
+    .app-container {
+        // Specific adjustments for tablets and smaller laptops if needed
+    }
+}
+
+@media (max-width: 480px) {
+    .app-container {
+        // Specific adjustments for mobile phones if needed
+    }
+}
+*/

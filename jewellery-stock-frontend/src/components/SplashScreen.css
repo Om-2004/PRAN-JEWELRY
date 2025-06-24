@@ -1,51 +1,218 @@
+/*
+ * SplashScreen.css
+ * This file defines the styles for the application's splash screen,
+ * ensuring it is visually appealing and responsive on all devices.
+ */
+
+/* The full-screen overlay for the splash screen */
 .splash-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+    position: fixed; /* Stays in place relative to the viewport */
+    top: 0;
+    left: 0;
+    width: 100%; /* Takes full width of the viewport */
+    height: 100%; /* Takes full height of the viewport */
+    /* Radial gradient background from a dark grey to black */
+    background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
+    display: flex; /* Use flexbox for centering content */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    z-index: 1000; /* Ensures the splash screen is on top of other content */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
+/* Container for the splash screen content (e.g., logo) */
 .splash-content {
-  width: 80vw;
-  height: 80vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
+    /*
+     * Responsive width:
+     * - Minimum: 250px (prevents content from becoming too small)
+     * - Preferred: 80vw (scales with 80% of viewport width)
+     * - Maximum: 600px (caps the size on very large screens)
+     */
+    width: clamp(250px, 80vw, 600px);
+    /*
+     * Responsive height, maintaining aspect ratio relative to width:
+     * - Minimum: 250px (matches min-width)
+     * - Preferred: 80vh (scales with 80% of viewport height)
+     * - Maximum: 600px (matches max-width)
+     */
+    height: clamp(250px, 80vh, 600px); /* Adjust height to match width's clamp for square aspect */
+    display: flex; /* Use flexbox for centering content within this container */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    position: relative; /* Allows for absolute positioning of children if needed */
+    box-sizing: border-box;
 }
 
+/* Styles for the logo image within the splash screen */
 .splash-logo {
-  width: 300px; /* Starts at visible size */
-  height: 300px;
-  object-fit: contain;
-  animation: 
-    goldenZoom 5s cubic-bezier(0.4, 0, 0.2, 1) forwards,
-    textGlow 2s ease-in-out infinite alternate;
-  filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.5));
+    /*
+     * Responsive size for the logo, maintaining aspect ratio.
+     * Uses min() to pick the smaller of two values:
+     * 1. 50vw: 50% of viewport width
+     * 2. 50vh: 50% of viewport height
+     * This ensures the logo scales down for narrow screens (mobile portrait)
+     * and also for short screens (mobile landscape or small monitors).
+     * The maximum size is capped at 300px, which was your original fixed size.
+     */
+    width: min(50vw, 50vh, 300px);
+    height: min(50vw, 50vh, 300px); /* Keep height same as width to maintain aspect ratio */
+    object-fit: contain; /* Ensures the entire image fits within its bounds without cropping */
+    /* Animations for golden zoom and text glow effects */
+    animation:
+        goldenZoom 5s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+        textGlow 2s ease-in-out infinite alternate;
+    /* Initial drop shadow effect for the logo */
+    filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.5));
+    box-sizing: border-box;
 }
 
+/* Keyframe animation for the logo zoom effect */
 @keyframes goldenZoom {
-  0% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  20% {
-    opacity: 1;
-    filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.8));
-  }
-  100% {
-    transform: scale(2.5); /* Grows 2.5x from initial size */
-    filter: drop-shadow(0 0 50px rgba(212, 175, 55, 1));
-  }
+    0% {
+        transform: scale(1); /* Start at original size */
+        opacity: 0.8; /* Start slightly transparent */
+    }
+    20% {
+        opacity: 1; /* Fade in to full opacity */
+        filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.8)); /* Enhance glow */
+    }
+    100% {
+        /*
+         * Scale relative to its initial responsive size.
+         * The 2.5 multiplier will apply to the calculated min(50vw, 50vh, 300px) size.
+         */
+        transform: scale(2.5);
+        filter: drop-shadow(0 0 50px rgba(212, 175, 55, 1)); /* Max glow */
+    }
 }
 
+/* Keyframe animation for the text glow effect */
 @keyframes textGlow {
-  from { filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.5)); }
-  to { filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.9)); }
+    from {
+        filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.5)); /* Initial glow state */
+    }
+    to {
+        filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.9)); /* Pulsating glow state */
+    }
 }
+
+/*
+ * Media queries can be added here for specific fine-tuning,
+ * though clamp() and min() handle much of the basic responsiveness for the splash.
+ */
+/*
+@media (max-width: 480px) {
+    .splash-logo {
+        // Potentially slightly different min/max values for very small phones
+    }
+}
+*/
+/*
+ * SplashScreen.css
+ * This file defines the styles for the application's splash screen,
+ * ensuring it is visually appealing and responsive on all devices.
+ */
+
+/* The full-screen overlay for the splash screen */
+.splash-overlay {
+    position: fixed; /* Stays in place relative to the viewport */
+    top: 0;
+    left: 0;
+    width: 100%; /* Takes full width of the viewport */
+    height: 100%; /* Takes full height of the viewport */
+    /* Radial gradient background from a dark grey to black */
+    background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
+    display: flex; /* Use flexbox for centering content */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    z-index: 1000; /* Ensures the splash screen is on top of other content */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+/* Container for the splash screen content (e.g., logo) */
+.splash-content {
+    /*
+     * Responsive width:
+     * - Minimum: 250px (prevents content from becoming too small)
+     * - Preferred: 80vw (scales with 80% of viewport width)
+     * - Maximum: 600px (caps the size on very large screens)
+     */
+    width: clamp(250px, 80vw, 600px);
+    /*
+     * Responsive height, maintaining aspect ratio relative to width:
+     * - Minimum: 250px (matches min-width)
+     * - Preferred: 80vh (scales with 80% of viewport height)
+     * - Maximum: 600px (matches max-width)
+     */
+    height: clamp(250px, 80vh, 600px); /* Adjust height to match width's clamp for square aspect */
+    display: flex; /* Use flexbox for centering content within this container */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    position: relative; /* Allows for absolute positioning of children if needed */
+    box-sizing: border-box;
+}
+
+/* Styles for the logo image within the splash screen */
+.splash-logo {
+    /*
+     * Responsive size for the logo, maintaining aspect ratio.
+     * Uses min() to pick the smaller of two values:
+     * 1. 50vw: 50% of viewport width
+     * 2. 50vh: 50% of viewport height
+     * This ensures the logo scales down for narrow screens (mobile portrait)
+     * and also for short screens (mobile landscape or small monitors).
+     * The maximum size is capped at 300px, which was your original fixed size.
+     */
+    width: min(50vw, 50vh, 300px);
+    height: min(50vw, 50vh, 300px); /* Keep height same as width to maintain aspect ratio */
+    object-fit: contain; /* Ensures the entire image fits within its bounds without cropping */
+    /* Animations for golden zoom and text glow effects */
+    animation:
+        goldenZoom 5s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+        textGlow 2s ease-in-out infinite alternate;
+    /* Initial drop shadow effect for the logo */
+    filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.5));
+    box-sizing: border-box;
+}
+
+/* Keyframe animation for the logo zoom effect */
+@keyframes goldenZoom {
+    0% {
+        transform: scale(1); /* Start at original size */
+        opacity: 0.8; /* Start slightly transparent */
+    }
+    20% {
+        opacity: 1; /* Fade in to full opacity */
+        filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.8)); /* Enhance glow */
+    }
+    100% {
+        /*
+         * Scale relative to its initial responsive size.
+         * The 2.5 multiplier will apply to the calculated min(50vw, 50vh, 300px) size.
+         */
+        transform: scale(2.5);
+        filter: drop-shadow(0 0 50px rgba(212, 175, 55, 1)); /* Max glow */
+    }
+}
+
+/* Keyframe animation for the text glow effect */
+@keyframes textGlow {
+    from {
+        filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.5)); /* Initial glow state */
+    }
+    to {
+        filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.9)); /* Pulsating glow state */
+    }
+}
+
+/*
+ * Media queries can be added here for specific fine-tuning,
+ * though clamp() and min() handle much of the basic responsiveness for the splash.
+ */
+/*
+@media (max-width: 480px) {
+    .splash-logo {
+        // Potentially slightly different min/max values for very small phones
+    }
+}
+*/

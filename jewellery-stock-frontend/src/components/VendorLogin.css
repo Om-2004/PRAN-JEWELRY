@@ -1,131 +1,250 @@
-/* Shared styles for VendorLogin.css and Register.css */
+/*
+ * auth-forms.css (Suggested shared file for VendorLogin.css and Register.css)
+ * This file contains responsive styles for the main authentication form containers
+ * (Login and Register), their headings, input fields, labels, and buttons.
+ * It uses fluid units and clamp() to ensure adaptability across all screen sizes.
+ */
 
-/* Main Container - INCREASED WIDTH AND PADDING */
-.login-container, /* For VendorLogin.css */
-.register-container { /* For Register.css */
-    max-width: 700px; /* Increased from 500px/600px - Adjust as desired, 700px is a good balance */
-    margin: 3rem auto; /* More vertical margin */
-    padding: 3rem; /* Increased internal padding */
-    background-color: rgba(30, 30, 30, 0.95); /* Slightly darker/more opaque background */
-    border-radius: 15px; /* Slightly more rounded corners */
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6); /* Stronger, more luxurious shadow */
+/* Main Container for Login and Register Forms */
+.login-container, /* Styles applied to the login form's main wrapper */
+.register-container { /* Styles applied to the registration form's main wrapper */
+    /*
+     * Responsive max-width for the form card:
+     * - Minimum: 300px (prevents form from becoming too narrow on very small mobile screens)
+     * - Preferred: 90vw (takes 90% of the viewport width, allowing fluid scaling)
+     * - Maximum: 700px (caps the width on large screens for readability and aesthetics)
+     */
+    max-width: clamp(300px, 90vw, 700px);
+    /*
+     * Responsive vertical margin:
+     * - Minimum: 1.5rem (ensures some space on small screens)
+     * - Preferred: 5vh (scales with viewport height, aiding vertical positioning)
+     * - Maximum: 3rem (limits excessive vertical margin on large screens)
+     */
+    margin: clamp(1.5rem, 5vh, 3rem) auto; /* Centers horizontally, fluid vertical spacing */
+    /*
+     * Responsive internal padding:
+     * - Minimum: 1.5rem (ensures content isn't squashed on small screens)
+     * - Preferred: 6vw (scales with viewport width for fluid internal spacing)
+     * - Maximum: 3rem (prevents overly large padding on wide screens)
+     */
+    padding: clamp(1.5rem, 6vw, 3rem);
+    background-color: rgba(30, 30, 30, 0.95); /* Slightly darker, semi-opaque background */
+    border-radius: 15px; /* Rounded corners for the container */
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6); /* Prominent shadow for depth */
     border: 1px solid rgba(212, 175, 55, 0.3); /* Subtle gold border */
-    color: #e0e0e0;
-    /* Adding flexbox to the container for better overall element distribution */
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Center items horizontally within the container */
-    gap: 1.5rem; /* Consistent spacing between major sections like heading, message, form */
+    color: #e0e0e0; /* Light text color for contrast */
+    display: flex; /* Enables Flexbox for layout control of direct children */
+    flex-direction: column; /* Stacks children vertically */
+    align-items: center; /* Centers items horizontally within the container */
+    /*
+     * Responsive gap between major sections (heading, form, message):
+     * - Minimum: 1rem (for small screens)
+     * - Preferred: 4vw (scales with viewport width)
+     * - Maximum: 1.5rem (for large screens)
+     */
+    gap: clamp(1rem, 4vw, 1.5rem);
+    box-sizing: border-box; /* Ensures padding and border are included in element's total size */
 }
 
-/* Heading - MORE PROMINENT */
+/* Heading Styles for Login and Register Forms */
 .login-container h2,
 .register-container h2 {
-    color: #f9d423;
-    text-align: center;
-    margin-bottom: 0rem; /* Adjusted, as gap will handle spacing */
-    font-size: 2.5rem; /* Larger heading */
-    position: relative;
-    padding-bottom: 0.8rem;
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); /* More depth */
+    color: #f9d423; /* Bright gold color for headings */
+    text-align: center; /* Center align heading text */
+    margin-bottom: 0; /* Gap property on parent handles spacing */
+    /*
+     * Responsive font size for headings:
+     * - Minimum: 1.8rem (readable on small mobiles)
+     * - Preferred: 5vw (scales fluidly with viewport width)
+     * - Maximum: 2.5rem (caps size on larger screens)
+     */
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    position: relative; /* For positioning the ::after pseudo-element */
+    padding-bottom: 0.8rem; /* Space for the underline */
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); /* Text shadow for depth */
 }
 
+/* Underline Effect for Headings */
 .login-container h2::after,
 .register-container h2::after {
-    content: '';
-    display: block;
-    width: 150px; /* Wider underline for heading */
-    height: 4px; /* Thicker underline */
-    background: linear-gradient(90deg, transparent, #f9d423, transparent);
-    margin: 1rem auto 0;
+    content: ''; /* Required for pseudo-element */
+    display: block; /* Makes it a block-level element */
+    /*
+     * Responsive width for the underline:
+     * - Minimum: 80px (ensures visibility on smallest screens)
+     * - Preferred: 25vw (scales with viewport width)
+     * - Maximum: 150px (caps width on larger screens)
+     */
+    width: clamp(80px, 25vw, 150px);
+    height: 4px; /* Thickness of the underline */
+    background: linear-gradient(90deg, transparent, #f9d423, transparent); /* Gold gradient */
+    /*
+     * Responsive top margin for the underline:
+     * - Minimum: 0.8rem
+     * - Preferred: 2vw
+     * - Maximum: 1rem
+     */
+    margin: clamp(0.8rem, 2vw, 1rem) auto 0; /* Responsive top margin, horizontally centered */
 }
 
-/* Form Container - USE FLEXBOX FOR BETTER SPACING */
-/* Assuming your form has class `login-form` or `register-form` */
+/* Form Container within the main .login-container / .register-container */
 .login-form,
 .register-form {
-    width: 100%; /* Ensure the form itself fills its container */
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem; /* Spacing between form groups */
-    max-width: 500px; /* Limit the form elements width within the container if needed */
-    /* If you find inputs are still too wide after increasing max-width of container, adjust this max-width */
+    width: 100%; /* Ensures the form itself takes full width of its parent */
+    display: flex; /* Enables Flexbox for form elements */
+    flex-direction: column; /* Stacks form groups vertically */
+    /*
+     * Responsive gap between form groups (e.g., input + label):
+     * - Minimum: 1rem
+     * - Preferred: 4vw
+     * - Maximum: 1.5rem
+     */
+    gap: clamp(1rem, 4vw, 1.5rem);
+    /*
+     * Responsive max-width for the form content (inputs, buttons):
+     * - Minimum: 280px (prevents form elements from being too narrow)
+     * - Preferred: 90% (scales relative to its parent .login-container/.register-container)
+     * - Maximum: 500px (prevents form elements from becoming excessively wide)
+     */
+    max-width: clamp(280px, 90%, 500px);
 }
 
-/* Form Group Divs - Remove individual margins as gap handles it */
+/* Form Group Divs (wrappers around labels and inputs) */
 .login-form > div,
 .register-form > div {
-    margin-bottom: 0; /* Remove old margin to let gap control spacing */
-    width: 100%; /* Ensure each input div takes full available width */
-    text-align: left; /* Align labels/inputs within their group */
+    margin-bottom: 0; /* Remove old margin as parent's gap controls spacing */
+    width: 100%; /* Ensures each input group takes full available width */
+    text-align: left; /* Aligns labels and inputs to the left within their group */
 }
 
-
-/* Labels - BOLDER AND SLIGHTLY LARGER */
+/* Styles for Labels */
 .login-form label,
 .register-form label {
-    display: block;
-    margin-bottom: 0.6rem; /* Slightly more space for label */
-    font-weight: 600; /* Bolder */
+    display: block; /* Makes labels block-level for proper stacking */
+    /*
+     * Responsive margin-bottom for labels:
+     * - Minimum: 0.4rem
+     * - Preferred: 1.5vw
+     * - Maximum: 0.6rem
+     */
+    margin-bottom: clamp(0.4rem, 1.5vw, 0.6rem);
+    font-weight: 600; /* Bolder text for labels */
     color: #f5f5f5; /* Slightly lighter text for labels */
-    font-size: 1.05rem; /* Slightly larger font */
+    /*
+     * Responsive font size for labels:
+     * - Minimum: 0.9rem
+     * - Preferred: 2.5vw
+     * - Maximum: 1.05rem
+     */
+    font-size: clamp(0.9rem, 2.5vw, 1.05rem);
 }
 
-/* Inputs - REFINED PADDING, BORDER, AND BACKGROUND */
+/* Styles for Input Fields */
 .login-form input,
 .register-form input {
-    width: 100%; /* Important: Ensure inputs fill their parent div */
-    padding: 14px 15px; /* More padding for better aesthetics */
-    border: 1px solid rgba(212, 175, 55, 0.4); /* Clearer gold-tinted border */
-    border-radius: 8px; /* Slightly more rounded */
-    font-size: 1.1rem; /* Larger font size */
-    background-color: rgba(60, 60, 60, 0.9); /* Slightly lighter dark background */
-    color: #e0e0e0;
-    transition: all 0.3s ease;
-    box-sizing: border-box; /* Essential to prevent padding from expanding width */
+    width: 100%; /* Inputs take full width of their parent div */
+    /*
+     * Responsive padding for inputs:
+     * - Vertical: clamp(10px, 3vw, 14px)
+     * - Horizontal: clamp(12px, 4vw, 15px)
+     */
+    padding: clamp(10px, 3vw, 14px) clamp(12px, 4vw, 15px);
+    border: 1px solid rgba(212, 175, 55, 0.4); /* Gold-tinted border */
+    border-radius: 8px; /* Rounded corners for inputs */
+    /*
+     * Responsive font size for input text:
+     * - Minimum: 1rem
+     * - Preferred: 2.5vw
+     * - Maximum: 1.1rem
+     */
+    font-size: clamp(1rem, 2.5vw, 1.1rem);
+    background-color: rgba(60, 60, 60, 0.9); /* Dark background */
+    color: #e0e0e0; /* Light text color */
+    transition: all 0.3s ease; /* Smooth transition for focus effect */
+    box-sizing: border-box; /* Essential: includes padding/border in total width */
 }
 
-/* Input Focus State - ENHANCED GLOW */
+/* Input Focus State */
 .login-form input:focus,
 .register-form input:focus {
-    outline: none;
-    border-color: #f9d423; /* Brighter gold on focus */
+    outline: none; /* Removes default outline */
+    border-color: #f9d423; /* Brighter gold border on focus */
     box-shadow: 0 0 0 4px rgba(249, 212, 35, 0.3); /* Prominent glow effect */
-    background-color: rgba(70, 70, 70, 0.9); /* Even lighter background on focus */
+    background-color: rgba(70, 70, 70, 0.9); /* Slightly lighter background on focus */
 }
 
-/* Button Styling - MORE SUBSTANTIAL */
+/* Button Styling */
 .login-form button,
 .register-form button {
-    width: 100%;
-    max-width: 500px; /* Ensure button doesn't exceed form element width */
-    padding: 1.2rem 2rem; /* Larger padding for button */
-    margin-top: 1rem; /* Space above the button */
+    width: 100%; /* Buttons take full width of their parent */
+    /*
+     * Responsive max-width for buttons:
+     * - Minimum: 280px (ensures buttons are not too small)
+     * - Preferred: 80vw (scales with viewport width)
+     * - Maximum: 500px (prevents overly wide buttons)
+     */
+    max-width: clamp(280px, 80vw, 500px); /* Ensure button doesn't exceed form element width */
+    /*
+     * Responsive padding for buttons:
+     * - Vertical: clamp(1rem, 3vw, 1.2rem)
+     * - Horizontal: clamp(1.5rem, 5vw, 2rem)
+     */
+    padding: clamp(1rem, 3vw, 1.2rem) clamp(1.5rem, 5vw, 2rem);
+    /*
+     * Responsive margin-top for buttons:
+     * - Minimum: 0.8rem
+     * - Preferred: 2vw
+     * - Maximum: 1rem
+     */
+    margin-top: clamp(0.8rem, 2vw, 1rem); /* Space above the button */
     background: linear-gradient(135deg, #d4af37, #f9d423); /* Gold gradient */
     color: #222; /* Dark text */
-    border: none;
-    border-radius: 8px;
-    font-size: 1.2rem; /* Larger font size */
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* More prominent shadow */
+    border: none; /* No border */
+    border-radius: 8px; /* Rounded corners */
+    /*
+     * Responsive font size for buttons:
+     * - Minimum: 1rem
+     * - Preferred: 3vw
+     * - Maximum: 1.2rem
+     */
+    font-size: clamp(1rem, 3vw, 1.2rem);
+    font-weight: bold; /* Bold text */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: all 0.3s ease; /* Smooth transition */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Prominent shadow */
+    box-sizing: border-box; /* Includes padding and border in total size */
 }
 
+/* Button Hover State */
 .login-form button:hover,
 .register-form button:hover {
-    background: linear-gradient(135deg, #c19e34, #e8c41a);
+    background: linear-gradient(135deg, #c19e34, #e8c41a); /* Darker gold gradient on hover */
     transform: translateY(-3px); /* Lift effect */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Enhanced shadow */
 }
 
-/* Message Styling (No changes needed, these look good) */
+/* Message Styling (e.g., success/error messages) */
 .message {
-    text-align: center;
-    margin: 1rem 0;
-    padding: 0.8rem;
-    border-radius: 6px;
-    font-weight: 500;
+    text-align: center; /* Center align messages */
+    /*
+     * Responsive margin for messages:
+     * - Vertical: clamp(0.8rem, 2vw, 1rem)
+     * - Horizontal: 0
+     */
+    margin: clamp(0.8rem, 2vw, 1rem) 0;
+    /*
+     * Responsive padding for messages:
+     * - Vertical: clamp(0.6rem, 1.5vw, 0.8rem)
+     * - Horizontal: clamp(0.8rem, 2vw, 1rem)
+     */
+    padding: clamp(0.6rem, 1.5vw, 0.8rem) clamp(0.8rem, 2vw, 1rem);
+    border-radius: 6px; /* Rounded corners */
+    font-weight: 500; /* Medium font weight */
+    font-size: clamp(0.85rem, 2vw, 1rem); /* Responsive font size */
+    box-sizing: border-box; /* Includes padding and border in total size */
+    width: 100%; /* Ensures message takes full width */
+    max-width: 500px; /* Limits width for readability */
 }
 
 .message.success {
@@ -140,27 +259,10 @@
     border: 1px solid rgba(244, 67, 54, 0.3);
 }
 
-/* Responsive adjustments for smaller screens */
-@media (max-width: 768px) {
-    .login-container,
-    .register-container {
-        padding: 2rem;
-        margin: 1.5rem auto;
-        max-width: 90%; /* Allow it to take more width on smaller screens */
-    }
-    
-    .login-container h2,
-    .register-container h2 {
-        font-size: 2rem; /* Adjust heading size */
-    }
-
-    .login-container h2::after,
-    .register-container h2::after {
-        width: 100px; /* Adjust underline width */
-    }
-
-    .login-form,
-    .register-form {
-        max-width: 100%; /* Allow form to stretch to container width */
-    }
-}
+/*
+ * The previous media query for (max-width: 768px) has been removed
+ * as the fluid sizing with clamp() and viewport units now handles
+ * responsive adjustments across all screen sizes more effectively.
+ * If specific, non-fluid layout changes are needed at certain breakpoints
+ * in the future, new media queries can be added here.
+ */
