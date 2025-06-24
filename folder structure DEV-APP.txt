@@ -1,0 +1,92 @@
+?? DEV-APP (Root Project Folder)
+¦
++-- ?? client (Frontend - React App)
+¦   +-- ?? node_modules
+¦   +-- ?? public
+¦   ¦   +-- favicon.ico
+¦   ¦   +-- index.html
+¦   ¦   +-- logo192.png
+¦   ¦   +-- logo512.png
+¦   ¦   +-- manifest.json
+¦   ¦   +-- robots.txt
+¦   +-- ?? src
+¦   +-- ?? actions
+¦   ¦   +-- alert.js
+¦   ¦   +-- auth.js
+¦   ¦   +-- post.js
+¦   ¦   +-- profile.js
+¦   ¦   +-- types.js
+¦   +-- ?? components
+¦   ¦   +-- ?? auth
+¦   ¦   ¦   +-- Login.js
+¦   ¦   ¦   +-- Register.js
+¦   ¦   +-- ?? dashboard
+¦   ¦   ¦   +-- Dashboard.js
+¦   ¦   ¦   +-- DashboardActions.js
+¦   ¦   ¦   +-- Education.js
+¦   ¦   ¦   +-- Experience.js
+¦   ¦   +-- ?? Layout
+¦   ¦   ¦   +-- Alert.js
+¦   ¦   ¦   +-- Landing.js
+¦   ¦   ¦   +-- Navbar.js
+¦   ¦   ¦   +-- Spinner.js
+¦   ¦   ¦   +-- spinner.gif
+¦   ¦   +-- ?? post
+¦   ¦   ¦   +-- Post.js
+¦   ¦   +-- ?? posts
+¦   ¦   ¦   +-- CommentForm.js
+¦   ¦   ¦   +-- CommentItem.js
+¦   ¦   ¦   +-- PostForm.js
+¦   ¦   ¦   +-- PostItem.js
+¦   ¦   ¦   +-- Posts.js
+¦   ¦   +-- ?? profile
+¦   ¦   ¦   +-- Profile.js
+¦   ¦   ¦   +-- ProfileAbout.js
+¦   ¦   ¦   +-- ProfileEducation.js
+¦   ¦   ¦   +-- ProfileExperience.js
+¦   ¦   ¦   +-- ProfileGitHub.js
+¦   ¦   ¦   +-- ProfileTop.js
+¦   ¦   +-- ?? profile-forms
+¦   ¦   ¦   +-- AddEducation.js
+¦   ¦   ¦   +-- AddExperience.js
+¦   ¦   ¦   +-- CreateProfile.js
+¦   ¦   ¦   +-- EditProfile.js
+¦   ¦   +-- ?? profiles
+¦   ¦   ¦   +-- ProfileItem.js
+¦   ¦   ¦   +-- Profiles.js
+¦   ¦   +-- ?? Routing
+¦   ¦   +-- PrivateRoute.js
+¦   +-- ?? utils
+¦   ¦   +-- setAuthToken.js
+¦   +-- App.css
+¦   +-- App.js
+¦   +-- index.js
+¦   +-- reportWebVitals.js
+¦   +-- setupTests.js
+¦   +-- store.js
+¦
++-- ?? config
+¦   +-- db.js
+¦   +-- default.json
+¦   +-- production.json
+¦
++-- ?? middleware
+¦   +-- auth.js
+¦
++-- ?? models
+¦   +-- Post.js
+¦   +-- Profile.js
+¦   +-- User.js
+¦
++-- ?? routes
+¦   +-- ?? api
+¦   +-- auth.js
+¦   +-- posts.js
+¦   +-- profile.js
+¦   +-- users.js
+¦
++-- ?? .env
++-- ?? .gitignore
++-- ?? index.js (Express entry point)
++-- ?? package.json (Backend)
++-- ?? package-lock.json (Backend)
