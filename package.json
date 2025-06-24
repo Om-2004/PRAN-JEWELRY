@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node backend/index.js",
     "build": "cd jewellery-stock-frontend && npm install && npm run build",
-    "heroku-postbuild": "npm run build",
+    "heroku-postbuild": "npm run build && cp -a jewellery-stock-frontend/build/. public/",
     "dev": "npm-run-all --parallel dev:*",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd jewellery-stock-frontend && npm start"

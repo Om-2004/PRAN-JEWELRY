@@ -4,6 +4,7 @@ const app = express();
 const connectDB = require('./config/db');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 
 dotenv.config();
 
@@ -24,9 +25,12 @@ app.use('/api/vendors', require('./routes/vendor'));
 app.use('/api/customers', require('./routes/customer'));
 
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "jewellery-stock-frontend/build")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "jewellery-stock-frontend/build", "index.html"));
+  // Serve static files from the 'public' directory
+  app.use(express.static(path.join(__dirname, '../public')));
+  
+  // Handle React routing
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public', 'index.html'));
   });
 }
 
