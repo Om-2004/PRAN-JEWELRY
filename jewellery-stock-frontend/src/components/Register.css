@@ -259,6 +259,42 @@
     border: 1px solid rgba(244, 67, 54, 0.3);
 }
 
+/* Container for the "Sign In" link message */
+.sign-in-link {
+    /*
+     * Responsive margin-top:
+     * - Minimum: 0.8rem
+     * - Preferred: 2vw
+     * - Maximum: 1rem
+     */
+    margin-top: clamp(0.8rem, 2vw, 1rem); /* Space above the link */
+    color: #e0e0e0; /* Matches the general text color */
+    /*
+     * Responsive font-size:
+     * - Minimum: 0.8rem
+     * - Preferred: 2vw
+     * - Maximum: 0.95rem
+     */
+    font-size: clamp(0.8rem, 2vw, 0.95rem); /* Responsive font size */
+    text-align: center; /* Center align the text */
+}
+
+/* Styling for the clickable "Sign In" text */
+.sign-in-link .login-text-link {
+    color: #f9d423; /* Bright gold color for the link */
+    font-weight: bold; /* Make the link text bold */
+    cursor: pointer; /* Indicate it's clickable */
+    text-decoration: underline; /* Standard underline for links */
+    transition: color 0.2s ease, text-decoration 0.2s ease; /* Smooth transition for hover effects */
+}
+
+/* Hover effect for the "Sign In" link */
+.sign-in-link .login-text-link:hover {
+    color: #e8c41a; /* Slightly lighter gold on hover */
+    text-decoration: none; /* Remove underline on hover for a subtle effect */
+}
+
+
 /*
  * The previous media query for (max-width: 768px) has been removed
  * as the fluid sizing with clamp() and viewport units now handles

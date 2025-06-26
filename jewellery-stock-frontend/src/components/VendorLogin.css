@@ -2,7 +2,8 @@
  * auth-forms.css (Suggested shared file for VendorLogin.css and Register.css)
  * This file contains responsive styles for the main authentication form containers
  * (Login and Register), their headings, input fields, labels, and buttons.
- * It uses fluid units and clamp() to ensure adaptability across all screen sizes.
+ * It has been updated to reflect a "royal" and "glossy" theme, aligning with
+ * the aesthetic of the Dashboard, while maintaining original element sizes.
  */
 
 /* Main Container for Login and Register Forms */
@@ -29,11 +30,15 @@
      * - Maximum: 3rem (prevents overly large padding on wide screens)
      */
     padding: clamp(1.5rem, 6vw, 3rem);
-    background-color: rgba(30, 30, 30, 0.95); /* Slightly darker, semi-opaque background */
+    /* 👇 Royal Theme Update: Darker, richer background */
+    background-color: rgba(18, 18, 18, 0.96); /* Very dark, near-black with slight transparency */
     border-radius: 15px; /* Rounded corners for the container */
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6); /* Prominent shadow for depth */
-    border: 1px solid rgba(212, 175, 55, 0.3); /* Subtle gold border */
-    color: #e0e0e0; /* Light text color for contrast */
+    /* 👇 Royal Theme Update: More prominent shadow for depth */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(212, 175, 55, 0.1); /* Deep shadow with subtle gold outline */
+    /* 👇 Royal Theme Update: Stronger gold border */
+    border: 2px solid rgba(212, 175, 55, 0.6); /* Gold border with more opacity */
+    /* 👇 Royal Theme Update: Softer gold/off-white text color */
+    color: #f0e68c; /* Dark Khaki - a softer gold */
     display: flex; /* Enables Flexbox for layout control of direct children */
     flex-direction: column; /* Stacks children vertically */
     align-items: center; /* Centers items horizontally within the container */
@@ -50,7 +55,8 @@
 /* Heading Styles for Login and Register Forms */
 .login-container h2,
 .register-container h2 {
-    color: #f9d423; /* Bright gold color for headings */
+    /* 👇 Royal Theme Update: Brighter gold color for headings */
+    color: #ffd700; /* Pure Gold color */
     text-align: center; /* Center align heading text */
     margin-bottom: 0; /* Gap property on parent handles spacing */
     /*
@@ -62,7 +68,9 @@
     font-size: clamp(1.8rem, 5vw, 2.5rem);
     position: relative; /* For positioning the ::after pseudo-element */
     padding-bottom: 0.8rem; /* Space for the underline */
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); /* Text shadow for depth */
+    /* 👇 Royal Theme Update: More pronounced text shadow for depth */
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6); /* Deeper text shadow */
+    letter-spacing: 0.5px; /* Slight letter spacing for elegance */
 }
 
 /* Underline Effect for Headings */
@@ -77,8 +85,9 @@
      * - Maximum: 150px (caps width on larger screens)
      */
     width: clamp(80px, 25vw, 150px);
-    height: 4px; /* Thickness of the underline */
-    background: linear-gradient(90deg, transparent, #f9d423, transparent); /* Gold gradient */
+    height: 4px; /* 👇 Royal Theme Update: Thicker underline */
+    /* 👇 Royal Theme Update: Brighter gold gradient */
+    background: linear-gradient(90deg, transparent, #ffd700, transparent); /* Bright gold gradient */
     /*
      * Responsive top margin for the underline:
      * - Minimum: 0.8rem
@@ -130,7 +139,8 @@
      */
     margin-bottom: clamp(0.4rem, 1.5vw, 0.6rem);
     font-weight: 600; /* Bolder text for labels */
-    color: #f5f5f5; /* Slightly lighter text for labels */
+    /* 👇 Royal Theme Update: Lighter text for labels */
+    color: #f5f5f5; /* Light grey, stands out well on dark background */
     /*
      * Responsive font size for labels:
      * - Minimum: 0.9rem
@@ -150,8 +160,9 @@
      * - Horizontal: clamp(12px, 4vw, 15px)
      */
     padding: clamp(10px, 3vw, 14px) clamp(12px, 4vw, 15px);
-    border: 1px solid rgba(212, 175, 55, 0.4); /* Gold-tinted border */
-    border-radius: 8px; /* Rounded corners for inputs */
+    /* 👇 Royal Theme Update: Gold-tinted border with more opacity */
+    border: 1px solid rgba(212, 175, 55, 0.5); /* Gold border */
+    border-radius: 8px; /* Slightly more rounded corners for inputs */
     /*
      * Responsive font size for input text:
      * - Minimum: 1rem
@@ -159,8 +170,9 @@
      * - Maximum: 1.1rem
      */
     font-size: clamp(1rem, 2.5vw, 1.1rem);
-    background-color: rgba(60, 60, 60, 0.9); /* Dark background */
-    color: #e0e0e0; /* Light text color */
+    /* 👇 Royal Theme Update: Darker background for input fields */
+    background-color: rgba(30, 30, 30, 0.9); /* Dark background, aligns with container */
+    color: #e0e0e0; /* Light text color for input values */
     transition: all 0.3s ease; /* Smooth transition for focus effect */
     box-sizing: border-box; /* Essential: includes padding/border in total width */
 }
@@ -169,9 +181,12 @@
 .login-form input:focus,
 .register-form input:focus {
     outline: none; /* Removes default outline */
-    border-color: #f9d423; /* Brighter gold border on focus */
-    box-shadow: 0 0 0 4px rgba(249, 212, 35, 0.3); /* Prominent glow effect */
-    background-color: rgba(70, 70, 70, 0.9); /* Slightly lighter background on focus */
+    /* 👇 Royal Theme Update: Brighter gold border on focus */
+    border-color: #ffd700; /* Pure Gold border on focus */
+    /* 👇 Royal Theme Update: More prominent gold glow effect */
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.4); /* Stronger gold glow */
+    /* 👇 Royal Theme Update: Slightly lighter background on focus for visual feedback */
+    background-color: rgba(40, 40, 40, 0.95); /* Subtle change to indicate focus */
 }
 
 /* Button Styling */
@@ -198,10 +213,12 @@
      * - Maximum: 1rem
      */
     margin-top: clamp(0.8rem, 2vw, 1rem); /* Space above the button */
-    background: linear-gradient(135deg, #d4af37, #f9d423); /* Gold gradient */
-    color: #222; /* Dark text */
+    /* 👇 Royal Theme Update: Richer gold gradient */
+    background: linear-gradient(135deg, #cc9900, #ffdb58); /* Deeper gold gradient */
+    /* 👇 Royal Theme Update: Darker text for contrast on gold */
+    color: #1a1a1a; /* Very dark text */
     border: none; /* No border */
-    border-radius: 8px; /* Rounded corners */
+    border-radius: 8px; /* Slightly more rounded corners */
     /*
      * Responsive font size for buttons:
      * - Minimum: 1rem
@@ -212,16 +229,20 @@
     font-weight: bold; /* Bold text */
     cursor: pointer; /* Pointer cursor on hover */
     transition: all 0.3s ease; /* Smooth transition */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Prominent shadow */
+    /* 👇 Royal Theme Update: More pronounced shadow */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); /* Enhanced shadow for depth */
     box-sizing: border-box; /* Includes padding and border in total size */
+    letter-spacing: 0.2px; /* Subtle letter spacing */
 }
 
 /* Button Hover State */
 .login-form button:hover,
 .register-form button:hover {
-    background: linear-gradient(135deg, #c19e34, #e8c41a); /* Darker gold gradient on hover */
-    transform: translateY(-3px); /* Lift effect */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Enhanced shadow */
+    /* 👇 Royal Theme Update: Darker, richer gold gradient on hover */
+    background: linear-gradient(135deg, #b38f00, #e6c200); /* Darker gold gradient on hover */
+    transform: translateY(-3px); /* More pronounced lift effect */
+    /* 👇 Royal Theme Update: Enhanced shadow on hover */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); /* Deeper shadow */
 }
 
 /* Message Styling (e.g., success/error messages) */
@@ -248,15 +269,62 @@
 }
 
 .message.success {
-    background-color: rgba(40, 167, 69, 0.2);
-    color: #4caf50;
-    border: 1px solid rgba(76, 175, 80, 0.3);
+    /* 👇 Royal Theme Update: Subdued success color, better on dark background */
+    background-color: rgba(76, 175, 80, 0.15); /* Green with more transparency */
+    color: #81c784; /* Lighter green text */
+    border: 1px solid rgba(76, 175, 80, 0.4); /* Stronger green border */
 }
 
 .message.error {
-    background-color: rgba(220, 53, 69, 0.2);
-    color: #f44336;
-    border: 1px solid rgba(244, 67, 54, 0.3);
+    /* 👇 Royal Theme Update: Subdued error color, better on dark background */
+    background-color: rgba(244, 67, 54, 0.15); /* Red with more transparency */
+    color: #ef9a9a; /* Lighter red text */
+    border: 1px solid rgba(244, 67, 54, 0.4); /* Stronger red border */
+}
+
+/* Link for "Don't have an account? Create One" */
+.create-account-link {
+    margin-top: 1.5rem; /* Increased margin-top for better separation */
+    /* 👇 Royal Theme Update: Softer general text color */
+    color: #e0e0e0; /* Match existing text color */
+    font-size: clamp(0.8rem, 2vw, 0.95rem); /* Make it responsive */
+    text-align: center;
+}
+
+.create-account-link .register-text-link {
+    /* 👇 Royal Theme Update: Brighter gold for the link */
+    color: #ffd700; /* Pure Gold color */
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: underline; /* Indicate it's a link */
+    transition: color 0.2s ease;
+}
+
+.create-account-link .register-text-link:hover {
+    /* 👇 Royal Theme Update: Darker gold on hover */
+    color: #e8c41a; /* Lighter gold on hover */
+    text-decoration: none; /* Remove underline on hover for a subtle effect */
+}
+
+/* NEW: Consistent styling for "Already have an account? Sign In" link */
+.sign-in-link {
+    margin-top: 1.5rem; /* Consistent increased margin-top */
+    color: #e0e0e0;
+    font-size: clamp(0.8rem, 2vw, 0.95rem);
+    text-align: center;
+}
+
+.sign-in-link .login-text-link {
+    color: #ffd700; /* Pure Gold color */
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.sign-in-link .login-text-link:hover {
+    color: #e8c41a;
+    text-decoration: none;
 }
 
 /*
@@ -266,3 +334,63 @@
  * If specific, non-fluid layout changes are needed at certain breakpoints
  * in the future, new media queries can be added here.
  */
+
+/* Responsive Adjustments (Specific Breakpoints) for forms */
+@media (max-width: 768px) {
+    .login-container,
+    .register-container {
+        padding: clamp(1.2rem, 5vw, 2.5rem); /* Slightly reduced padding on tablets/mobiles */
+        margin: clamp(1rem, 4vh, 2rem) auto; /* Slightly reduced vertical margin */
+    }
+
+    .login-container h2,
+    .register-container h2 {
+        font-size: clamp(1.6rem, 5vw, 2rem); /* Adjust heading size for smaller screens */
+    }
+
+    .login-form input,
+    .register-form input {
+        padding: clamp(0.8rem, 2.5vw, 1.2rem) clamp(1rem, 3vw, 1.5rem); /* Adjust input padding */
+        font-size: clamp(0.95rem, 2.5vw, 1.05rem); /* Adjust input font size */
+    }
+
+    .login-form button,
+    .register-form button {
+        padding: clamp(0.9rem, 2.8vw, 1.1rem) clamp(1.2rem, 4vw, 1.8rem); /* Adjust button padding */
+        font-size: clamp(0.95rem, 2.8vw, 1.1rem); /* Adjust button font size */
+    }
+
+    .message {
+        font-size: clamp(0.8rem, 1.8vw, 0.95rem); /* Adjust message font size */
+    }
+
+    .create-account-link,
+    .sign-in-link {
+        font-size: clamp(0.75rem, 1.8vw, 0.9rem); /* Adjust link font size */
+    }
+}
+
+@media (max-width: 480px) {
+    .login-container,
+    .register-container {
+        padding: clamp(1rem, 4vw, 2rem); /* Further reduced padding for small phones */
+        margin: clamp(0.8rem, 3vh, 1.5rem) auto; /* Further reduced vertical margin */
+    }
+
+    .login-container h2,
+    .register-container h2 {
+        font-size: clamp(1.5rem, 6vw, 1.8rem); /* Adjust heading size for very small phones */
+    }
+
+    .login-form input,
+    .register-form input {
+        padding: clamp(0.7rem, 2vw, 1rem) clamp(0.8rem, 2.5vw, 1.2rem); /* Adjust input padding */
+        font-size: clamp(0.9rem, 2.2vw, 1rem); /* Adjust input font size */
+    }
+
+    .login-form button,
+    .register-form button {
+        padding: clamp(0.8rem, 2.5vw, 1.1rem) clamp(1rem, 3.5vw, 1.5rem); /* Adjust button padding */
+        font-size: clamp(0.9rem, 2.5vw, 1.1rem); /* Adjust button font size */
+    }
+}

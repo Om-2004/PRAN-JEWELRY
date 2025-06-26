@@ -1,7 +1,8 @@
 /*
- * Home.css - Full Updated Version
+ * Home.css - Full Updated Version (Royal & Glossy Theme)
  * This file styles the main Home component, focusing on a responsive layout
  * for the container, headings, and action buttons across all device sizes.
+ * It now features a luxurious dark and gold aesthetic with enhanced visual effects.
  */
 
 /* Main container for the home page content */
@@ -21,18 +22,22 @@
      */
     margin: clamp(2rem, 5vh, 4rem) auto;
     /*
-     * Responsive padding:
+     * Responsive internal padding:
      * - Minimum: 2rem (for small screens)
      * - Preferred: 5vw (scales with viewport width)
      * - Maximum: 4rem (for large screens)
      */
     padding: clamp(2rem, 5vw, 4rem);
     text-align: center; /* Center align text content */
-    background-color: rgba(30, 30, 30, 0.95); /* Semi-transparent dark background */
+    /* 👇 Royal Theme Update: Darker, richer background with higher opacity */
+    background-color: rgba(18, 18, 18, 0.98); /* Near-black, highly opaque */
     border-radius: 18px; /* Rounded corners */
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.7); /* Deep shadow for depth */
-    border: 2px solid rgba(212, 175, 55, 0.4); /* Subtle gold border */
-    color: #e0e0e0; /* Light text color */
+    /* 👇 Royal Theme Update: Deeper, more pronounced shadow for significant depth */
+    box-shadow: 0 15px 70px rgba(0, 0, 0, 0.9); /* More spread and intensity */
+    /* 👇 Royal Theme Update: Stronger, more visible gold border */
+    border: 3px solid rgba(212, 175, 55, 0.8); /* Thicker and more opaque gold border */
+    /* 👇 Royal Theme Update: Softer gold/off-white text color for luxury */
+    color: #f0e68c; /* Dark Khaki - a softer gold */
     box-sizing: border-box; /* Include padding and border in the element's total width and height */
 
     /* Splash screen transition properties */
@@ -44,7 +49,8 @@
 
 /* Hover effect for the home container */
 .home-container:hover {
-    box-shadow: 0 0 70px rgba(212, 175, 55, 0.6); /* Enhanced gold glow on hover */
+    /* 👇 Royal Theme Update: Enhanced and brighter gold glow on hover */
+    box-shadow: 0 0 80px rgba(255, 215, 0, 0.7); /* Brighter, pure gold glow */
 }
 
 /* Keyframe animation for fading in the home container */
@@ -61,7 +67,8 @@
 
 /* Main heading style */
 .home-container h1 {
-    color: #f9d423; /* Bright gold color */
+    /* 👇 Royal Theme Update: Brighter, pure gold color */
+    color: #ffd700; /* Pure Gold color */
     /*
      * Responsive margin-bottom:
      * - Minimum: 1.5rem
@@ -76,7 +83,8 @@
      * - Maximum: 3.5rem (for large desktops)
      */
     font-size: clamp(2rem, 6vw, 3.5rem);
-    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5); /* Text shadow for depth */
+    /* 👇 Royal Theme Update: More pronounced text shadow for deeper contrast */
+    text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7); /* Deeper text shadow */
     letter-spacing: 2px; /* Spacing between letters */
     position: relative; /* For positioning the ::after pseudo-element */
     padding-bottom: 1rem; /* Space for the underline */
@@ -93,8 +101,9 @@
      * - Maximum: 200px
      */
     width: clamp(100px, 30vw, 200px);
-    height: 5px; /* Height of the underline */
-    background: linear-gradient(90deg, transparent, #f9d423, transparent); /* Gradient gold line */
+    height: 6px; /* 👇 Royal Theme Update: Thicker underline for more presence */
+    /* 👇 Royal Theme Update: Brighter gold gradient for the underline */
+    background: linear-gradient(90deg, transparent, #ffd700, transparent); /* Bright gold gradient */
     margin: clamp(1rem, 2vw, 1.5rem) auto 0; /* Responsive top margin, horizontally centered */
 }
 
@@ -127,8 +136,10 @@
      * - Minimum horizontal: 1.5rem, Max horizontal: 2.5rem
      */
     padding: clamp(0.8rem, 2vw, 1.2rem) clamp(1.5rem, 4vw, 2.5rem);
-    background: linear-gradient(135deg, #d4af37, #f9d423); /* Gold gradient background */
-    color: #222; /* Dark text color */
+    /* 👇 Royal Theme Update: Richer, deeper gold gradient */
+    background: linear-gradient(135deg, #cc9900, #ffdb58); /* Deeper gold gradient */
+    /* 👇 Royal Theme Update: Darker text for better contrast */
+    color: #1a1a1a; /* Very dark text */
     text-decoration: none; /* Remove underline for links */
     border-radius: 10px; /* Rounded corners */
     font-weight: bold; /* Bold text */
@@ -140,7 +151,8 @@
      */
     font-size: clamp(0.9rem, 2.8vw, 1.3rem);
     transition: all 0.3s ease; /* Smooth transition for hover effects */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Button shadow */
+    /* 👇 Royal Theme Update: More pronounced button shadow */
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5); /* Enhanced shadow */
     /*
      * Responsive min-width for buttons:
      * - Minimum: 120px (ensures buttons are not too small on mobile)
@@ -155,9 +167,11 @@
 
 /* Hover effect for buttons */
 .home-button:hover {
-    background: linear-gradient(135deg, #c19e34, #e8c41a); /* Darker gold gradient on hover */
+    /* 👇 Royal Theme Update: Even darker, richer gold gradient on hover */
+    background: linear-gradient(135deg, #b38f00, #e6c200); /* Deeper gold on hover */
     transform: translateY(-4px); /* Lift effect */
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4); /* Enhanced shadow */
+    /* 👇 Royal Theme Update: More intense shadow on hover */
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.6); /* Enhanced shadow */
     animation: subtlePulse 2s infinite; /* Subtle pulsating animation */
 }
 
@@ -168,13 +182,17 @@
     left: 0;
     width: 100%;
     height: 100%;
-    /* Uses the same jewellery photo as the body, ensure path is correct from this CSS file */
-    background: url('../../../JEWELLERY-PHOTO.webp') no-repeat center center;
-    background-size: cover; /* Ensures it covers the entire area */
     z-index: -1; /* Puts it behind other content */
     opacity: 0; /* Starts invisible for fade-in effect */
     animation: bgFadeIn 1.5s ease-out forwards;
     animation-delay: 0.8s; /* Delayed fade-in */
+
+    /* 👇 MODIFIED: Apply multiple backgrounds for the shadowed dark-golden effect */
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), /* Darkens the image (black overlay) */
+        linear-gradient(to top, rgba(212, 175, 55, 0.1), transparent), /* Adds subtle golden tint from bottom */
+        url('../../../JEWELLERY-PHOTO.webp') no-repeat center center fixed; /* Your original image */
+    background-size: cover, cover, cover; /* Apply 'cover' to all background layers */
 }
 
 /* Keyframe animation for background fading in */
@@ -183,8 +201,9 @@
         opacity: 0;
     }
     to {
-        opacity: 0.8;
-    } /* Adjust opacity as needed */
+        /* This opacity will now apply to the *entire* background stack */
+        opacity: 1; /* Set to 1 as the darkening is handled by the gradient layers */
+    }
 }
 
 /* Keyframe animation for subtle button pulse on hover */

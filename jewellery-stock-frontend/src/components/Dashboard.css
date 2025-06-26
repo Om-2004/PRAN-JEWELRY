@@ -1,239 +1,191 @@
 /*
- * Dashboard.css
- * This file defines the styles for the main Vendor Dashboard, ensuring a fully
- * responsive layout that adapts gracefully across all devices (mobile, tablet, desktop).
- * It uses fluid units and clamp() for adaptable sizing and spacing.
+ * Dashboard.css - Golden Dark Theme
+ * Maintains all functionality with luxurious dark/gold aesthetic
  */
 
 /* ──────────────────────────────────────────────────────────────────────────────── */
-/* Main Dashboard Container                                                         */
+/* Main Dashboard Container - Dark Theme                                           */
 /* ──────────────────────────────────────────────────────────────────────────────── */
 .dashboard-container {
-    /*
-     * Responsive max-width:
-     * - Minimum: 320px (ensures readability on smallest phones)
-     * - Preferred: 95vw (takes 95% of viewport width for fluid scaling)
-     * - Maximum: 1200px (caps the width on very large screens for readability)
-     */
     max-width: clamp(320px, 95vw, 1200px);
-    /*
-     * Responsive vertical margin:
-     * - Minimum: 15px (ensures some space on small screens)
-     * - Preferred: 3vh (scales with viewport height)
-     * - Maximum: 30px (limits excessive vertical margin on large screens)
-     */
-    margin: clamp(15px, 3vh, 30px) auto; /* Centers horizontally, fluid vertical spacing */
-    /*
-     * Responsive internal padding:
-     * - Minimum: 15px (ensures content isn't squashed on small screens)
-     * - Preferred: 4vw (scales with viewport width)
-     * - Maximum: 30px (prevents overly large padding on wide screens)
-     */
+    margin: clamp(15px, 3vh, 30px) auto;
     padding: clamp(15px, 4vw, 30px);
-    background-color: rgba(255, 255, 255, 0.96); /* Near-opaque white background */
-    border-radius: 12px; /* Rounded corners */
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.15); /* Soft shadow for depth */
+    background-color: rgba(10, 10, 10, 0.98); /* Dark background */
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.5); /* Stronger shadow */
     border: 2px solid #d4af37; /* Gold border */
-    box-sizing: border-box; /* Ensures padding and border are included in element's total size */
+    box-sizing: border-box;
+    color: #f0e68c; /* Soft gold text */
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────── */
-/* Header Bar - Gold Themed                                                         */
+/* Header Bar - Gold Themed                                                        */
 /* ──────────────────────────────────────────────────────────────────────────────── */
 .dashboard-header {
-    display: flex; /* Enables Flexbox for layout */
-    justify-content: space-between; /* Spreads items to ends with space in between */
-    align-items: center; /* Vertically aligns items in the center */
-    /*
-     * Responsive margin-bottom:
-     * - Minimum: 20px
-     * - Preferred: 3vw
-     * - Maximum: 30px
-     */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: clamp(20px, 3vw, 30px);
-    /*
-     * Responsive padding-bottom:
-     * - Minimum: 15px
-     * - Preferred: 2.5vw
-     * - Maximum: 20px
-     */
     padding-bottom: clamp(15px, 2.5vw, 20px);
-    border-bottom: 2px solid rgba(212, 175, 55, 0.3); /* Gold-tinted bottom border */
-    flex-wrap: wrap; /* Allows header items to wrap on smaller screens */
-    gap: 15px; /* Adds a gap between items when they wrap */
+    border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .dashboard-header h2 {
-    margin: 0; /* Remove default margin */
-    /*
-     * Responsive font-size:
-     * - Minimum: 1.4rem (readable on small mobiles)
-     * - Preferred: 3vw (scales fluidly)
-     * - Maximum: 1.8rem (caps size on larger screens)
-     */
+    margin: 0;
     font-size: clamp(1.4rem, 3vw, 1.8rem);
-    color: #d4af37; /* Gold color */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Subtle text shadow */
-    display: flex; /* Enables Flexbox for icon and text alignment */
-    align-items: center; /* Vertically aligns icon and text */
-    /*
-     * Responsive gap for icon and text:
-     * - Minimum: 5px
-     * - Preferred: 1vw
-     * - Maximum: 10px
-     */
+    color: #d4af37;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3); /* Darker shadow */
+    display: flex;
+    align-items: center;
     gap: clamp(5px, 1vw, 10px);
 }
 
 .dashboard-header h2::before {
-    content: "✦"; /* Decorative character */
-    color: #d4af37; /* Gold color for the decorator */
-    font-size: 1.2em; /* Slightly larger than text for emphasis */
+    content: "✦";
+    color: #d4af37;
+    font-size: 1.2em;
+    text-shadow: 0 0 5px rgba(212, 175, 55, 0.5); /* Gold glow */
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────── */
-/* View Switch Buttons - Gold Gradient                                              */
+/* View Switch Buttons - Gold Gradient                                             */
 /* ──────────────────────────────────────────────────────────────────────────────── */
 .dashboard-buttons {
-    display: flex; /* Enables Flexbox for button layout */
-    /*
-     * Responsive gap between buttons:
-     * - Minimum: 10px
-     * - Preferred: 2vw
-     * - Maximum: 15px
-     */
+    display: flex;
     gap: clamp(10px, 2vw, 15px);
-    /*
-     * Responsive margin-bottom:
-     * - Minimum: 15px
-     * - Preferred: 2.5vw
-     * - Maximum: 25px
-     */
     margin-bottom: clamp(15px, 2.5vw, 25px);
-    flex-wrap: wrap; /* Allows buttons to wrap to the next line on smaller screens */
-    justify-content: center; /* Center align buttons when they wrap */
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .dashboard-button {
-    /*
-     * Responsive padding:
-     * - Vertical: clamp(10px, 2vw, 12px)
-     * - Horizontal: clamp(15px, 4vw, 25px)
-     */
     padding: clamp(10px, 2vw, 12px) clamp(15px, 4vw, 25px);
-    /*
-     * Responsive font-size:
-     * - Minimum: 0.9rem
-     * - Preferred: 2vw
-     * - Maximum: 1rem
-     */
     font-size: clamp(0.9rem, 2vw, 1rem);
-    font-weight: 600; /* Semi-bold text */
-    cursor: pointer; /* Pointer cursor on hover */
-    border: none; /* No border */
-    background: linear-gradient(135deg, #d4af37, #f9d423); /* Gold gradient */
-    color: #000; /* Black text */
-    border-radius: 6px; /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
-    transition: all 0.3s ease; /* Smooth transition for hover effects */
-    /*
-     * Responsive min-width:
-     * - Minimum: 120px (ensures buttons are not too small on mobiles)
-     * - Preferred: 30vw (scales fluidly)
-     * - Maximum: 160px (caps width on larger screens)
-     */
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: linear-gradient(135deg, #d4af37, #f9d423);
+    color: #1a1a1a; /* Dark text for contrast */
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Darker shadow */
+    transition: all 0.3s ease;
     min-width: clamp(120px, 30vw, 160px);
-    text-align: center; /* Center text within buttons */
-    box-sizing: border-box; /* Includes padding and border in total size */
+    text-align: center;
+    box-sizing: border-box;
 }
 
 .dashboard-button:hover {
-    background: linear-gradient(135deg, #c19e34, #e8c41a); /* Darker gold on hover */
-    transform: translateY(-2px); /* Slight lift effect */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
+    background: linear-gradient(135deg, #c19e34, #e8c41a);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
 .dashboard-button.active {
-    background: linear-gradient(135deg, #b38f2a, #d9b618); /* Darker gold for active state */
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2); /* Inset shadow for active state */
+    background: linear-gradient(135deg, #b38f2a, #d9b618);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────── */
-/* Logout Button - Red with Gold Accent                                             */
+/* Logout Button - Red with Gold Accent                                            */
 /* ──────────────────────────────────────────────────────────────────────────────── */
 .logout-button {
-    /*
-     * Responsive padding:
-     * - Vertical: clamp(6px, 1.5vw, 8px)
-     * - Horizontal: clamp(12px, 3vw, 18px)
-     */
     padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 18px);
-    background-color: #dc3545; /* Red background */
-    color: white; /* White text */
-    border: none; /* No default border */
-    border-radius: 6px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor on hover */
-    font-weight: 600; /* Semi-bold text */
-    transition: all 0.3s ease; /* Smooth transition */
-    border: 1px solid transparent; /* Transparent border for hover effect */
-    /*
-     * Responsive font-size:
-     * - Minimum: 0.8rem
-     * - Preferred: 1.8vw
-     * - Maximum: 0.95rem
-     */
+    background-color: #2a0e0e; /* Deep red-dark background */
+    color: #ff6b6b; /* Soft red text */
+    border: 1px solid #d4af37; /* Gold border */
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
     font-size: clamp(0.8rem, 1.8vw, 0.95rem);
-    box-sizing: border-box; /* Includes padding and border in total size */
+    box-sizing: border-box;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .logout-button:hover {
-    background-color: #c82333; /* Darker red on hover */
-    transform: translateY(-2px); /* Slight lift effect */
-    border-color: #d4af37; /* Gold border on hover */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow on hover */
+    background-color: #d4af37; /* Gold background on hover */
+    color: #8b0000; /* Dark red text on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(139, 0, 0, 0.4);
+    border-color: #8b0000; /* Dark red border on hover */
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────── */
-/* Content Area - Subtle Luxury                                                     */
+/* Delete Account Button - Dark Gold Theme                                         */
+/* ──────────────────────────────────────────────────────────────────────────────── */
+.delete-account-button {
+    padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 18px);
+    background-color: #1a0a0a; /* Darker red background than logout */
+    color: #ff4d4d; /* Brighter red text */
+    border: 1px solid #d4af37; /* Gold border */
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: clamp(0.8rem, 1.8vw, 0.95rem);
+    box-sizing: border-box;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.delete-account-button:hover {
+    background-color: #8b0000; /* Dark red background on hover */
+    color: #d4af37; /* Gold text on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(139, 0, 0, 0.5);
+    border-color: #ff4d4d; /* Bright red border on hover */
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────── */
+/* Content Area - Dark Luxury                                                      */
 /* ──────────────────────────────────────────────────────────────────────────────── */
 .dashboard-content {
-    /*
-     * Responsive padding:
-     * - Minimum: 15px
-     * - Preferred: 3vw
-     * - Maximum: 25px
-     */
     padding: clamp(15px, 3vw, 25px);
-    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
-    border-radius: 8px; /* Rounded corners */
-    border: 1px solid rgba(212, 175, 55, 0.2); /* Subtle gold border */
-    box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.05); /* Very subtle inner gold glow */
-    box-sizing: border-box; /* Includes padding and border in total size */
+    background-color: rgba(20, 20, 20, 0.9); /* Dark background */
+    border-radius: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.3); /* Gold border */
+    box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.1); /* Gold glow */
+    box-sizing: border-box;
+    color: #f0e68c; /* Soft gold text */
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────── */
-/* Responsive Adjustments (Specific Breakpoints)                                   */
+/* Responsive Adjustments                                                          */
 /* ──────────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
     .dashboard-header {
-        flex-direction: column; /* Stack header items vertically */
-        align-items: flex-start; /* Align header items to the start (left) */
-        gap: 15px; /* Consistent gap when stacked */
-        padding-bottom: 15px; /* Slightly less padding on smaller screens */
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        padding-bottom: 15px;
+    }
+
+    .header-actions {
+        width: 100%;
+        gap: 8px;
+        flex-direction: column;
     }
 
     .dashboard-buttons {
-        flex-direction: column; /* Stack view switch buttons vertically */
-        gap: 10px; /* Consistent gap when stacked */
-        width: 100%; /* Ensure button container takes full width */
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
     }
 
     .dashboard-button {
-        min-width: 100%; /* Ensure all buttons take full available width when stacked */
+        min-width: 100%;
     }
 
-    /* .logout-button { */
-        /* On smaller screens, if the logout button is part of the header and needs to be prominent,
-           you might want to adjust its width or placement, e.g., to be full width in its context. */
-    /* } */
+    .logout-button,
+    .delete-account-button {
+        width: 100%;
+        text-align: center;
+    }
 }
